@@ -456,7 +456,7 @@ port1control =        $1E3
  ;     10 = atarivox
 
  ; controller 0 data...
-paddleposition0  =    $1E4
+paddleposition0     =     $1E4
 keypadmatrix0a      =     $1E4
 drivingposition0    =     $1E4
 trakballx0          =     $1E4
@@ -464,7 +464,7 @@ mousex0             =     $1E4
 lighttgunx0         =     $1E4
 
  ; controller 1 data...
-paddleposition2     = $1E5
+paddleposition2     =     $1E5
 keypadmatrix1a      =     $1E5
 drivingposition1    =     $1E5
 trakballx1          =     $1E5
@@ -472,35 +472,35 @@ mousex1             =     $1E5
 lightgunx1          =     $1E5
 
  ; controller 0 altdata...
-paddleposition1     = $1E6 
+paddleposition1     =     $1E6 
 keypadmatrix0b      =     $1E6
 trakbally0          =     $1E6
 mousey0             =     $1E6
 lightguny0          =     $1E6
 
  ; controller 1 altdata...
-paddleposition3     = $1E7 
+paddleposition3     =     $1E7 
 keypadmatrix1b      =     $1E7
 trakbally1          =     $1E7
 mousey1             =     $1E7
 lightguny1          =     $1E7
 
 ; controller state save. for trakball state+dir codes, rotary position codes
-controller0statesave = $1E8
+controller0statesave =    $1E8
 mousecodex0          =    $1E8
 trakballcodex0       =    $1E8
 keypadmatrix0c       =    $1E8
 
-controller1statesave = $1E9
+controller1statesave =    $1E9
 mousecodex1          =    $1E9
 trakballcodex1       =    $1E9
 keypadmatrix1c       =    $1E9
 
-keypadmatrix0d       = $1EA
+keypadmatrix0d       =    $1EA
 mousecodey0          =    $1EA
 trakballcodey0       =    $1EA
 
-keypadmatrix1d       = $1EB
+keypadmatrix1d       =    $1EB
 mousecodey1          =    $1EB
 trakballcodey1       =    $1EB
 

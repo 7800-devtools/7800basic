@@ -2127,6 +2127,9 @@ void changecontrol(char **statement)
     // changecontrol 0|1 controltype
 
     int port;
+    static drivingsupport = 0;
+    static mousesupport = 0;
+    static keypadsupport = 0;
 
     assertminimumargs(statement, "changecontrol", 2);
     removeCR(statement[2]);
@@ -2239,6 +2242,11 @@ void changecontrol(char **statement)
     }
     else if (!strcmp(statement[3], "driving"))
     {
+        if(drivingsupport==0)
+        {
+            drivingsupport=1;
+            strcpy(redefined_variables[numredefvars++], "DRIVINGSUPPORT = 1");
+        }
 	printf("  lda #6 ; controller=driving\n");
 	if (port == 0)
 	{
@@ -2255,6 +2263,11 @@ void changecontrol(char **statement)
     }
     else if (!strcmp(statement[3], "keypad"))
     {
+        if(keypadsupport==0)
+        {
+            keypadsupport=1;
+            strcpy(redefined_variables[numredefvars++], "KEYPADSUPPORT = 1");
+        }
 	printf("  lda #7 ; controller=keypad\n");
 	if (port == 0)
 	{
@@ -2271,6 +2284,11 @@ void changecontrol(char **statement)
     }
     else if (!strcmp(statement[3], "stmouse"))
     {
+        if(mousesupport == 0)
+	{
+            mousesupport = 1;
+	    strcpy(redefined_variables[numredefvars++], "MOUSESUPPORT = 1");
+        }
 	printf("  lda #8 ; controller=stmouse\n");
 	if (port == 0)
 	{

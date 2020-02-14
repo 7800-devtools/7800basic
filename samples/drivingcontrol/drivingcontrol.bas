@@ -1,10 +1,12 @@
 
  rem *** a simple program to move a happy face around with the joystick
 
+ rem DRIVINGSUPPORT
+
  set zoneheight 8
 
  rem *** enable driving controllers!
- set drivingcontrols on
+ changecontrol 0 driving
 
  dim player0x=a
  dim player0y=b
