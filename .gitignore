@@ -45,6 +45,8 @@
 7800postprocess
 7800preprocess
 7800makecc2
+7800header
+7800sign
 packages
 packages/*
 docs
