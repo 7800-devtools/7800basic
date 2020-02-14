@@ -1,0 +1,53 @@
+########## Typical C ignores ##########
+# Prerequisites
+*.d
+
+# Object files
+*.o
+*.ko
+*.obj
+*.elf
+
+# Linker output
+*.ilk
+*.map
+*.exp
+
+# Precompiled Headers
+*.gch
+*.pch
+# Libraries
+*.lib
+*.a
+*.la
+*.lo
+
+# Shared objects (inc. Windows DLLs)
+*.dll
+*.so
+*.so.*
+*.dylib
+
+# Executables
+*.exe
+*.out
+*.app
+*.x86
+*.x64
+
+# vi backup files
+.*.swp
+
+########## 7800Basic specific ignores ##########
+7800basic
+7800filter
+7800optimize
+7800postprocess
+7800preprocess
+7800makecc2
+packages
+packages/*
+docs
+docs/*
+7800devkit
+7800devkit/*
