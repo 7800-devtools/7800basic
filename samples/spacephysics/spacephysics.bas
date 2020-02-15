@@ -50,6 +50,7 @@
   dim tempy=var47
   dim temploop=var48
   dim tempframe=var51
+  dim thrustnoisetime=var52
  
   rem ** joystick fire debounce...
   dim debouncefire=var49
@@ -156,12 +157,16 @@ main_loop
     rem ** check if the bullets have been on-screen too long...
     gosub check_bullet_time
 
+  rem ###### Section 2b. other engine housekeeping...
+    if thrustnoisetime>0 then thrustnoisetime=thrustnoisetime-1
+
   rem ###### Section 3. display objects. this should always be last in the main loop for maximum efficiency.
     rem ** ship display...
     gosub display_live_player
 
     rem ** bullet display...
     gosub display_bullets
+
 
   drawscreen
 
@@ -215,6 +220,7 @@ display_live_player
 addshipthrust
  dim tempfix=temp1.temp2
 
+ if thrustnoisetime=0 then playsfx sfx_thrust:thrustnoisetime=9
 
  rem ** lookup x component of thrust from our table...
  temp3=ship_angle*2    ; +0=sine lookup
@@ -329,6 +335,7 @@ check_firebutton
  rem ** return...
  if !joy0fire then debouncefire=0:return
 
+
  rem ** if we're here, the player just pressed fire. Check to see if we have 
  rem ** a free bullet to fire...
  temp5=255
@@ -338,6 +345,8 @@ check_firebutton
 
  rem ** return if all 3 bullets are in play then return...
  if temp5=255 then return
+
+ playsfx sfx_laserrecoil
 
  debouncefire=255 ; remember that the fire button was pressed
 
@@ -477,5 +486,35 @@ display_bullets
     if tempx<>200 then plotsprite bullet_8x8 0 tempx tempy
   next
   return
+
+ data sfx_laserrecoil
+ $10,$10,$00 ; version, priority, frames per chunk
+ $06,$0c,$0f ; first chunk of freq,channel,volume
+ $16,$04,$0f
+ $16,$04,$0f
+ $1e,$04,$0f
+ $0b,$0c,$0f
+ $0b,$0c,$0f
+ $1e,$06,$0f
+ $1e,$06,$0c
+ $16,$04,$09
+ $1e,$04,$09
+ $1e,$04,$0f
+ $0b,$0c,$0f
+ $0e,$0c,$0f
+ $0d,$0c,$04
+ $07,$0c,$05
+ $1b,$04,$03
+ $0b,$0c,$02
+ $10,$0c,$03
+ $03,$06,$02
+ $00,$00,$00
+end
+
+ data sfx_thrust
+ $10,$01,$08 ; version, priority, frames per chunk
+ $1f,$08,$05 ; first chunk of freq,channel,volume
+ 0,0,0
+end
 
 
