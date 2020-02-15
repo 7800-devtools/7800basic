@@ -2127,9 +2127,9 @@ void changecontrol(char **statement)
     // changecontrol 0|1 controltype
 
     int port;
-    static drivingsupport = 0;
-    static mousesupport = 0;
-    static keypadsupport = 0;
+    static int drivingsupport = 0;
+    static int mousesupport = 0;
+    static int keypadsupport = 0;
 
     assertminimumargs(statement, "changecontrol", 2);
     removeCR(statement[2]);
