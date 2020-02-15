@@ -37,8 +37,10 @@ NMI
 
 longcontrollerreads ; ** controllers that take a lot of time to read. We use much of the visible screen here.
          ifconst LONGCONTROLLERREAD
-           lda #$40
+           lda #$38
+ ifconst LONGDEBUG
            sta BACKGRND
+ endif
            sta inttemp6
 
 lonereadlineloop
@@ -49,15 +51,20 @@ longreadloop
            sta inttemp3
            lda longreadroutinehi,y
            sta inttemp4
-           jsr (inttemp3)
+	   ora inttemp3
+           beq longreadloopreturn
+           jmp (inttemp3)
+longreadloopreturn
            dex
            bpl longreadloop
            dec inttemp6
            sta WSYNC
            bne lonereadlineloop
 
+ ifconst LONGDEBUG
            lda #$00
            sta BACKGRND
+ endif
          endif ; LONGCONTROLLERREAD
 
          jsr servicesfxchannels 
@@ -100,20 +107,20 @@ IRQ
 
      ifconst LONGCONTROLLERREAD
 longreadroutinelo
- ;         NONE         PROLINE       LIGHTGUN      PADDLE
- .byte <nullroutine, <nullroutine, <nullroutine, <nullroutine
- ;        TRKBALL      VCS STICK      DRIVING       KEYPAD
- .byte <nullroutine, <nullroutine, <nullroutine, <nullroutine
- ;        STMOUSE       AMOUSE        ATARIVOX
- .byte <mouseupdate, <mouseupdate, <nullroutine
+ ;        NONE          PROLINE        LIGHTGUN      PADDLE
+ .byte    0,            0,             0,            0           
+ ;        TRKBALL       VCS STICK      DRIVING       KEYPAD
+ .byte    0,            0,             0,            0           
+ ;        STMOUSE       AMOUSE         ATARIVOX
+ .byte    <mouseupdate, <mouseupdate,  0
 
 longreadroutinehi
- ;         NONE         PROLINE       LIGHTGUN      PADDLE
- .byte >nullroutine, >nullroutine, >nullroutine, >nullroutine
- ;        TRKBALL      VCS STICK      DRIVING       KEYPAD
- .byte >nullroutine, >nullroutine, >nullroutine, >nullroutine
- ;        STMOUSE       AMOUSE        ATARIVOX
- .byte >mouseupdate, >mouseupdate, >nullroutine
+ ;        NONE          PROLINE        LIGHTGUN      PADDLE
+ .byte    0,            0,             0,            0           
+ ;        TRKBALL       VCS STICK      DRIVING       KEYPAD
+ .byte    0,            0,             0,            0           
+ ;        STMOUSE       AMOUSE         ATARIVOX
+ .byte    >mouseupdate, >mouseupdate,  0
 nullroutine
  rts
      endif ; LONGCONTROLLERREAD
@@ -1672,7 +1679,6 @@ createallgamedlls
      ldy paldetected
      beq skipcreatePALpadding
      clc
-     ;adc #25 
      adc #21 
 skipcreatePALpadding
      jsr createnonvisibledlls
@@ -1680,7 +1686,6 @@ skipcreatePALpadding
      jsr createvisiblezones
      stx overscanDLLstart
 createallgamedllscontinue
-     ;lda #(NVLINES+50) ; extras for PAL
      lda #(NVLINES+55) ; extras for PAL
      jsr createnonvisibledlls
 
@@ -1925,7 +1930,7 @@ amigatoataribits ; swap bits 1 and 4...
   .byte %00000101, %00001101, %00000111, %00001111
 
 mouseupdate
-   ;ldx #1
+;LONGDEBUG = 1
    lda SWCHA
    and #$0f
    sta inttemp2
@@ -1935,16 +1940,16 @@ mouseupdate
    lsr
    lsr
    sta inttemp1
-mouseupdateloop
+
    lda port0control,x
-   cmp #8
+   cmp #8 ; st mouse
    beq domousecontrol
-   cmp #9
+   cmp #9 ; amiga mouse
    bne skipmousecontrol
-   ; st mice encode on different bits than amiga mice...
+   ; st mice encode on different bits/joystick-lines than amiga mice...
    ;  0000YyXx st mouse
    ;  0000xyXY amiga mouse
-   ; ...so we need to shuffle the outer amiga bits to reuse the st driver.
+   ; ...so can shuffle the amiga bits to reuse the st driver.
    lda inttemp1,x
    tay
    lda amigatoataribits,y
@@ -1982,9 +1987,7 @@ domousecontrol
    lsr
    sta mousecodey0,x
 skipmousecontrol
-   ;dex
-   ;bpl mouseupdateloop
-   rts  
+   jmp longreadloopreturn
  endif ; MOUSESUPPORT
 
  ifconst DRIVINGSUPPORT

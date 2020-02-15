@@ -2246,6 +2246,7 @@ void changecontrol(char **statement)
         {
             drivingsupport=1;
             strcpy(redefined_variables[numredefvars++], "DRIVINGSUPPORT = 1");
+	    sprintf(constants[numconstants++], "DRIVINGSUPPORT");
         }
 	printf("  lda #6 ; controller=driving\n");
 	if (port == 0)
@@ -2267,6 +2268,7 @@ void changecontrol(char **statement)
         {
             keypadsupport=1;
             strcpy(redefined_variables[numredefvars++], "KEYPADSUPPORT = 1");
+	    sprintf(constants[numconstants++], "KEYPADSUPPORT");
         }
 	printf("  lda #7 ; controller=keypad\n");
 	if (port == 0)
@@ -2288,6 +2290,9 @@ void changecontrol(char **statement)
 	{
             mousesupport = 1;
 	    strcpy(redefined_variables[numredefvars++], "MOUSESUPPORT = 1");
+	    strcpy(redefined_variables[numredefvars++], "LONGCONTROLLERREAD = 1");
+	    sprintf(constants[numconstants++], "MOUSESUPPORT");
+	    sprintf(constants[numconstants++], "LONGCONTROLLERREAD");
         }
 	printf("  lda #8 ; controller=stmouse\n");
 	if (port == 0)
@@ -2305,7 +2310,16 @@ void changecontrol(char **statement)
     }
     else if (!strcmp(statement[3], "amigamouse"))
     {
-	printf("  lda #9 ; controller=stmouse\n");
+        if(mousesupport == 0)
+	{
+            mousesupport = 1;
+	    strcpy(redefined_variables[numredefvars++], "MOUSESUPPORT = 1");
+	    strcpy(redefined_variables[numredefvars++], "LONGCONTROLLERREAD = 1");
+	    sprintf(constants[numconstants++], "MOUSESUPPORT");
+	    sprintf(constants[numconstants++], "LONGCONTROLLERREAD");
+        }
+
+	printf("  lda #9 ; controller=amigamouse\n");
 	if (port == 0)
 	{
 	    printf("  sta port0control\n");
@@ -8847,27 +8861,6 @@ void set(char **statement)
 	assertminimumargs(statement + 1, "set plotvaluepage", 1);	//+1 to skip "dlmemory"
 	removeCR(statement[3]);	//remove CR from the value, if present
 	sprintf(redefined_variables[numredefvars++], "PLOTVALUEPAGE = %s", statement[3]);
-    }
-    else if (!strncmp(statement[2], "drivingsupport\0", 15))
-    {
-	if (!strncmp(statement[3], "on", 2))
-	{
-	    strcpy(redefined_variables[numredefvars++], "DRIVINGSUPPORT = 1");
-	}
-    }
-    else if (!strncmp(statement[2], "mousesupport\0", 15))
-    {
-	if (!strncmp(statement[3], "on", 2))
-	{
-	    strcpy(redefined_variables[numredefvars++], "MOUSESUPPORT = 1");
-	}
-    }
-    else if (!strncmp(statement[2], "keypadsupport\0", 15))
-    {
-	if (!strncmp(statement[3], "on", 2))
-	{
-	    strcpy(redefined_variables[numredefvars++], "KEYPADSUPPORT = 1");
-	}
     }
     else if (!strncmp(statement[2], "extradlmemory\0", 13))
     {
