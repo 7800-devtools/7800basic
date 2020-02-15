@@ -11,7 +11,7 @@
 char stdoutfilename[256];
 FILE *stdoutfilepointer;
 
-#define BASIC_VERSION_INFO "7800basic v0.7 (c)2020\n"
+#define BASIC_VERSION_INFO "7800basic v0.7"
 
 int main(int argc, char *argv[])
 {
@@ -48,7 +48,7 @@ int main(int argc, char *argv[])
 	    filename = optarg;
 	    break;
 	case 'v':
-	    printf("%s %s %s", BASIC_VERSION_INFO, __DATE__, __TIME__);
+	    printf("%s (%s, %s)\n", BASIC_VERSION_INFO, __TIME__, __DATE__);
 	    exit(0);
 	case '?':
 	    fprintf(stderr, "usage: %s -r <variable redefs file> -i <includes path>\n", argv[0]);

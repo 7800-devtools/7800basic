@@ -8,7 +8,7 @@ ERELEASE=$(cat release.dat | sed 's/ /_/g')
 YEAR=$(date +%Y)
 
 dos2unix 7800bas.c >/dev/null 2>&1
-cat 7800bas.c | sed 's/BASIC_VERSION_INFO .*/BASIC_VERSION_INFO "7800basic v'"$RELEASE (c)$YEAR"'\\n"/g' > 7800bas.c.new
+cat 7800bas.c | sed 's/BASIC_VERSION_INFO .*/BASIC_VERSION_INFO "7800basic v'"$RELEASE"'"/g' > 7800bas.c.new
 mv 7800bas.c.new 7800bas.c
 unix2dos 7800bas.c >/dev/null 2>&1
 
