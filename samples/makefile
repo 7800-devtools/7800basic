@@ -28,4 +28,4 @@ helloworld/helloworld.bas.a8:
 	cd ..
 
 clean:
-	rm */*.bas.* */7800.asm */7800basic_variable_redefs.h */a78info.cfg */includes.7800
+	rm -fr */*.bas.* */7800.asm */7800basic_variable_redefs.h */a78info.cfg */includes.7800 */cfg

@@ -11,6 +11,7 @@
   Optional code blocks to change bullet behaviors at edges: stop, bounce, 
     or wrap
   Optional code blocks to change ship behavior at edges: bounce or wrap
+  Sub-pixel X-shifted graphics, for smoother X motion
 
  Key Concepts: 
   The ship position and velocity are held as fixed point variables, 
@@ -38,7 +39,7 @@
   ***************************************************************************/
 
   displaymode 320A
-  set zoneheight 16
+  set zoneheight 8
   set screenheight 192
   set plotvalueonscreen on
   set romsize 32k
@@ -48,6 +49,7 @@
   dim tempx=var46
   dim tempy=var47
   dim temploop=var48
+  dim tempframe=var51
  
   rem ** joystick fire debounce...
   dim debouncefire=var49
@@ -95,41 +97,23 @@
   P2C2=$1B; yellow
   P3C2=$4B; unused
 
-  incgraphic bullet_8x8.png
-  incgraphic shipwedge_0_8x8.png   320C
-  incgraphic shipwedge_1_8x8.png   320C
-  incgraphic shipwedge_2_8x8.png   320C
-  incgraphic shipwedge_3_8x8.png   320C
-  incgraphic shipwedge_4_8x8.png   320C
-  incgraphic shipwedge_5_8x8.png   320C
-  incgraphic shipwedge_6_8x8.png   320C
-  incgraphic shipwedge_7_8x8.png   320C
-  incgraphic shipwedge_8_8x8.png   320C
-  incgraphic shipwedge_9_8x8.png   320C
-  incgraphic shipwedge_10_8x8.png  320C
-  incgraphic shipwedge_11_8x8.png  320C
-  incgraphic shipwedge_12_8x8.png  320C
-  incgraphic shipwedge_13_8x8.png  320C
-  incgraphic shipwedge_14_8x8.png  320C
-  incgraphic shipwedge_15_8x8.png  320C
 
-  incgraphic shipwedgeT_0_8x8.png  320C
-  incgraphic shipwedgeT_1_8x8.png  320C
-  incgraphic shipwedgeT_2_8x8.png  320C
-  incgraphic shipwedgeT_3_8x8.png  320C
-  incgraphic shipwedgeT_4_8x8.png  320C
-  incgraphic shipwedgeT_5_8x8.png  320C
-  incgraphic shipwedgeT_6_8x8.png  320C
-  incgraphic shipwedgeT_7_8x8.png  320C
-  incgraphic shipwedgeT_8_8x8.png  320C
-  incgraphic shipwedgeT_9_8x8.png  320C
-  incgraphic shipwedgeT_10_8x8.png 320C
-  incgraphic shipwedgeT_11_8x8.png 320C
-  incgraphic shipwedgeT_12_8x8.png 320C
-  incgraphic shipwedgeT_13_8x8.png 320C
-  incgraphic shipwedgeT_14_8x8.png 320C
-  incgraphic shipwedgeT_15_8x8.png 320C
- 
+  incgraphic bullet_8x8.png
+
+  set tallspritemode spritesheet
+  rem * all ship rotations
+  incgraphic shipwedge_8x8.png   320C
+
+  rem * all ship rotations shifted right one pixel
+  incgraphic shipwedge_sub_8x8.png   320C
+
+  rem * all ship rotations with thrust
+  incgraphic shipwedgeT_8x8.png  320C
+
+  rem * all ship rotations with thrust, shifted right one pixel
+  incgraphic shipwedgeT_sub_8x8.png  320C
+
+
   rem ** Initializations
     ship_angle=4                   ; facing right 
     ship_x=24
@@ -213,8 +197,19 @@ check_ship_boundary
   return
 
 display_live_player
-  if joy0up then plotsprite shipwedgeT_0_8x8 0 ship_x ship_y ship_angle : return
-  plotsprite shipwedge_0_8x8 0 ship_x ship_y ship_angle
+  rem * get access to the lower byte of the 16-bit ship X coordinate
+  dim ship_x_lo = ship_x+1
+
+  tempframe=ship_angle
+
+  rem * if the ship X is halfway to being increased, skip to the set of frames that are shifted over
+  if ship_x_lo > 128 then tempframe=tempframe+16
+
+  rem ** display thrusting ship graphic
+  if joy0up then plotsprite shipwedgeT_8x8 0 ship_x ship_y tempframe: return
+
+  rem ** display regular ship graphic
+  plotsprite shipwedge_8x8 0 ship_x ship_y tempframe
   return
 
 addshipthrust
