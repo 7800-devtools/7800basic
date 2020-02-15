@@ -2628,7 +2628,7 @@ end
 
  data sfx_snore
  $10,$10,$00 ; version, priority, frames per chunk
- $0c,$0r,$01 ; first chunk of freq,channel,volume
+ $0c,$0c,$01 ; first chunk of freq,channel,volume
  $17,$0c,$03
  $03,$06,$06
  $0a,$06,$04
