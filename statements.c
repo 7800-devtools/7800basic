@@ -603,8 +603,6 @@ void dmahole(char **statement)
 	    printf(" jmp dmahole_%d_%d\n", requestedhole, currentbank);
     }
 
-    if (bankcount > 0)
-	printf("dmahole_%d_%d\n", currentbank, requestedhole);
 
     sprintf(stdoutfilename, "7800hole.%d.asm", requestedhole);
     if ((stdoutfilepointer = freopen(stdoutfilename, "w", stdout)) == NULL)
