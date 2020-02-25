@@ -653,7 +653,10 @@ advancesfxpointer
 sfxsoundloop
      pha
      lda sfx1priority,x
-     beq advancesfxpointer
+     bne sfxsoundloop_carryon
+     pla ; fix the stack before we go
+     jmp advancesfxpointer
+sfxsoundloop_carryon
      pla
      and #$F0
      lsr
