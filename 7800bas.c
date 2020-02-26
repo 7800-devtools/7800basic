@@ -72,7 +72,8 @@ int main(int argc, char *argv[])
     superchip = 0;
     optimization = 0;
     smartbranching = 1;
-    collisionwrap = 0;
+    collisionwrap = 1;
+    strcpy(redefined_variables[numredefvars++], "collisionwrap = 1");
     line = 0;
     numfixpoint44 = 0;
     numfixpoint88 = 0;
