@@ -187,7 +187,6 @@ debouncejoymove
   $0c,$08,$02
   $0d,$08,$02
   $00,$00,$00
-  $00,$00,$00
 end
 
  data sfx_spaceinvshoot
