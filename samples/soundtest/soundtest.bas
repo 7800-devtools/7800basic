@@ -25,7 +25,7 @@
  dim sound2play=a
  dim sound2playbcd=b
  dim maxsounds=c
- maxsounds=100
+ maxsounds=101
 
 main 
  clearscreen
@@ -149,6 +149,7 @@ main
  if sound2play=98 then playsfx sfx_arfarf
  if sound2play=99 then playsfx sfx_activate
  if sound2play=100 then playsfx sfx_hahaha2
+ if sound2play=101 then playsfx sfx_wilhelm
  gosub debouncejoyfire
  goto main 
 
@@ -3454,6 +3455,75 @@ end
  $00,$00,$00
 end
 
+ data sfx_wilhelm
+ $10,$10,$00 ; version, priority, frames per chunk
+ $1d,$07,$02 ; first chunk of freq,channel,volume
+ $05,$06,$0c
+ $07,$07,$0f
+ $17,$06,$0f
+ $08,$07,$0f
+ $07,$06,$0f
+ $00,$06,$0f
+ $02,$07,$0f
+ $06,$07,$0f
+ $0b,$04,$0f
+ $17,$06,$0f
+ $0e,$01,$0f
+ $07,$07,$0f
+ $0d,$06,$0f
+ $0c,$07,$0f
+ $07,$07,$0f
+ $03,$07,$0f
+ $0a,$04,$0f
+ $0a,$01,$0f
+ $05,$07,$0f
+ $0a,$04,$0f
+ $0c,$06,$0f
+ $0a,$04,$0f
+ $0a,$04,$0f
+ $09,$01,$0f
+ $0a,$04,$0f
+ $1b,$06,$0f
+ $0a,$04,$0f
+ $0a,$01,$0f
+ $0a,$04,$0f
+ $0a,$04,$0f
+ $13,$0f,$0f
+ $00,$06,$0f
+ $0a,$04,$0f
+ $10,$01,$0f
+ $13,$04,$0f
+ $08,$07,$0f
+ $09,$01,$0f
+ $18,$01,$0f
+ $0a,$04,$0f
+ $15,$04,$0f
+ $13,$04,$0f
+ $15,$04,$0f
+ $15,$04,$0f
+ $15,$04,$0f
+ $15,$04,$0f
+ $16,$04,$0f
+ $17,$04,$0f
+ $0e,$01,$0f
+ $19,$04,$09
+ $0a,$07,$07
+ $15,$04,$07
+ $00,$06,$04
+ $13,$04,$09
+ $12,$04,$0c
+ $12,$04,$04
+ $16,$04,$04
+ $08,$07,$04
+ $07,$07,$04
+ $08,$07,$04
+ $1b,$0f,$02
+ $13,$04,$02
+ $09,$07,$02
+ $0b,$07,$02
+ $00,$00,$00
+end
+
 
  alphadata sounddescriptions atascii
  'salvo laser shot'
@@ -3557,4 +3627,5 @@ end
  'arf arf         '
  'activate        '
  'ha ha ha 2      '
+ 'wilhelm         '
 end
