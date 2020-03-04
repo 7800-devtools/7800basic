@@ -54,6 +54,8 @@ SCORESIZE                 = 6
              sta ssCTRL
              lda sCHARBASE
              sta ssCHARBASE
+             lda #$60
+             sta charactermode
              jsr drawwait
              jsr blacken320colors
              jsr clearscreen
