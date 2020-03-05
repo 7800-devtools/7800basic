@@ -508,9 +508,9 @@ carryonkeepdisplayinghs
              jsr plotsprite
 
              ldx hscursorx
-
+             ldy hsdisplaymode
              lda SWCHA
-             cpx #3
+             cpy #3
              bne hsskipadjustjoystick1
              asl
              asl
