@@ -451,13 +451,13 @@ checkjoybuttons
      ldx port0control
      lda controlsusing2buttoncode,x
      beq .skipp0firecheck
-     ; ** not sure if we need to handle the mice with custom code or not
-     lda #0
+     lda INPT0
+     lsr
      sta sINPT1
      lda INPT4
      bmi .skipp0firecheck
      ;one button joystick is down
-     lda #$f0
+     eor #%10000000
      sta sINPT1
      lda joybuttonmode
      and #%00000100
@@ -470,12 +470,13 @@ checkjoybuttons
      ldx port1control
      lda controlsusing2buttoncode,x
      beq .all2buttonschecked
-     lda #0
+     lda INPT2
+     lsr
      sta sINPT3
      lda INPT5
      bmi .skipp1firecheck
      ;one button joystick is down
-     lda #$f0
+     eor #%10000000
      sta sINPT3
      lda joybuttonmode
      and #%00010000
@@ -486,10 +487,12 @@ checkjoybuttons
      sta SWCHB
 .skipp1firecheck
      lda INPT1
+     and #%10000000
      ora sINPT1
      sta sINPT1
 
      lda INPT3
+     and #%10000000
      ora sINPT3
      sta sINPT3
 .all2buttonschecked

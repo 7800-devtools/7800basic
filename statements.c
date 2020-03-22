@@ -210,8 +210,8 @@ int switchjoy(char *input_source)
     }
     if (!strncmp(input_source, "joy0fire0\0", 9))
     {
-	printf(" bit INPT0\n");
-	return 3;
+	printf(" bit sINPT1\n");
+	return 5;
     }
     if (!strncmp(input_source, "joy0fire1\0", 9))
     {
@@ -6739,6 +6739,13 @@ void doif(char **statement)
 		else
 		    bne(statement[4]);
 	    }
+	    else if (i == 5)	// bvs/bvc
+	    {
+		if (not)
+		    bvc(statement[4]);
+		else
+		    bvs(statement[4]);
+	    }
 
 
 	    freemem(dealloccstatement);
@@ -6780,6 +6787,13 @@ void doif(char **statement)
 		    printf("	BNE ");
 		else
 		    printf("	BEQ ");
+	    }
+	    else if (i == 5)
+	    {
+		if (not)
+		    printf("	BVS ");
+		else
+		    printf("	BVC ");
 	    }
 
 	    printf(".skip%s\n", statement[0]);
