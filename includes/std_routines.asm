@@ -19,7 +19,9 @@ NMI
          sta BACKGRND
      endif
      dec interruptindex 
-     beq reallyoffvisible
+     bne skipreallyoffvisible
+     jmp reallyoffvisible
+skipreallyoffvisible
        lda visibleover
        beq skiptopscreenroutine
          txa ; save X+Y
@@ -81,7 +83,23 @@ longreadloopreturn
          dec countdownseconds
 skipcountdownseconds
 
-         jsr checkjoybuttons
+         ldx #1
+buttonreadloop
+         txa
+         pha
+         ldy port0control,x
+         lda buttonhandlerlo,y
+         sta inttemp3
+         lda buttonhandlerhi,y
+         sta inttemp4
+	 ora inttemp3
+         beq buttonreadloopreturn
+         jmp (inttemp3)
+buttonreadloopreturn
+         pla
+         tax
+         dex
+         bpl buttonreadloop
 
 	 ifconst DRIVINGSUPPORT
            jsr drivingupdate
@@ -445,86 +463,59 @@ avoxsilentdata
      	rts
      endif ; AVOXVOICE
 
-checkjoybuttons
-     ;we poll the joystick fire buttons and throw them in shadow registers. We do this
-     ;to map 1-button joysticks to the left button on 2-button joysticks.
-     ldx port0control
-     lda controlsusing2buttoncode,x
-     beq .skipp0firecheck
-     lda INPT0
+joybuttonhandler
+     txa
      lsr
-     sta sINPT1
-     lda INPT4
-     bmi .skipp0firecheck
+     tay
+     lda INPT0,y
+     lsr
+     sta sINPT1,x
+     lda INPT1,y
+     and #%10000000
+     ora sINPT1,x
+     sta sINPT1,x
+
+     lda INPT4,x
+     bmi .skip1bjoyfirecheck
      ;one button joystick is down
      eor #%10000000
-     sta sINPT1
+     sta sINPT1,x
+
      lda joybuttonmode
+     and twobuttonmask,x
      and #%00000100
-     beq .skipp0firecheck
+     beq .skip1bjoyfirecheck
      lda joybuttonmode
-     ora #%00000100
+     ora twobuttonmask,x
      sta joybuttonmode
      sta SWCHB
-.skipp0firecheck
-     ldx port1control
-     lda controlsusing2buttoncode,x
-     beq .all2buttonschecked
-     lda INPT2
-     lsr
-     sta sINPT3
-     lda INPT5
-     bmi .skipp1firecheck
-     ;one button joystick is down
-     eor #%10000000
-     sta sINPT3
-     lda joybuttonmode
-     and #%00010000
-     beq .skipp1firecheck
-     lda joybuttonmode
-     ora #%00010000
-     sta joybuttonmode
-     sta SWCHB
-.skipp1firecheck
-     lda INPT1
-     and #%10000000
-     ora sINPT1
-     sta sINPT1
+.skip1bjoyfirecheck
+     jmp buttonreadloopreturn
 
-     lda INPT3
-     and #%10000000
-     ora sINPT3
-     sta sINPT3
-.all2buttonschecked
- ifconst LIGHTGUNSUPPORT
-     jmp checkgun0trigger ; tack lightgun trigger onto the joystick button state, so we reuse basic code...
- endif
-     rts
+twobuttonmask
+ .byte %00000100,%00010000
 
+gunbuttonhandler ; outside of the conditional, so our button handler LUT is valid
  ifconst LIGHTGUNSUPPORT
-checkgun0trigger
-     lda port0control 
-     cmp #2 ; lightgun in port 0?
-     bne skipcheckgun0trigger
+     cpx #0
+     bne secondportgunhandler
+firstportgunhandler
      lda SWCHA
-     asl ; shift D4 to D5
-     asl ; shift D5 to D6
-     asl ; shift D6 to D7
+     asl 
+     asl 
+     asl ; shift D4 to D7
      and #%10000000
      eor #%10000000
      sta sINPT1
-skipcheckgun0trigger
-     lda port0control
-     cmp #2 ; lightgun i port 1?
-     bne skipcheckgun1trigger
+     jmp buttonreadloopreturn
+secondportgunhandler
      lda SWCHA
      lsr ; shift D0 into carry
      lsr ; shift carry into D7
      and #%10000000
      eor #%10000000
      sta sINPT3
-skipcheckgun1trigger
-     rts
+     jmp buttonreadloopreturn
  endif ; LIGHTGUNSUPPORT
 
 controlsusing2buttoncode
@@ -536,9 +527,34 @@ controlsusing2buttoncode
      .byte 1 ; 05=vcs joystick
      .byte 1 ; 06=driving control
      .byte 0 ; 07=keypad control
-     .byte 1 ; 08=st mouse/cx80  - not sure if the 2-button code will mess up this controller
-     .byte 1 ; 09=amiga mouse    - not sure if the 2-button code will mess up this controller
+     .byte 0 ; 08=st mouse/cx80
+     .byte 0 ; 09=amiga mouse
      .byte 1 ; 10=atarivox
+
+buttonhandlerhi
+     .byte 0                  ; 00=no controller plugged in
+     .byte >joybuttonhandler  ; 01=proline joystick
+     .byte >gunbuttonhandler  ; 02=lightgun
+     .byte 0                  ; 03=paddle [not implemented yet]
+     .byte >joybuttonhandler  ; 04=trakball
+     .byte >joybuttonhandler  ; 05=vcs joystick
+     .byte >joybuttonhandler  ; 06=driving control
+     .byte 0                  ; 07=keypad
+     .byte >mousebuttonhandler; 08=st mouse
+     .byte >mousebuttonhandler; 09=amiga mouse
+     .byte >joybuttonhandler  ; 10=atarivox
+buttonhandlerlo
+     .byte 0 ; 00=no controller plugged in
+     .byte <joybuttonhandler  ; 01=proline joystick
+     .byte <gunbuttonhandler  ; 02=lightgun 
+     .byte 0                  ; 03=paddle [not implemented yet]
+     .byte <joybuttonhandler  ; 04=trakball
+     .byte <joybuttonhandler  ; 05=vcs joystick
+     .byte <joybuttonhandler  ; 06=driving control
+     .byte 0                  ; 07=keypad
+     .byte <mousebuttonhandler; 08=st mouse
+     .byte <mousebuttonhandler; 09=amiga mouse
+     .byte <joybuttonhandler  ; 10=atarivox
 
 drawwait
      lda visibleover
@@ -1996,6 +2012,25 @@ skipmousecontrol
    jmp longreadloopreturn
  endif ; MOUSESUPPORT
 
+mousebuttonhandler ; outside of conditional, so button handler entry in LUT is valid
+ ifconst MOUSESUPPORT
+   ; stick the mouse buttons in the correct shadow register...
+   txa
+   asl
+   tay ; y=x*2
+   lda INPT1,y
+ eor #%10000000
+   lsr
+   sta sINPT1,x
+
+   lda INPT4,x
+   and #%10000000
+ eor #%10000000
+   ora sINPT1,x
+   sta sINPT1,x
+   jmp buttonreadloopreturn
+ endif ; MOUSESUPPORT
+
  ifconst DRIVINGSUPPORT
 rotationalcompare
  ; new=00, old=xx
@@ -2134,35 +2169,26 @@ allpinsinputlut
  .byte $0F, $F0
 
 setonebuttonmode
-   lda #$ff
-   sta SWCHB
+   lda #$14
+   sta CTLSWB ; set both 2-button disable bits to writable
    lda CTLSWBs
-   sta SWCHB
-   lda CTLSWBs
-   and twobuttonlut,x
+   ora thisjoy2buttonbit,x 
    sta CTLSWBs
-   sta CTLSWB
-   lda #$00
-   sta SWCHB
+   sta SWCHB ; turn off the 2-button disable bits
    rts
 
-onebuttonlut
- .byte $10, $04
+thisjoy2buttonbit
+ .byte $04, $10
 
 settwobuttonmode
-   lda #$ff
-   sta SWCHB
+   lda #$14
+   sta CTLSWB ; set both 2-button disable bits to writable
    lda CTLSWBs
-   sta SWCHB
-   lda CTLSWBs
-   ora onebuttonlut,x
+   and thisjoy2buttonmask,x
    sta CTLSWBs
-   sta CTLSWB
-   lda #$00
    sta SWCHB
    rts
  
-twobuttonlut
- .byte $04, $10
-
+thisjoy2buttonmask
+ .byte $fb, $ef
 
