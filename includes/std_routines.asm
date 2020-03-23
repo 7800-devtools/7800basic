@@ -483,7 +483,6 @@ joybuttonhandler
 
      lda joybuttonmode
      and twobuttonmask,x
-     and #%00000100
      beq .skip1bjoyfirecheck
      lda joybuttonmode
      ora twobuttonmask,x
