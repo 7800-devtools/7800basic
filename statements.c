@@ -9259,13 +9259,6 @@ void set(char **statement)
 	    strcpy(redefined_variables[numredefvars++], "TIASFXMONO = 1");
 	}
     }
-    else if (!strncmp(statement[2], "onebuttonmode", 13))
-    {
-	if (!strncmp(statement[3], "on", 2))
-	{
-	    strcpy(redefined_variables[numredefvars++], "ONEBUTTONMODE = 1");
-	}
-    }
     else if (!strncmp(statement[2], "xm", 2))
     {
 	if (!strncmp(statement[3], "on", 2))
