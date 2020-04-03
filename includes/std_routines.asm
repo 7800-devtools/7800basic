@@ -45,7 +45,7 @@ longcontrollerreads ; ** controllers that take a lot of time to read. We use muc
  endif
            sta inttemp6
 
-lonereadlineloop
+longreadlineloop
            ldx #1
 longreadloop
            ldy port0control,x
@@ -61,7 +61,7 @@ longreadloopreturn
            bpl longreadloop
            dec inttemp6
            sta WSYNC
-           bne lonereadlineloop
+           bne longreadlineloop
 
  ifconst LONGDEBUG
            lda #$00
@@ -1450,8 +1450,6 @@ yesboxcollision
 noboxcollision
      clc ;2
      rts ;6
-
-
 
 randomize
      lda rand
