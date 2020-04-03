@@ -4,7 +4,7 @@
 
 ;-------------------------------------------------------
 ; BOXCOLLISIONCHECK
-; Original author: Mike Saarna
+; author: Mike Saarna
 ;
 ; A general bounding box collision check. compares 2 rectangles of differing size
 ; and shape for overlap. Carry is set for collision detected, clear for none.
@@ -57,5 +57,63 @@
 .checkdone
 
             ENDM
+
+ MAC MEDIAN3
+
+	; A median filter (for smoothing paddle jitter)
+	;   this macro takes the current paddle value, compares it to historic
+	;   values, and replaces the current paddle value with the median.
+	; 
+	; called as:  MEDIAN3 STORAGE CURRENT
+	;    where STORAGE points to 3 consecutive bytes of memory. The first 2
+	;        must be dedicated to this MEDIAN filter. The last 1 is a temp.
+	;    where CURRENT is memory holding the new value you wish to compare to
+	;        the previous values, and update with the median value.
+	;
+	; returns: CURRENT (modified to contain median value)
+	;
+	; author: Mike Saarna (aka RevEng)
+
+.MedianBytes    SET {1}
+.NewValue       SET {2}
+
+	lda #0
+	ldy .NewValue
+	sty .MedianBytes+2 ; put the new value in the most "recent" slot
+
+	; build an index from relative size comparisons between our 3 values.
+	cpy .MedianBytes
+	rol
+	cpy .MedianBytes+1
+	rol
+	ldy .MedianBytes
+	cpy .MedianBytes+1
+	rol
+	tay
+
+	ldx MedianOrderLUT,y ; convert the size-comparison index to an index to the median value
+	lda .MedianBytes,x
+	sta .NewValue ; we replace the new value memory with the median value
+
+	; then shift values from "newer" bytes to "older" bytes, leaving the 
+	; newest byte (.MedianBytes+2) empty for next time.
+	lda .MedianBytes+1 
+	sta .MedianBytes
+	lda .MedianBytes+2
+	sta .MedianBytes+1
+ ifnconst MedianOrderLUT
+	jmp MedianOrderLUTend
+MedianOrderLUT ; converts our "comparison index" to an index to the median value
+	.byte 0 ; 0  B2 < B0 < B1
+	.byte 1 ; 1  B2 < B1 < B0
+	.byte 2 ; 2   impossible 
+	.byte 2 ; 3  B1 < B2 < B0
+	.byte 2 ; 4  B0 < B2 < B1
+	.byte 2 ; 5   impossible 
+	.byte 1 ; 6  B0 < B1 < B2
+	.byte 0 ; 7  B1 < B0 < B2
+MedianOrderLUTend
+ endif
+   ENDM
 
 ; EOF
