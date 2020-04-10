@@ -3648,7 +3648,7 @@ void incgraphic(char *file_name, int offset)
 	if (num_unique_palette > 4)
 	    prwarn("image contains more unique colors than 320D allows");
 	graphicsinfo[dmaplain][graphicsdatawidth[dmaplain]] = width / 8;	//image width in 6502 bytes
-	graphicsmode[dmaplain][graphicsdatawidth[dmaplain]] = 128;
+	graphicsmode[dmaplain][graphicsdatawidth[dmaplain]] = 0;
 	for (x = 0; x < width; x = x + 8)
 	{
 	    graphicsdatawidth[dmaplain] = graphicsdatawidth[dmaplain] + 1;
