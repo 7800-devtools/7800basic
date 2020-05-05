@@ -2166,11 +2166,9 @@ allpinsinputlut
  .byte $0F, $F0
 
 setonebuttonmode
-   lda #$14
-   sta CTLSWB ; set both 2-button disable bits to writable
-   lda CTLSWBs
-   ora thisjoy2buttonbit,x 
-   sta CTLSWBs
+   lda thisjoy2buttonbit,x
+   sta CTLSWB ; set this 2-button disable bit to writable
+   lda #0
    sta SWCHB ; turn off the 2-button disable bits
    rts
 
@@ -2178,11 +2176,9 @@ thisjoy2buttonbit
  .byte $04, $10
 
 settwobuttonmode
+   lda thisjoy2buttonbit,x
+   sta CTLSWB ; set this 2-button disable bit to writable
    lda #$14
-   sta CTLSWB ; set both 2-button disable bits to writable
-   lda CTLSWBs
-   and thisjoy2buttonmask,x
-   sta CTLSWBs
    sta SWCHB
    rts
  
