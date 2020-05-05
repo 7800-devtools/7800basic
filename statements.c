@@ -2333,7 +2333,7 @@ void changecontrol(char **statement)
     }
     else if (!strcmp(statement[3], "atarivox"))
     {
-	printf("  lda #10 ; controller=stmouse\n");
+	printf("  lda #10 ; controller=atarivox\n");
 	if (port == 0)
 	{
 	    printf("  sta port0control\n");
