@@ -4868,8 +4868,7 @@ void savememory(char **statement)
     printf("    lda hsdevice\n");
     printf("    cmp #2\n");
     printf("    bne skipvoxsave%d\n", templabel);
-    printf("    lda #32\n");
-    printf("    jsr AVoxWriteBytes\n");
+    printf("    jsr savedifficultytableAVOXskipconvert\n");
     printf("  ifconst DOUBLEBUFFER\n");
     printf("    lda doublebufferstate\n");
     printf("    bne skipsavememory%d\n", templabel);
