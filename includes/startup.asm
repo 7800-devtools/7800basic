@@ -178,6 +178,9 @@ storeAinhsdevice
          jsr silenceavoxvoice
      endif
 
+     ldx #0
+     jsr settwobuttonmode
+
 
      ifconst bankswitchmode
          ; we need to switch to the first bank before we jump there!

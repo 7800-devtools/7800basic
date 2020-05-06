@@ -218,6 +218,7 @@ sfxpitchoffset = $E2
 sfxnoteindex = $E3
 
 CTLSWAs = $E4
+CTLSWBs = $E5
 
 A = $e6
 a = $e6
