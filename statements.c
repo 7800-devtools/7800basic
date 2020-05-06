@@ -2905,8 +2905,7 @@ void add_graphic(char **statement, int incbanner)
 	    prerror("ran out of banner height entries");
 	strcpy(bannerfilenames[s], generalname);
 	bannerheights[s] = height / zoneheight;
-	bannerwidths[s] = width / 32;
-	//bannerpixelwidth[s]=
+	bannerwidths[s] = (width-1) / 32;
 
 	// width of 32 bytes, in coordinates...
 	//TODO: stuff this into a LUT...
