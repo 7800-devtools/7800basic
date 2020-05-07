@@ -2105,12 +2105,12 @@ keyrowdirectionmask
     .byte #%00000000 ; 0 : port0=input  port1=input
     .byte #%11110000 ; 1 : port0=output port1=input
     .byte #%00001111 ; 2 : port0=input  port1=output
-    .byte #%11111111 ; 2 : port0=output port1=output
+    .byte #%11111111 ; 3 : port0=output port1=output
 
 keyrowselectvalue
-        .byte #%11111111, #%11111111, #%11111111, #%11111111 ; no row selected, all pins high, always
-        .byte #%11101111, #%11011111, #%10111111, #%01111111 ; p0 keypad in
-        .byte #%11111110, #%11111101, #%11111011, #%11110111 ; p1 keypad in
+        .byte #%00000000, #%00000000, #%00000000, #%00000000 ; no row selected, all pins high, always
+        .byte #%11100000, #%11010000, #%10110000, #%01110000 ; p0 keypad in
+        .byte #%00001110, #%00001101, #%00001011, #%00000111 ; p1 keypad in
         .byte #%11101110, #%11011101, #%10111011, #%01110111 ; p0+p1 keypads in
  endif;  KEYPADSUPPORT
 
