@@ -736,13 +736,13 @@ void plotsprite(char **statement)
 	removeCR(statement[6]);
 
 	printf("    lda #<%s\n", statement[2]);
-	printf("    ldy ");
+	printf("    ldy #%s_width\n", statement[2]);
+	printf("    clc\n");
+	printf("    beq plotspritewidthskip%d\n", templabel);
+	printf("plotspritewidthloop%d\n", templabel);
+	printf("      adc ");
 	printimmed(statement[6]);
 	printf("%s\n", statement[6]);
-	printf("      clc\n");
-	printf("      beq plotspritewidthskip%d\n", templabel);
-	printf("plotspritewidthloop%d\n", templabel);
-	printf("      adc #%s_width\n", statement[2]);
 	printf("      dey\n");
 	printf("      bne plotspritewidthloop%d\n", templabel);
 	printf("plotspritewidthskip%d\n", templabel);
