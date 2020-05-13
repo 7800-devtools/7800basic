@@ -735,14 +735,20 @@ void plotsprite(char **statement)
     {
 	removeCR(statement[6]);
 
+	printf("    lda #<%s\n", statement[2]);
 	printf("    ldy ");
-	printimmed(statement[6]); // sprite index #
+	printimmed(statement[6]);
 	printf("%s\n", statement[6]);
-	printf("    lda #%s_width\n", statement[2]);
-	printf("    jsr mul8 ; Y and A contain multiplicands, result in A \n");
-	printf("    clc\n");
-	printf("    adc #<%s\n", statement[2]);
-	printf("    sta temp1\n");
+	printf("      clc\n");
+	printf("      beq plotspritewidthskip%d\n", templabel);
+	printf("plotspritewidthloop%d\n", templabel);
+	printf("      adc #%s_width\n", statement[2]);
+	printf("      dey\n");
+	printf("      bne plotspritewidthloop%d\n", templabel);
+	printf("plotspritewidthskip%d\n", templabel);
+	printf("    sta temp1\n\n");
+
+	templabel++;
 
     }
     else
