@@ -408,21 +408,6 @@ uninterruptableroutines
        jsr serviceatarivoxqueue
      endif
 
-     lda #0
-     sta palfastframe
-     lda paldetected
-     beq skippalframeadjusting
-     ; ** PAL console is detected. we increment palframes to accurately count 5 frames,
-     ldx palframes
-     inx
-     cpx #5
-     bne palframeskipdone
-     inc palfastframe
-     ldx #0
-palframeskipdone
-     stx palframes
-skippalframeadjusting
-
      ifconst MUSICTRACKER
      ; We normally run the servicesong routine from the top-screen interrupt, but if it
      ; happens to interrupt the scheduling of a sound effect in the game code, we skip it.
@@ -594,11 +579,6 @@ servicesfxchannelsloop
      lda sfx1pointhi,x
      sta inttemp6
 
-     lda sfx1tick,x
-     beq servicesfx_cont1 ; this chunk is over, load the next!
-     dec sfx1tick,x ; frame countdown is non-zero, subtract one
-     lda palfastframe
-     beq servicesfxchannelsloop
      lda sfx1tick,x
      beq servicesfx_cont1 ; this chunk is over, load the next!
      dec sfx1tick,x ; frame countdown is non-zero, subtract one

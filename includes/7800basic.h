@@ -439,8 +439,8 @@ songchannel2stackdepth  = $1DD
 songchannel3stackdepth  = $1DE
 songchannel4stackdepth  = $1DF
 
-palframes    =        $1E0
-palfastframe =        $1E1
+; $1E0 is available
+; $1E1 is available
 
 port0control =        $1E2
 port1control =        $1E3
