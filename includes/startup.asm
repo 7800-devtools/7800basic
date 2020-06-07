@@ -178,9 +178,21 @@ storeAinhsdevice
          jsr silenceavoxvoice
      endif
 
-     ldx #0
+     ldx #1
+     ldy #3
+joystickdetectloop
+     jsr setonebuttonmode
+     ; ensure we're in one-button mode and check for a genesis controller
+     lda INPT0,y
+     and #$80
+     ;eor #$80
+     sta genesisdetected0,x
+skipsetgenesis
      jsr settwobuttonmode
-
+     dey
+     dey
+     dex
+     bpl joystickdetectloop
 
      ifconst bankswitchmode
          ; we need to switch to the first bank before we jump there!

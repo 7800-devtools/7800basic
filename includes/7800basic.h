@@ -439,8 +439,8 @@ songchannel2stackdepth  = $1DD
 songchannel3stackdepth  = $1DE
 songchannel4stackdepth  = $1DF
 
-; $1E0 is available
-; $1E1 is available
+palframes    = $1E0
+palfastframe = $1E1
 
 port0control =        $1E2
 port1control =        $1E3
@@ -506,5 +506,8 @@ keypadmatrix1d       =    $1EB
 mousecodey1          =    $1EB
 trakballcodey1       =    $1EB
 
-; $1EC - $1FF reserved for stack
+genesisdetected0 = $1EC
+genesisdetected1 = $1ED
+
+; $1EE - $1FF reserved for stack
 
