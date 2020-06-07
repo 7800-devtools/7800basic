@@ -185,7 +185,6 @@ joystickdetectloop
      ; ensure we're in one-button mode and check for a genesis controller
      lda INPT0,y
      and #$80
-     ;eor #$80
      sta genesisdetected0,x
 skipsetgenesis
      jsr settwobuttonmode
