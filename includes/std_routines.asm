@@ -465,7 +465,7 @@ avoxsilentdata
 
 joybuttonhandler
      txa
-     lsr
+     asl
      tay
      lda INPT0,y
      lsr

@@ -220,8 +220,8 @@ int switchjoy(char *input_source)
     }
     if (!strncmp(input_source, "joy1fire0\0", 9))
     {
-	printf(" bit INPT2\n");
-	return 3;
+	printf(" bit sINPT3\n");
+	return 5;
     }
     if (!strncmp(input_source, "joy1fire1\0", 9))
     {
