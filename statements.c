@@ -617,6 +617,7 @@ void dmahole(char **statement)
 	else
 	    printf("dmahole_%d_%d\n", requestedhole, currentbank);
     }
+    printf("DMAHOLESTART SET .\n");
 
 }
 
@@ -3816,7 +3817,7 @@ void barf_graphic_file(void)
     else
     {
 	if ((graphicsdatawidth[dmaplain] > 0) || (dmaplain > 0))	//calculate from graphics area...
-	    printf(" echo \" \",[($%04X - .)]d , \"bytes of ROM space left in the main area of bank %d.\"\n", ADDRBASE,
+	    printf(" echo \" \",[($%04X - .)]d , \"bytes of ROM space left in the main area of bank %d.\"\n", ADDRBASE+0x4000,
 		   currentbank + 1);
 	else
 	    printf(" echo \" \",[($%04X - .)]d , \"bytes of ROM space left in the main area of bank %d.\"\n", 0xBFFF,
@@ -3982,8 +3983,8 @@ void barf_graphic_file(void)
 		}
 
 		printf
-		    (" echo \"  \",\"  \",\"  \",\"  \",[($%04X - .)]d , \"bytes of ROM space left in DMA hole %d.\"\n",
-		     ADDRBASE, currentplain);
+		    //(" echo \"  \",\"  \",\"  \",\"  \",[($%04X - .)]d , \"bytes of ROM space left in DMA hole %d.\"\n", ADDRBASE, currentplain);
+		    (" echo \"  \",\"  \",\"  \",\"  \",[(256*WZONEHEIGHT)-(. - DMAHOLESTART)]d , \"bytes of ROM space left in DMA hole %d.\"\n", currentplain);
 	    }
 	}
 
