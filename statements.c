@@ -26,6 +26,8 @@ char tallspritelabel[2048][1024];
 int tallspriteheight[2048];
 int tallspritecount = 0;
 
+int currentdmahole = 0;
+
 #define PNG_DEBUG 3
 #include <png.h>
 
@@ -603,6 +605,8 @@ void dmahole(char **statement)
 	    printf(" jmp dmahole_%d_%d\n", requestedhole, currentbank);
     }
 
+    if(requestedhole > 0)
+        printf("DMAHOLEEND%d SET .\n",requestedhole-1);
 
     sprintf(stdoutfilename, "7800hole.%d.asm", requestedhole);
     if ((stdoutfilepointer = freopen(stdoutfilename, "w", stdout)) == NULL)
@@ -617,8 +621,9 @@ void dmahole(char **statement)
 	else
 	    printf("dmahole_%d_%d\n", requestedhole, currentbank);
     }
-    printf("DMAHOLESTART SET .\n");
 
+    currentdmahole = requestedhole;
+    printf("DMAHOLESTART%d SET .\n",requestedhole);
 }
 
 void voice(char **statement)
@@ -3762,68 +3767,39 @@ void barf_graphic_file(void)
     {
 	BANKSTART = 0xE000;
     }
-    else if (currentbank == (bankcount - 1))
+    else if (currentbank == (bankcount - 1)) // last bank
     {
 	BANKSTART = 0xE000;
 	REALSTART = 0x8000;
     }
     else if ((romat4k == 1) && (currentbank == 0))
     {
-	BANKSTART = 0x6000;
-	REALSTART = 0x8000;
-	// need to waste less space with zoneheight=8...
-	//BANKSTART=0x7000;
-	//REALSTART=0x9000;
+        if(zoneheight==16)
+        {
+	    BANKSTART = 0x6000;
+	    REALSTART = 0x8000;
+        }
+        else // zoneheight == 8
+        {
+	    BANKSTART=0x7000;
+	    REALSTART=0x9000;
+        }
     }
     else
     {
-	BANKSTART = 0xA000;
-	REALSTART = 0x8000;
-	// need to waste less space with zoneheight=8...
-	//BANKSTART=0xB000;
-	//REALSTART=0x9000;
+        if(zoneheight==16)
+        {
+	    BANKSTART = 0xA000;
+	    REALSTART = 0x8000;
+        }
+        else // zoneheight == 8
+        {
+	    BANKSTART=0xB000;
+	    REALSTART=0x9000;
+        }
     }
 
-
-    ADDRBASE = BANKSTART - (dmaplain * DMASIZE);
-
-    if (bankcount == 0)
-    {
-	if ((graphicsdatawidth[dmaplain] > 0) || (dmaplain > 0))	//calculate from graphics area...
-	    printf(" echo \" \",[($%04X - gameend)]d , \"bytes of ROM space left in the main area.\"\n", ADDRBASE);
-	else
-	    printf(" echo \" \",[($%04X - gameend)]d , \"bytes of ROM space left in the main area.\"\n", 0xF000);
-    }
-    else if ((currentbank + 1) == bankcount)
-    {
-
-	if ((graphicsdatawidth[dmaplain] > 0) || (dmaplain > 0))	//calculate from graphics area...
-	    printf(" echo \" \",[($%04X - .)]d , \"bytes of ROM space left in the main area of bank %d.\"\n", ADDRBASE,
-		   currentbank + 1);
-	else
-	    printf(" echo \" \",[($%04X - .)]d , \"bytes of ROM space left in the main area of bank %d.\"\n", 0xEFFF,
-		   currentbank + 1);
-    }
-    else if ((romat4k == 1) && (currentbank == 0))
-    {
-
-	if ((graphicsdatawidth[dmaplain] > 0) || (dmaplain > 0))	//calculate from graphics area...
-	    printf(" echo \" \",[($%04X - .)]d , \"bytes of ROM space left in the main area of bank %d.\"\n", ADDRBASE,
-		   currentbank + 1);
-	else
-	    printf(" echo \" \",[($%04X - .)]d , \"bytes of ROM space left in the main area of bank %d.\"\n", 0x7FFF,
-		   currentbank + 1);
-    }
-    else
-    {
-	if ((graphicsdatawidth[dmaplain] > 0) || (dmaplain > 0))	//calculate from graphics area...
-	    printf(" echo \" \",[($%04X - .)]d , \"bytes of ROM space left in the main area of bank %d.\"\n", ADDRBASE+0x4000,
-		   currentbank + 1);
-	else
-	    printf(" echo \" \",[($%04X - .)]d , \"bytes of ROM space left in the main area of bank %d.\"\n", 0xBFFF,
-		   currentbank + 1);
-    }
-
+    printf("DMAHOLEEND%d SET .\n",currentdmahole);
 
     //if stdout is redirected, its time change it back to 7800.asm
     if (strcmp(stdoutfilename, "7800.asm") != 0)
@@ -3833,6 +3809,46 @@ void barf_graphic_file(void)
 	{
 	    prerror("couldn't reopen the 7800.asm file");
 	}
+    }
+
+
+    ADDRBASE = BANKSTART - (dmaplain * DMASIZE);
+
+    if (bankcount == 0)  // non-banked
+    {
+	if ((graphicsdatawidth[dmaplain] > 0) || (dmaplain > 0))	//calculate from graphics area...
+	    printf(" echo \" \",[($%04X - gameend)]d , \"bytes of ROM space left in the main area.\"\n", ADDRBASE);
+	else
+	    printf(" echo \" \",[($%04X - gameend)]d , \"bytes of ROM space left in the main area.\"\n", 0xF000);
+    }
+    else if ((currentbank + 1) == bankcount) // 0xC000
+    {
+
+	if ((graphicsdatawidth[dmaplain] > 0) || (dmaplain > 0))	//calculate from graphics area...
+	    printf(" echo \" \",[($%04X - .)]d , \"bytes of ROM space left in the main area of bank %d.\"\n", ADDRBASE,
+		   currentbank + 1);
+	else
+	    printf(" echo \" \",[($%04X - .)]d , \"bytes of ROM space left in the main area of bank %d.\"\n", 0xEFFF,
+		   currentbank + 1);
+    }
+    else if ((romat4k == 1) && (currentbank == 0)) // 0x4000
+    {
+
+	if ((graphicsdatawidth[dmaplain] > 0) || (dmaplain > 0))	//calculate from graphics area...
+	    printf(" echo \" \",[($%04X - .)]d , \"bytes of ROM space left in the main area of bank %d.\"\n", ADDRBASE,
+		   currentbank + 1);
+	else
+	    printf(" echo \" \",[($%04X - .)]d , \"bytes of ROM space left in the main area of bank %d.\"\n", 0x7FFF,
+		   currentbank + 1);
+    }
+    else 
+    {
+	if ((graphicsdatawidth[dmaplain] > 0) || (dmaplain > 0))	//calculate from graphics area...
+	    printf(" echo \" \",[($%04X - .)]d , \"bytes of ROM space left in the main area of bank %d.\"\n", ADDRBASE,
+		   currentbank + 1);
+	else
+	    printf(" echo \" \",[($%04X - .)]d , \"bytes of ROM space left in the main area of bank %d.\"\n", 0xBFFF,
+		   currentbank + 1);
     }
 
 
@@ -3950,6 +3966,7 @@ void barf_graphic_file(void)
 
 		FILE *holefilepointer;
 		char holefilename[256];
+		fflush(stdout);
 		sprintf(holefilename, "7800hole.%d.asm", currentplain);
 		holefilepointer = fopen(holefilename, "r");
 		if (holefilepointer != NULL)
@@ -3982,9 +3999,8 @@ void barf_graphic_file(void)
 
 		}
 
-		printf
-		    //(" echo \"  \",\"  \",\"  \",\"  \",[($%04X - .)]d , \"bytes of ROM space left in DMA hole %d.\"\n", ADDRBASE, currentplain);
-		    (" echo \"  \",\"  \",\"  \",\"  \",[(256*WZONEHEIGHT)-(. - DMAHOLESTART)]d , \"bytes of ROM space left in DMA hole %d.\"\n", currentplain);
+		if(holefilepointer!=NULL)
+			printf (" echo \"  \",\"  \",\"  \",\"  \",[(256*WZONEHEIGHT)-(DMAHOLEEND%d - DMAHOLESTART%d)]d , \"bytes of ROM space left in DMA hole %d.\"\n", currentplain,currentplain,currentplain);
 	    }
 	}
 

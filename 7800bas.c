@@ -117,6 +117,9 @@ int main(int argc, char *argv[])
 	prerror("couldn't create the 7800.asm file.");
     }
 
+    remove("7800hole.0.asm");
+    remove("7800hole.1.asm");
+    remove("7800hole.2.asm");
 
     create_a78info();		//wipe/create a78 parameter file
 
