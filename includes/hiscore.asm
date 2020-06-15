@@ -14,7 +14,7 @@ hiscoremodulestart
 
 detecthsc
          ; check for the HSC ROM signature...
-         lda #%00001000
+         lda #%00011100
          sta $470 ; enable HSC in the XM
          lda $3900
          cmp #$C6

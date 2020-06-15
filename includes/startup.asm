@@ -186,8 +186,10 @@ joystickdetectloop
      lda INPT0,y
      and #$80
      sta genesisdetected0,x
+     bne skipsetgenesistwobutton
 skipsetgenesis
      jsr settwobuttonmode
+skipsetgenesistwobutton
      dey
      dey
      dex

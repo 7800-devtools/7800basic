@@ -473,7 +473,7 @@ joybuttonhandler
      lda INPT1,y
      and #%10000000
      ora sINPT1,x
-     eor genesisdetected0,x ; invert INPT1 if genesis is detected
+     ;eor genesisdetected0,x ; invert INPT1 if genesis is detected
      sta sINPT1,x
 
      lda INPT4,x
