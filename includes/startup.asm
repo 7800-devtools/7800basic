@@ -198,6 +198,7 @@ storeAinhsdevice
 skipSGRAMcheck
      endif
 
+ ifconst TURNEDOFF
      ldx #1
      ldy #3
 joystickdetectloop
@@ -214,6 +215,12 @@ skipsetgenesistwobutton
      dey
      dex
      bpl joystickdetectloop
+ endif
+
+     ldx #1
+     jsr settwobuttonmode
+     ldx #0
+     jsr settwobuttonmode
 
      ifconst bankswitchmode
          ; we need to switch to the first bank before we jump there!
