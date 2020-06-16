@@ -221,15 +221,6 @@ savescreenrts
      rts
 
 drawscreen
-     ifconst SPRITECOUNTING
-         lda spritecount
-         cmp maxspritecount
-         bcc skipspritecountsave
-         sta maxspritecount
-skipspritecountsave
-         lda #0
-         sta spritecount
-     endif ; SPRITECOUNTING
 
      lda #0
      sta temp1 ; not B&W if we're here...
@@ -766,10 +757,6 @@ skipdrumkitoverride
      rts
 
 plotsprite
-     ifconst SPRITECOUNTING
-         inc spritecount
-     endif
-
  ifconst DOUBLEBUFFER
      lda doublebufferstate
      bne skipplotspritewait
@@ -1068,9 +1055,6 @@ plotcharloopcontinue
      jmp plotcharlooploop
 
 plotcharacters
-     ifconst SPRITECOUNTING
-         inc spritecount
-     endif
  ifconst DOUBLEBUFFER
      lda doublebufferstate
      bne skipplotcharacterswait

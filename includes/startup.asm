@@ -141,11 +141,6 @@ pndetecispal
      sta port0control
      sta port1control
 
-     ;max sprites displayed in any one frame before drawscreen is called...
-     lda #0
-     sta maxspritecount 
-
- 
      ;Setup port A to read mode
      ;lda #$00
      ;sta SWCHA
