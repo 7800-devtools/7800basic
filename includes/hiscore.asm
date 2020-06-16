@@ -9,13 +9,15 @@ hiscoremodulestart
          sta avoxdetected
          lda #$0
          sta SWACNT
-        lda avoxdetected
+         lda avoxdetected
          rts
 
 detecthsc
          ; check for the HSC ROM signature...
-         lda #%00011100
-         sta $470 ; enable HSC in the XM
+         lda XCTRL1s 
+         ora #%00001100
+         sta XCTRL1s
+         sta XCTRL1
          lda $3900
          cmp #$C6
          bne detecthscfail
@@ -53,6 +55,9 @@ hscheader
  .byte $00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00
  .byte $00,$00,$00,$00,$00,$00,$00,$00,$03
 detecthscfail
+         lda XCTRL1s 
+         and #%11110111
+         sta XCTRL1s 
          lda #0
          rts
      endif ; HSSUPPORT

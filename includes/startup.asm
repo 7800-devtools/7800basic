@@ -132,6 +132,9 @@ pndetecispal
 
      jsr vblankresync
 
+     lda #%00000100 ; leave cartridge plugged in for any testing
+     sta XCTRL1s
+
      ifconst pokeysupport
          ; pokey support is compiled in, so try to detect it...
          jsr detectpokeylocation
@@ -171,6 +174,28 @@ storeAinhsdevice
 
      ifconst AVOXVOICE
          jsr silenceavoxvoice
+     endif
+
+     ifconst SGRAM
+         ; check if we actually have SGRAM. If not, probe XM for it...
+         ldy #$EA
+         sty $4000
+         ldy $4000
+         cpy #$EA
+         beq skipSGRAMcheck
+             lda XCTRL1s
+             ora #%01100100
+             sta XCTRL1
+             sty $4000
+             ldy $4000
+             cpy #$EA
+             bne skipSGRAMcheck
+                 ;if we're here, XM memory satisfied our RAM requirement
+                 sta XCTRL1s ; save it
+                 lda #$10
+                 sta XCTRL2
+                 sta XCTRL3
+skipSGRAMcheck
      endif
 
      ldx #1

@@ -390,7 +390,7 @@ tempavox         = $1B3
 doublebufferminimumframetarget    = $1B4
 doublebufferminimumframeindex     = $1B5
 pausedisable     = $1B6
-XCNTRL1s         = $1B7
+XCTRL1s          = $1B7
 spritecount      = $1B8
 avoxenable       = $1B9
 
