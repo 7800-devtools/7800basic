@@ -11,6 +11,8 @@
 char stdoutfilename[256];
 FILE *stdoutfilepointer;
 
+extern int currentdmahole;
+
 #define BASIC_VERSION_INFO "7800basic v0.9"
 
 int main(int argc, char *argv[])
@@ -246,6 +248,8 @@ int main(int argc, char *argv[])
 
 	keywords(statement);
     }
+
+    printf("DMAHOLEEND%d SET .\n",currentdmahole);
 
     //if stdout is redirected, change it back to 7800.asm so the gameend label goes in the right spot...
     if (strcmp(stdoutfilename, "7800.asm") != 0)
