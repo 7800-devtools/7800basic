@@ -757,6 +757,7 @@ skipdrumkitoverride
      rts
 
 plotsprite
+ ifnconst NODRAWWAIT
  ifconst DOUBLEBUFFER
      lda doublebufferstate
      bne skipplotspritewait
@@ -765,6 +766,7 @@ plotspritewait
      lda visibleover
      bne plotspritewait
 skipplotspritewait
+ endif
 
      ;arguments: 
      ; temp1=lo graphicdata 
@@ -782,6 +784,8 @@ skipplotspritewait
      endif
 
      tax
+
+ ifnconst NOLIMITCHECKING
 
      ; the next block allows for vertical masking, and ensures we don't overwrite non-DL memory
 
@@ -803,6 +807,7 @@ exitplotsprite1
      rts
 
 continueplotsprite1
+     endif
 
      lda DLPOINTL,x ;Get pointer to DL that this sprite starts in
  ifconst DOUBLEBUFFER
@@ -863,11 +868,18 @@ continueplotsprite1a
      iny
      sty dlend,x
 
+     ifconst ALWAYSTERMINATE
+         iny
+         lda #0
+         sta (dlpnt),y
+     endif
+
      ifconst ATOMICSPRITEUPDATE
          ldy temp8
          lda temp6
          sta (dlpnt),y
      endif
+
 checkcontinueplotsprite2
 
      lda temp5
@@ -879,11 +891,13 @@ checkcontinueplotsprite2
 
      inx ;Next region
 
+ ifnconst NOLIMITCHECKING
      cpx #WZONECOUNT
 
      bcc continueplotsprite2 ; the second half of the sprite is fully on-screen, so carry on...
      rts
 continueplotsprite2
+ endif
 
      lda DLPOINTL,x ;Get pointer to next DL
  ifconst DOUBLEBUFFER
@@ -947,6 +961,12 @@ continueplotsprite2a
 
      iny
      sty dlend,x
+
+     ifconst ALWAYSTERMINATE
+         iny
+         lda #0
+         sta (dlpnt),y
+     endif
 
      ifconst ATOMICSPRITEUPDATE
          ldy temp8
