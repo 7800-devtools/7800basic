@@ -23,7 +23,9 @@ NMI
      jmp reallyoffvisible
 skipreallyoffvisible
        lda visibleover
-       beq skiptopscreenroutine
+       bne carryontopscreenroutine
+       jmp skiptopscreenroutine
+carryontopscreenroutine
          txa ; save X+Y
          pha
          tya
@@ -37,36 +39,90 @@ skipreallyoffvisible
        ; ** Other important routines that need to regularly run, and can run onscreen.
        ; ** Atarivox can't go here, because Maria might interrupt it while it's bit-banging.
 
-longcontrollerreads ; ** controllers that take a lot of time to read. We use much of the visible screen here.
          ifconst LONGCONTROLLERREAD
-           lda #$38
- ifconst LONGDEBUG
-           sta BACKGRND
- endif
-           sta inttemp6
-
-longreadlineloop
-           ldx #1
-longreadloop
-           ldy port0control,x
-           lda longreadroutinelo,y
-           sta inttemp3
+longcontrollerreads ; ** controllers that take a lot of time to read. We use much of the visible screen here.
+           ldy port0control
            lda longreadroutinehi,y
            sta inttemp4
-	   ora inttemp3
-           beq longreadloopreturn
-           jmp (inttemp3)
+           lda longreadroutinelo,y
+           sta inttemp3
+           ldy port0control+1
+           lda longreadroutinehi,y
+           sta inttemp6
+           lda longreadroutinelo,y
+           sta inttemp5
+
+           ifconst PADDLESUPPORT
+               ldy #0
+               sty VBLANK ; start charging the paddle caps
+           endif
+
+TIMEVAL = 159
+TIMEOFFSET = (255 ^ TIMEVAL)
+LONGDEBUG = 1
+
+ ifconst LONGDEBUG
+           lda #64
+           sta BACKGRND
+ endif
+redoTIM64T
+           ldy #(TIMEVAL+TIMEOFFSET)
+           sty TIM64T
+           nop
+           lda INTIM
+           cmp #(TIMEVAL+TIMEOFFSET-1)
+           bne redoTIM64T
+
+           ldx #1                   ;2
+longreadloop
+           dex                      ;2
+           bmi skipfirstlongread    ;2
+           ldx #0                   ;2
+           jmp (inttemp3)           ;5 when done, JMPs to LLRET
+skipfirstlongread
+           ldx #1                   ;2
+           jmp (inttemp5)           ;5 when done, JMPs to LLRET
 longreadloopreturn
-           dex
-           bpl longreadloop
-           dec inttemp6
-           sta WSYNC
-           bne longreadlineloop
+LLRET 
+           ldy INTIM
+           cpy #TIMEOFFSET
+           bcs longreadloop
+
+ ifconst PADDLESUPPORT
+           ; ground paddles if in-use, and correct the positions
+           lda port0control
+           cmp #3
+           bne skippaddle0fixup
+           lda #%10000000
+           sta VBLANK ; dump paddles to ground... this may not be great for 2-button controllers, certainly not genesis
+           lda paddleposition0
+           eor #$ff
+           sta paddleposition0
+           lda paddleposition1
+           eor #$ff
+           sta paddleposition1
+skippaddle0fixup
+           lda port0control+1
+           cmp #3
+           bne skippaddle1fixup
+           lda #%10000000
+           sta VBLANK ; dump paddles to ground... this may not be great for 2-button controllers, certainly not genesis
+           lda paddleposition2
+           eor #$ff
+           sta paddleposition2
+           lda paddleposition3
+           eor #$ff
+           sta paddleposition3
+skippaddle1fixup
+
+ endif ; PADDLESUPPORT
 
  ifconst LONGDEBUG
            lda #$00
            sta BACKGRND
  endif
+         else
+LLRET = 0
          endif ; LONGCONTROLLERREAD
 
          jsr servicesfxchannels 
@@ -101,9 +157,6 @@ buttonreadloopreturn
          dex
          bpl buttonreadloop
 
-	 ifconst DRIVINGSUPPORT
-           jsr drivingupdate
-	 endif ; DRIVINGSUPPORT
 	 ifconst KEYPADSUPPORT
            jsr keypadrowselect
 	 endif ; KEYPADSUPPORT
@@ -126,19 +179,19 @@ IRQ
      ifconst LONGCONTROLLERREAD
 longreadroutinelo
  ;        NONE          PROLINE        LIGHTGUN      PADDLE
- .byte    0,            0,             0,            0           
+ .byte    <LLRET,       <LLRET,        <LLRET,       <paddleupdate
  ;        TRKBALL       VCS STICK      DRIVING       KEYPAD
- .byte    0,            0,             0,            0           
+ .byte    <LLRET,       <LLRET,        <mouseupdate, <LLRET
  ;        STMOUSE       AMOUSE         ATARIVOX
- .byte    <mouseupdate, <mouseupdate,  0
+ .byte    <mouseupdate, <mouseupdate,  <LLRET
 
 longreadroutinehi
  ;        NONE          PROLINE        LIGHTGUN      PADDLE
- .byte    0,            0,             0,            0           
+ .byte    >LLRET,       >LLRET,        >LLRET,       >paddleupdate
  ;        TRKBALL       VCS STICK      DRIVING       KEYPAD
- .byte    0,            0,             0,            0           
+ .byte    >LLRET,       >LLRET,        >mouseupdate, >LLRET
  ;        STMOUSE       AMOUSE         ATARIVOX
- .byte    >mouseupdate, >mouseupdate,  0
+ .byte    >mouseupdate, >mouseupdate,  >LLRET
 nullroutine
  rts
      endif ; LONGCONTROLLERREAD
@@ -523,29 +576,29 @@ controlsusing2buttoncode
      .byte 1 ; 10=atarivox
 
 buttonhandlerhi
-     .byte 0                  ; 00=no controller plugged in
-     .byte >joybuttonhandler  ; 01=proline joystick
-     .byte >gunbuttonhandler  ; 02=lightgun
-     .byte 0                  ; 03=paddle [not implemented yet]
-     .byte >joybuttonhandler  ; 04=trakball
-     .byte >joybuttonhandler  ; 05=vcs joystick
-     .byte >joybuttonhandler  ; 06=driving control
-     .byte 0                  ; 07=keypad
-     .byte >mousebuttonhandler; 08=st mouse
-     .byte >mousebuttonhandler; 09=amiga mouse
-     .byte >joybuttonhandler  ; 10=atarivox
+     .byte 0                    ; 00=no controller plugged in
+     .byte >joybuttonhandler    ; 01=proline joystick
+     .byte >gunbuttonhandler    ; 02=lightgun
+     .byte >paddlebuttonhandler ; 03=paddle
+     .byte >joybuttonhandler    ; 04=trakball
+     .byte >joybuttonhandler    ; 05=vcs joystick
+     .byte >joybuttonhandler    ; 06=driving control
+     .byte 0                    ; 07=keypad
+     .byte >mousebuttonhandler  ; 08=st mouse
+     .byte >mousebuttonhandler  ; 09=amiga mouse
+     .byte >joybuttonhandler    ; 10=atarivox
 buttonhandlerlo
-     .byte 0 ; 00=no controller plugged in
-     .byte <joybuttonhandler  ; 01=proline joystick
-     .byte <gunbuttonhandler  ; 02=lightgun 
-     .byte 0                  ; 03=paddle [not implemented yet]
-     .byte <joybuttonhandler  ; 04=trakball
-     .byte <joybuttonhandler  ; 05=vcs joystick
-     .byte <joybuttonhandler  ; 06=driving control
-     .byte 0                  ; 07=keypad
-     .byte <mousebuttonhandler; 08=st mouse
-     .byte <mousebuttonhandler; 09=amiga mouse
-     .byte <joybuttonhandler  ; 10=atarivox
+     .byte 0                    ; 00=no controller plugged in
+     .byte <joybuttonhandler    ; 01=proline joystick
+     .byte <gunbuttonhandler    ; 02=lightgun 
+     .byte <paddlebuttonhandler ; 03=paddle
+     .byte <joybuttonhandler    ; 04=trakball
+     .byte <joybuttonhandler    ; 05=vcs joystick
+     .byte <joybuttonhandler    ; 06=driving control
+     .byte 0                    ; 07=keypad
+     .byte <mousebuttonhandler  ; 08=st mouse
+     .byte <mousebuttonhandler  ; 09=amiga mouse
+     .byte <joybuttonhandler    ; 10=atarivox
 
 drawwait
      lda visibleover
@@ -1928,7 +1981,6 @@ NewPageflipoffset
      endif ; DOUBLEBUFFER
 
  ifconst MOUSESUPPORT
-   ifnconst DRIVINGSUPPORT
 rotationalcompare
      ; new=00, old=xx
      .byte $00, $01, $ff, $00
@@ -1938,7 +1990,6 @@ rotationalcompare
      .byte $01, $00, $00, $ff
      ; new=11, old=xx
      .byte $00, $ff, $01, $00
-   endif
 
    ;  0000YyXx st mouse
    ;  0000xyXY amiga mouse
@@ -1949,7 +2000,6 @@ amigatoataribits ; swap bits 1 and 4...
   .byte %00000101, %00001101, %00000111, %00001111
 
 mouseupdate
-;LONGDEBUG = 1
    lda SWCHA
    and #$0f
    sta inttemp2
@@ -1963,8 +2013,10 @@ mouseupdate
    lda port0control,x
    cmp #8 ; st mouse
    beq domousecontrol
-   cmp #9 ; amiga mouse
-   bne skipmousecontrol
+   cmp #6 ; driving control
+   beq domousecontrol
+   ;cmp #9 ; amiga mouse
+   ;bne skipmousecontrol
    ; st mice encode on different bits/joystick-lines than amiga mice...
    ;  0000YyXx st mouse
    ;  0000xyXY amiga mouse
@@ -2007,9 +2059,62 @@ domousecontrol
    sta mousecodey0,x
 skipmousecontrol
    jmp longreadloopreturn
+ else  ; !MOUSESUPPORT
+mouseupdate = 0
  endif ; MOUSESUPPORT
 
-mousebuttonhandler ; outside of conditional, so button handler entry in LUT is valid
+
+ ifconst PADDLESUPPORT
+paddleupdate
+   ; non-indexed to avoid avoid stompying on x or y...
+   cpx #0
+   bne nextportpaddle
+   lda INPT0
+   bmi skippaddle0save
+   sty paddleposition0
+skippaddle0save
+   lda INPT1
+   bmi skippaddle1save
+   sty paddleposition1
+skippaddle1save
+  jmp longreadloopreturn
+
+nextportpaddle
+  lda INPT2
+   bmi skippaddle2save
+   sty paddleposition2
+skippaddle2save
+   lda INPT3
+   bmi skippaddle3save
+   sty paddleposition3
+skippaddle3save
+   jmp longreadloopreturn
+
+ else
+paddleupdate = LLRET
+ endif
+
+paddlebuttonhandler ; outside of conditional, for button-handler LUT
+ ifconst PADDLESUPPORT
+ ; x=0|1 for port, rather than paddle #. 
+ ; Only the first paddle button will integrate into "joy0fire" testing. If the
+ ; game wants to support 2 paddles, up to the game to instead test the 
+ ; joystick right+left directions instead.
+   lda SWCHA ; top of nibble is first paddle button
+   cpx #0 ; port 0?
+   beq skippaddleport2shift
+     asl ; shift second port to upper nibble
+     asl
+     asl
+     asl
+skippaddleport2shift
+   and #%10000000
+   eor #%10000000 ; invert
+   sta sINPT1,x
+   jmp buttonreadloopreturn
+ endif ; PADDLESUPPORT
+
+mousebuttonhandler ; outside of conditional, for button-handler LUT
  ifconst MOUSESUPPORT
    ; stick the mouse buttons in the correct shadow register...
    txa
@@ -2027,50 +2132,6 @@ mousebuttonhandler ; outside of conditional, so button handler entry in LUT is v
    sta sINPT1,x
    jmp buttonreadloopreturn
  endif ; MOUSESUPPORT
-
- ifconst DRIVINGSUPPORT
-rotationalcompare
- ; new=00, old=xx
- .byte $00, $01, $ff, $00
- ; new=01, old=xx
- .byte $ff, $00, $00, $01
- ; new=10, old=xx
- .byte $01, $00, $00, $ff
- ; new=11, old=xx
- .byte $00, $ff, $01, $00
-drivingupdate
-   ldx #1
-   lda port1control
-   cmp #6 ; check if port1=driving
-   bne skipfirstdrivingcontrol
-   lda SWCHA
-   and #%00000011
-   asl
-   asl
-drivingupdateloop
-   ora controller0statesave,x
-   tay
-   lda rotationalcompare,y
-   clc
-   adc drivingposition0,x
-   sta drivingposition0,x
-   tya
-   lsr
-   lsr
-   sta controller0statesave,x
-skipfirstdrivingcontrol
-   lda port0control
-   cmp #6 ; check if port0=driving
-   bne drivingcontrolsloopdone
-   lda SWCHA
-   and #%00110000
-   lsr
-   lsr
-   dex
-   bpl drivingupdateloop
-drivingcontrolsloopdone
-   rts
- endif ; DRIVINGSUPPORT
 
  ifconst KEYPADSUPPORT
    ; ** select keypad rows 0 to 3 over 4 frames...

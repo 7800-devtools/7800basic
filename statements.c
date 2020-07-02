@@ -2135,6 +2135,9 @@ void changecontrol(char **statement)
     static int drivingsupport = 0;
     static int mousesupport = 0;
     static int keypadsupport = 0;
+    static int paddlesupport = 0;
+    static int longcontrollerread = 0;
+
 
     assertminimumargs(statement, "changecontrol", 2);
     removeCR(statement[2]);
@@ -2210,6 +2213,18 @@ void changecontrol(char **statement)
 
     if (!strcmp(statement[3], "paddle"))
     {
+        if(paddlesupport == 0)
+	{
+            paddlesupport = 1;
+	    strcpy(redefined_variables[numredefvars++], "PADDLESUPPORT = 1");
+	    sprintf(constants[numconstants++], "PADDLESUPPORT");
+        }
+        if(longcontrollerread == 0)
+        {
+	    strcpy(redefined_variables[numredefvars++], "LONGCONTROLLERREAD = 1");
+	    sprintf(constants[numconstants++], "LONGCONTROLLERREAD");
+            longcontrollerread=1;
+        }
 	printf("  lda #3 ; controller=paddle\n");
 	if (port == 0)
 	{
@@ -2247,12 +2262,25 @@ void changecontrol(char **statement)
     }
     else if (!strcmp(statement[3], "driving"))
     {
+        if(mousesupport == 0)
+	{
+            mousesupport = 1;
+	    strcpy(redefined_variables[numredefvars++], "MOUSESUPPORT = 1");
+	    sprintf(constants[numconstants++], "MOUSESUPPORT");
+        }
         if(drivingsupport==0)
         {
             drivingsupport=1;
             strcpy(redefined_variables[numredefvars++], "DRIVINGSUPPORT = 1");
 	    sprintf(constants[numconstants++], "DRIVINGSUPPORT");
         }
+        if(longcontrollerread == 0)
+        {
+            longcontrollerread=1;
+	    strcpy(redefined_variables[numredefvars++], "LONGCONTROLLERREAD = 1");
+	    sprintf(constants[numconstants++], "LONGCONTROLLERREAD");
+        }
+
 	printf("  lda #6 ; controller=driving\n");
 	if (port == 0)
 	{
@@ -2295,8 +2323,12 @@ void changecontrol(char **statement)
 	{
             mousesupport = 1;
 	    strcpy(redefined_variables[numredefvars++], "MOUSESUPPORT = 1");
-	    strcpy(redefined_variables[numredefvars++], "LONGCONTROLLERREAD = 1");
 	    sprintf(constants[numconstants++], "MOUSESUPPORT");
+        }
+        if(longcontrollerread == 0)
+        {
+            longcontrollerread=1;
+	    strcpy(redefined_variables[numredefvars++], "LONGCONTROLLERREAD = 1");
 	    sprintf(constants[numconstants++], "LONGCONTROLLERREAD");
         }
 	printf("  lda #8 ; controller=stmouse\n");
@@ -2319,8 +2351,12 @@ void changecontrol(char **statement)
 	{
             mousesupport = 1;
 	    strcpy(redefined_variables[numredefvars++], "MOUSESUPPORT = 1");
-	    strcpy(redefined_variables[numredefvars++], "LONGCONTROLLERREAD = 1");
 	    sprintf(constants[numconstants++], "MOUSESUPPORT");
+        }
+        if(longcontrollerread == 0)
+        {
+            longcontrollerread=1;
+	    strcpy(redefined_variables[numredefvars++], "LONGCONTROLLERREAD = 1");
 	    sprintf(constants[numconstants++], "LONGCONTROLLERREAD");
         }
 
