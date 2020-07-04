@@ -2215,9 +2215,15 @@ void changecontrol(char **statement)
     {
         if(paddlesupport == 0)
 	{
-            paddlesupport = 1;
+            paddlesupport = paddlesupport | (port+1);
 	    strcpy(redefined_variables[numredefvars++], "PADDLESUPPORT = 1");
 	    sprintf(constants[numconstants++], "PADDLESUPPORT");
+        }
+        else if((paddlesupport|(port+1)) == 0) // check to see if both ports can be controlled with paddles
+	{
+            paddlesupport = paddlesupport | (port+1);
+	    strcpy(redefined_variables[numredefvars++], "FOURPADDLESUPPORT = 1"); // if so, enable four paddle reads
+	    sprintf(constants[numconstants++], "FOURPADDLESUPPORT");
         }
         if(longcontrollerread == 0)
         {
@@ -9380,6 +9386,36 @@ void set(char **statement)
 	if (!strncmp(statement[3], "off", 3))
 	{
 	    strcpy(redefined_variables[numredefvars++], "pauseroutineoff = 1");
+	}
+    }
+    else if (!strncmp(statement[2], "paddlerange", 11))
+    {
+        char outstr[256];
+	int value = strictatoi(statement[3]);
+        if ((value<1)||(value>240))
+	    prerror("'set paddlerange must have an argument >0 and <241");
+        sprintf(outstr,"PADDLERANGE = %d",value);
+	strcpy(redefined_variables[numredefvars++], outstr);
+    }
+    else if (!strncmp(statement[2], "paddlepair", 10))
+    {
+	if (!strncmp(statement[3], "on", 2))
+	{
+	    strcpy(redefined_variables[numredefvars++], "TWOPADDLESUPPORT = 1");
+	}
+    }
+    else if (!strncmp(statement[2], "mousexonly", 10))
+    {
+	if (!strncmp(statement[3], "on", 2))
+	{
+	    strcpy(redefined_variables[numredefvars++], "MOUSEXONLY = 1");
+	}
+    }
+    else if (!strncmp(statement[2], "drivingboost", 12))
+    {
+	if (!strncmp(statement[3], "on", 2))
+	{
+	    strcpy(redefined_variables[numredefvars++], "DRIVINGBOOST = 1");
 	}
     }
     else if (!strncmp(statement[2], "screenheight", 12))
