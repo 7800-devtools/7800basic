@@ -46,22 +46,36 @@ longcontrollerreads ; ** controllers that take a lot of time to read. We use muc
            sta inttemp4
            lda longreadroutinelo,y
            sta inttemp3
+           ifconst DRIVINGBOOST
+               cpy #6 
+               bne skipboostsetupp0
+               lda mousex0
+               sta mousey0
+skipboostsetupp0
+           endif
            ldy port0control+1
            lda longreadroutinehi,y
            sta inttemp6
            lda longreadroutinelo,y
            sta inttemp5
+           ifconst DRIVINGBOOST
+               cpy #6 
+               bne skipboostsetupp1
+               lda mousex1
+               sta mousey1
+skipboostsetupp1
+           endif
 
            ifconst PADDLESUPPORT
                ldy #0
                sty VBLANK ; start charging the paddle caps
 
-               lda inttemp3
+               lda inttemp4
                ora inttemp6
                bne nodoublepaddles
                   jmp paddleport01update
 nodoublepaddles
-               lda inttemp3
+               lda inttemp4
                bne nopaddle0selected
                   jmp paddleport0update
 nopaddle0selected
@@ -78,59 +92,94 @@ TIMEVAL = 160
  endif
 TIMEOFFSET = 10
 
-           jsr setTIM64T
-
-           ldx #1                   ;2
+     SETTIM64T ; INTIM is in Y
+     ldx #1                   ;2
 longreadloop
-           dex                      ;2
-           bmi skipfirstlongread    ;2
-           ldx #0                   ;2
-           jmp (inttemp3)           ;5 when done, JMPs to LLRET
+     dex                      ;2
+     bmi skipfirstlongread    ;2
+     ldx #0                   ;2
+     jmp (inttemp3)           ;5 when done, JMPs to LLRET
 skipfirstlongread
-           ldx #1                   ;2
-           jmp (inttemp5)           ;5 when done, JMPs to LLRET
+     ldx #1                   ;2
+     jmp (inttemp5)           ;5 when done, JMPs to LLRET
 longreadloopreturn
 LLRET 
-           ldy INTIM
-           cpy #TIMEOFFSET
-           bcs longreadloop
+     ldy INTIM
+     cpy #TIMEOFFSET
+     bcs longreadloop
 longreadloopdone
+ lda #0
+ sta BACKGRND
+
+ ifconst DRIVINGBOOST_OFF
+    ldx #1
+drivingboostloop
+     ldy port0control,x
+     cpy #6 
+     bne drivingboostdone
+     sec
+     lda mousex0,x
+     sbc mousey0,x
+     pha 
+     bpl boosttoabsolutedone
+          eor #$ff
+          clc
+          adc #1
+boosttoabsolutedone
+     tay
+     pla
+     dey
+     beq leveloneboost
+     asl
+leveloneboost
+     asl
+     clc
+     adc mousey0,x
+     sta mousex0,x
+drivingboostdone
+     dex
+     bpl drivingboostloop
+ endif
 
  ifconst PADDLESUPPORT
-           ; ground paddles if in-use, and correct the positions
-           lda port0control
-           cmp #3
-           bne skippaddle0fixup
-           lda #%10000000
-           sta VBLANK ; dump paddles to ground... this may not be great for 2-button controllers, certainly not genesis
-           sec
-           lda paddleposition0
-           sbc #TIMEOFFSET
-           sta paddleposition0
-           sec
-           lda paddleposition1
-           sbc #TIMEOFFSET
-           sta paddleposition1
-skippaddle0fixup
-           lda port0control+1
-           cmp #3
-           bne skippaddle1fixup
-           lda #%10000000
-           sta VBLANK ; dump paddles to ground... this may not be great for 2-button controllers, certainly not genesis
-           sec
-           lda paddleposition2
-           sbc #TIMEOFFSET
-           sta paddleposition2
-           sec
-           lda paddleposition3
-           sbc #TIMEOFFSET
-           sta paddleposition3
-skippaddle1fixup
-
+     ldx #1
+paddlefixuploop
+     ; ground paddles if in-use, and correct the positions
+     lda port0control,x
+     cmp #3
+     bne skippaddlefixup
+     lda #%10000000
+     sta VBLANK ; dump paddles to ground... this may not be great for genesis controllers
+     sec
+     lda paddleposition0,x
+     sbc #TIMEOFFSET
+ ifnconst PADDLESMOOTHINGOFF
+     clc
+     adc paddleprevious0,x
+     ror
+     sta paddleprevious0,x
+ endif
+     sta paddleposition0,x
+ ifconst TWOPADDLESUPPORT
+     sec
+     lda paddleposition1,x
+     sbc #TIMEOFFSET
+ ifnconst PADDLESMOOTHINGOFF
+     clc
+     adc paddleprevious1,x
+     ror
+     sta paddleprevious1,x
+ endif
+     sta paddleposition1,x
+ endif
+skippaddlefixup
+     dex
+     bpl paddlefixuploop
  endif ; PADDLESUPPORT
          else  ; !LONGCONTROLLERREAD
 LLRET = 0
          endif ; LONGCONTROLLERREAD
+
 
          jsr servicesfxchannels 
          ifconst MUSICTRACKER
@@ -203,14 +252,22 @@ longreadroutinehi
 nullroutine
  rts
 
-setTIM64T
-     ldy #(TIMEVAL+TIMEOFFSET)
-setTIM64Tloop
-     sty TIM64T
-     lda INTIM
-     cmp #(TIMEVAL+TIMEOFFSET-1)
-     bne setTIM64Tloop
-     rts
+ MAC SETTIM64T
+ ifnconst PADDLESMOOTHINGOFF
+     lda #(TIMEVAL+TIMEOFFSET+1)
+ else
+     lda #(TIMEVAL+TIMEOFFSET)
+ endif
+.setTIM64Tloop
+     sta TIM64T
+     ldy INTIM
+ ifnconst PADDLESMOOTHINGOFF
+     cpy #(TIMEVAL+TIMEOFFSET-1+1)
+ else
+     cpy #(TIMEVAL+TIMEOFFSET-1)
+ endif
+     bne .setTIM64Tloop
+ ENDM
 
      endif ; LONGCONTROLLERREAD
 
@@ -2017,22 +2074,28 @@ amigatoataribits ; swap bits 1 and 4...
   .byte %00000001, %00001001, %00000011, %00001011
   .byte %00000101, %00001101, %00000111, %00001111
 
+
 mouseupdate
-   lda SWCHA
-   and #$0f
-   sta inttemp2
-   lda SWCHA
-   lsr
-   lsr
-   lsr
-   lsr
-   sta inttemp1
+   cpx #1               ; 2
+   bne skipmouseupdate1 ; 2 /3
+   lda SWCHA            ; 2
+   and #$0f             ; 2
+   sta inttemp2         ; 3
+   jmp skipmouseupdate0 ; 3
+skipmouseupdate1
+   lda SWCHA    ;3
+   lsr          ;2
+   lsr          ;2
+   lsr          ;2
+   lsr          ;2
+   sta inttemp1 ;3
+skipmouseupdate0
 
    lda port0control,x
-   cmp #8 ; st mouse
-   beq domousecontrol 
    cmp #6 ; driving control
    beq dodrivingcontrol 
+   cmp #8 ; st mouse
+   beq domousecontrol 
    ; st mice encode on different bits/joystick-lines than amiga mice...
    ;  0000YyXx st mouse
    ;  0000xyXY amiga mouse
@@ -2061,12 +2124,10 @@ domousecontrol
    lsr
    lsr
    sta mousecodey0,x
- endif
+ endif ; !MOUSEXONLY
 
+dodrivingcontrol
    ; ...then the X, so driving controls can skip the Y
- ifnconst DRIVINGBOOST
-dodrivingcontrol
- endif
    lda inttemp1,x
    and #%00000011
    asl
@@ -2083,39 +2144,16 @@ dodrivingcontrol
    lsr
    sta mousecodex0,x
    jmp longreadloopreturn
-
- ifconst DRIVINGBOOST
-dodrivingcontrol
-   lda inttemp1,x
-   and #%00000011
-   asl
-   asl
-   ora mousecodex0,x
-   and #%00001111
-   tay
-   lda rotationalcompare,y
-   asl 
-   clc
-   adc mousex0,x
-   sta mousex0,x
-   tya
-   lsr
-   lsr
-   sta mousecodex0,x
-   jmp longreadloopreturn
- endif
 
  else  ; !MOUSESUPPORT
 mouseupdate = 0
  endif ; MOUSESUPPORT
 
-
  ; paddles need tighter loops than other long-read controllers, so we work outside the long-read loop...
 
  ifconst PADDLESUPPORT
 paddleport0update
-  jsr setTIM64T
-  tay ; move INTIM to y
+  SETTIM64T ; INTIM is in Y
 paddleport0updateloop
   lda INPT0                     ; 3
   bmi skippaddle0setposition    ; 2/3
@@ -2135,8 +2173,7 @@ skippaddle1setposition
 
  ifconst PADDLESUPPORT
 paddleport1update
-  jsr setTIM64T
-  tay ; move INTIM to y
+  SETTIM64T ; INTIM is in Y
 paddleport1updateloop
   lda INPT2                     ; 3
   bmi skippaddle2setposition    ; 2/3
@@ -2156,8 +2193,7 @@ skippaddle3setposition
 
 paddleport01update
  ifconst FOURPADDLESUPPORT
-  jsr setTIM64T
-  tay ; move INTIM to y
+  SETTIM64T ; INTIM is in Y
 paddleport01updateloop
   lda INPT0                     ; 3
   bmi skippaddle0setposition01  ; 2/3

@@ -489,19 +489,23 @@ lightguny1          =     $1E7
 
 ; controller state save. for trakball state+dir codes, rotary position codes
 controller0statesave =    $1E8
+paddleprevious0      =    $1E8
 mousecodex0          =    $1E8
 trakballcodex0       =    $1E8
 keypadmatrix0c       =    $1E8
 
 controller1statesave =    $1E9
+paddleprevious2      =    $1E9
 mousecodex1          =    $1E9
 trakballcodex1       =    $1E9
 keypadmatrix1c       =    $1E9
 
+paddleprevious1      =    $1EA
 keypadmatrix0d       =    $1EA
 mousecodey0          =    $1EA
 trakballcodey0       =    $1EA
 
+paddleprevious3      =    $1EB
 keypadmatrix1d       =    $1EB
 mousecodey1          =    $1EB
 trakballcodey1       =    $1EB
