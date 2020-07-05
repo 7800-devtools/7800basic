@@ -2218,12 +2218,32 @@ void changecontrol(char **statement)
             paddlesupport = paddlesupport | (port+1);
 	    strcpy(redefined_variables[numredefvars++], "PADDLESUPPORT = 1");
 	    sprintf(constants[numconstants++], "PADDLESUPPORT");
+            if(port == 0)
+            {
+	        strcpy(redefined_variables[numredefvars++], "PADDLE0SUPPORT = 1");
+	        sprintf(constants[numconstants++], "PADDLE0SUPPORT");
+            }
+            else
+            {
+	        strcpy(redefined_variables[numredefvars++], "PADDLE1SUPPORT = 1");
+	        sprintf(constants[numconstants++], "PADDLE1SUPPORT");
+            }
         }
         else if((paddlesupport|(port+1)) == 0) // check to see if both ports can be controlled with paddles
 	{
             paddlesupport = paddlesupport | (port+1);
 	    strcpy(redefined_variables[numredefvars++], "FOURPADDLESUPPORT = 1"); // if so, enable four paddle reads
 	    sprintf(constants[numconstants++], "FOURPADDLESUPPORT");
+            if(port == 0)
+            {
+	        strcpy(redefined_variables[numredefvars++], "PADDLE0SUPPORT = 1");
+	        sprintf(constants[numconstants++], "PADDLE0SUPPORT");
+            }
+            else
+            {
+	        strcpy(redefined_variables[numredefvars++], "PADDLE1SUPPORT = 1");
+	        sprintf(constants[numconstants++], "PADDLE1SUPPORT");
+            }
         }
         if(longcontrollerread == 0)
         {
@@ -2266,41 +2286,6 @@ void changecontrol(char **statement)
 	printf("  jsr setportforinput\n");
 	printf("  jsr settwobuttonmode\n");
     }
-    else if (!strcmp(statement[3], "driving"))
-    {
-        if(mousesupport == 0)
-	{
-            mousesupport = 1;
-	    strcpy(redefined_variables[numredefvars++], "MOUSESUPPORT = 1");
-	    sprintf(constants[numconstants++], "MOUSESUPPORT");
-        }
-        if(drivingsupport==0)
-        {
-            drivingsupport=1;
-            strcpy(redefined_variables[numredefvars++], "DRIVINGSUPPORT = 1");
-	    sprintf(constants[numconstants++], "DRIVINGSUPPORT");
-        }
-        if(longcontrollerread == 0)
-        {
-            longcontrollerread=1;
-	    strcpy(redefined_variables[numredefvars++], "LONGCONTROLLERREAD = 1");
-	    sprintf(constants[numconstants++], "LONGCONTROLLERREAD");
-        }
-
-	printf("  lda #6 ; controller=driving\n");
-	if (port == 0)
-	{
-	    printf("  sta port0control\n");
-	    printf("  ldx #0\n");
-	}
-	else
-	{
-	    printf("  sta port1control\n");
-	    printf("  ldx #1\n");
-	}
-	printf("  jsr setportforinput\n");
-	printf("  jsr settwobuttonmode\n");
-    }
     else if (!strcmp(statement[3], "keypad"))
     {
         if(keypadsupport==0)
@@ -2323,13 +2308,36 @@ void changecontrol(char **statement)
 	/* we don't need to modify CTLSWA/CTLSWAs. the keypad driver does this */
 	printf("  jsr setonebuttonmode\n");
     }
-    else if (!strcmp(statement[3], "stmouse"))
+    else if ( (!strcmp(statement[3], "stmouse")) || (!strcmp(statement[3], "amigamouse")) || (!strcmp(statement[3], "driving")) )
     {
         if(mousesupport == 0)
 	{
-            mousesupport = 1;
+            mousesupport = mousesupport | (port+1);
 	    strcpy(redefined_variables[numredefvars++], "MOUSESUPPORT = 1");
 	    sprintf(constants[numconstants++], "MOUSESUPPORT");
+            if(port==0)
+            {
+	        strcpy(redefined_variables[numredefvars++], "MOUSE0SUPPORT = 1");
+	        sprintf(constants[numconstants++], "MOUSE0SUPPORT");
+            }
+            else
+            {
+	        strcpy(redefined_variables[numredefvars++], "MOUSE1SUPPORT = 1");
+	        sprintf(constants[numconstants++], "MOUSE1SUPPORT");
+            }
+        }
+        else if ( (mousesupport|(port+1))==0) // one port was enable previously
+        {
+            if(port==0)
+            {
+	        strcpy(redefined_variables[numredefvars++], "MOUSE0SUPPORT = 1");
+	        sprintf(constants[numconstants++], "MOUSE0SUPPORT");
+            }
+            else
+            {
+	        strcpy(redefined_variables[numredefvars++], "MOUSE1SUPPORT = 1");
+	        sprintf(constants[numconstants++], "MOUSE1SUPPORT");
+            }
         }
         if(longcontrollerread == 0)
         {
@@ -2337,36 +2345,12 @@ void changecontrol(char **statement)
 	    strcpy(redefined_variables[numredefvars++], "LONGCONTROLLERREAD = 1");
 	    sprintf(constants[numconstants++], "LONGCONTROLLERREAD");
         }
-	printf("  lda #8 ; controller=stmouse\n");
-	if (port == 0)
-	{
-	    printf("  sta port0control\n");
-	    printf("  ldx #0\n");
-	}
-	else
-	{
-	    printf("  sta port1control\n");
-	    printf("  ldx #1\n");
-	}
-	printf("  jsr setportforinput\n");
-	printf("  jsr setonebuttonmode\n");
-    }
-    else if (!strcmp(statement[3], "amigamouse"))
-    {
-        if(mousesupport == 0)
-	{
-            mousesupport = 1;
-	    strcpy(redefined_variables[numredefvars++], "MOUSESUPPORT = 1");
-	    sprintf(constants[numconstants++], "MOUSESUPPORT");
-        }
-        if(longcontrollerread == 0)
-        {
-            longcontrollerread=1;
-	    strcpy(redefined_variables[numredefvars++], "LONGCONTROLLERREAD = 1");
-	    sprintf(constants[numconstants++], "LONGCONTROLLERREAD");
-        }
-
-	printf("  lda #9 ; controller=amigamouse\n");
+        if (!strcmp(statement[3], "stmouse"))
+	   printf("  lda #8 ; controller=stmouse\n");
+        if (!strcmp(statement[3], "amigamouse"))
+	   printf("  lda #9 ; controller=amigamouse\n");
+        if (!strcmp(statement[3], "driving"))
+	   printf("  lda #6 ; controller=driving\n");
 	if (port == 0)
 	{
 	    printf("  sta port0control\n");
@@ -9402,6 +9386,13 @@ void set(char **statement)
 	if (!strncmp(statement[3], "on", 2))
 	{
 	    strcpy(redefined_variables[numredefvars++], "TWOPADDLESUPPORT = 1");
+	}
+    }
+    else if (!strncmp(statement[2], "paddlescalex2", 13))
+    {
+	if (!strncmp(statement[3], "on", 2))
+	{
+	    strcpy(redefined_variables[numredefvars++], "PADDLESCALEX2 = 1");
 	}
     }
     else if (!strncmp(statement[2], "mousexonly", 10))
