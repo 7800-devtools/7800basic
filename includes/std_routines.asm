@@ -2499,16 +2499,17 @@ keyrowselectvalue
  endif;  KEYPADSUPPORT
 
  ifconst KEYPADSUPPORT
+   ; TODO - split into compile-time KEYPAD0SUPPORT and KEYPAD1SUPPORT
 keypadcolumnread
+   lda port0control
+   cmp #7
+   bne skipkeypadcolumnread0
    lda framecounter
    and #3
    asl ; x2 because keypad variables are interleaved
    tax
-
    lda #0
    sta keypadmatrix0a,x
-   sta keypadmatrix1a,x
-
    lda INPT0
    cmp #$80
    rol keypadmatrix0a,x
@@ -2521,7 +2522,17 @@ keypadcolumnread
    lda keypadmatrix0a,x
    eor #%00000111
    sta keypadmatrix0a,x
-  
+skipkeypadcolumnread0  
+
+   lda port1control
+   cmp #7
+   bne skipkeypadcolumnread1
+   lda framecounter
+   and #3
+   asl ; x2 because keypad variables are interleaved
+   tax
+   lda #0
+   sta keypadmatrix1a,x
    rol keypadmatrix1a,x
    lda INPT2
    cmp #$80
@@ -2535,7 +2546,7 @@ keypadcolumnread
    lda keypadmatrix1a,x
    eor #%00000111
    sta keypadmatrix1a,x
-
+skipkeypadcolumnread1
    rts
  endif ; KEYPADSUPPORT
  
