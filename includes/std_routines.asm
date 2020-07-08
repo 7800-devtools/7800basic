@@ -793,10 +793,18 @@ plotsprite
      lda doublebufferstate
      bne skipplotspritewait
  endif ; DOUBLEBUFFER
+ ifconst DEBUGWAITCOLOR
+   lda #$41
+   sta BACKGRND
+ endif
 plotspritewait
      lda visibleover
      bne plotspritewait
 skipplotspritewait
+ ifconst DEBUGWAITCOLOR
+   lda #$0
+   sta BACKGRND
+ endif
  endif
 
      ;arguments: 
@@ -1070,9 +1078,17 @@ plotcharloop
      lda doublebufferstate
      bne skipplotcharloopwait
  endif ; DOUBLEBUFFER
+ ifconst DEBUGWAITCOLOR
+   lda #$61
+   sta BACKGRND
+ endif
 plotcharloopwait
      lda visibleover
      bne plotcharloopwait
+ ifconst DEBUGWAITCOLOR
+   lda #0
+   sta BACKGRND
+ endif
 skipplotcharloopwait
 plotcharlooploop
      ldy #0
@@ -1110,9 +1126,16 @@ plotcharacters
      lda doublebufferstate
      bne skipplotcharacterswait
  endif ; DOUBLEBUFFER
+ ifconst DEBUGWAITCOLOR
+   lda #$41
+   sta BACKGRND
+ endif
 plotcharacterswait
      lda visibleover
      bne plotcharacterswait
+ ifconst DEBUGWAITCOLOR
+   sta BACKGRND
+ endif
 skipplotcharacterswait
      ;arguments: 
      ; temp1=lo charactermap
