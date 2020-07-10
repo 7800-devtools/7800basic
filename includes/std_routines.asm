@@ -61,7 +61,7 @@ beginlongcontrollerreads
  ifconst PADDLERANGE
 TIMEVAL = PADDLERANGE
  else
-TIMEVAL = 80
+TIMEVAL = 160
  endif
 TIMEOFFSET = 10
 
@@ -157,19 +157,18 @@ longreadroutinehi
  
 
 SETTIM64T
+     bne skipdefaulttime
  ifnconst PADDLESMOOTHINGOFF
      lda #(TIMEVAL+TIMEOFFSET+1)
  else
      lda #(TIMEVAL+TIMEOFFSET)
  endif
+skipdefaulttime
+     tay
+     dey
 .setTIM64Tloop
      sta TIM64T
-     ldy INTIM
- ifnconst PADDLESMOOTHINGOFF
-     cpy #(TIMEVAL+TIMEOFFSET-1+1)
- else
-     cpy #(TIMEVAL+TIMEOFFSET-1)
- endif
+     cpy INTIM
      bne .setTIM64Tloop
      rts
      endif ; LONGCONTROLLERREAD
@@ -193,6 +192,18 @@ reallyoffvisible
      cld
 
      jsr uninterruptableroutines
+
+ ifconst MOUSE0SUPPORT
+ ifconst DRIVINGBOOST
+     jsr minidrivingread0
+ endif
+ endif
+
+ ifconst MOUSE1SUPPORT
+ ifconst DRIVINGBOOST
+     jsr minidrivingread1
+ endif
+ endif
 
      ifconst .userinterrupt
          jsr .userinterrupt
@@ -2003,9 +2014,11 @@ amigatoataribits ; swap bits 1 and 4...
   .byte %00001100, %00001101, %00001110, %00001111
  endif ; MOUSESUPPORT
 
+
+
+
 mouse0update
  ifconst MOUSE0SUPPORT
-
    lda #%00010000
    sta inttemp2
    ldy port0control
@@ -2017,19 +2030,24 @@ skipamigabitsfix0
    ifconst DRIVINGBOOST
        cpy #6  ; DRIVING?
        bne skipboostsetupp0
-       lda mousex0
-       sta mousey0
+           lda mousex0
+           sta inttemp6
+           lda mousey0
+           sta inttemp5
 skipboostsetupp0
    endif
 
-  jsr SETTIM64T ; INTIM is in Y
+   lda #(100 + TIMEOFFSET) ; minimum for driving
+   jsr SETTIM64T ; INTIM is in Y
+
 mouse0updateloop
-   lda SWCHA    ;3
-   lsr          ;2
-   lsr          ;2
-   lsr          ;2
-   lsr          ;2
-   ora inttemp2 ;3 atari/amiga table selection
+   lda SWCHA      ; 3
+   lsr
+   lsr
+   lsr
+   lsr
+   and #%00001111 ; 2
+   ora inttemp2   ; 3 atari/amiga table selection
 
    ; st mice encode on different bits/joystick-lines than amiga mice...
    ;  0000YyXx st mouse
@@ -2070,6 +2088,13 @@ mouseyread0
    and #%00001111
    tay
    lda rotationalcompare,y
+ ifconst DRIVINGBOOST
+   beq skipdirection0
+   sta inttemp5
+skipdirection0
+ else  ; !DRIVINGBOOST
+   lda rotationalcompare,y
+ endif ; DRIVINGBOOST
    clc
    adc mousex0
    sta mousex0
@@ -2088,27 +2113,17 @@ mouseyread0
      bne drivingboostdone0
      sec
      lda mousex0
-     sbc mousey0
-     pha 
-     bpl boosttoabsolutedone0
-          eor #$ff
-          clc
-          adc #1
-boosttoabsolutedone0
-     tay
-     pla
-     dey
-     beq leveloneboost0
-     asl
-leveloneboost0
-     asl
+     sbc inttemp6 ; the old mousex1
      clc
-     adc mousey0
+     adc mousex0 ; x2
      sta mousex0
+     lda inttemp5
+     sta mousey0 ; save the direction for next time
 drivingboostdone0
  endif
 
    jmp longcontrollerreadsdone
+
  endif ; MOUSE0SUPPORT
 
 mouse1update
@@ -2124,13 +2139,17 @@ mouse1update
 skipamigabitsfix1
    ifconst DRIVINGBOOST
        cpy #6  ; DRIVING?
-       bne skipboostsetupp0
-       lda mousex1
-       sta mousey1
-skipboostsetupp0
+       bne skipboostsetupp1
+           lda mousex1
+           sta inttemp6
+           lda mousey1
+           sta inttemp5
+skipboostsetupp1
    endif
 
-  jsr SETTIM64T ; INTIM is in Y
+   lda #(100 + TIMEOFFSET) ; minimum for driving
+   jsr SETTIM64T ; INTIM is in Y
+
 mouse1updateloop
    lda SWCHA      ; 3
    and #%00001111 ; 2
@@ -2175,6 +2194,13 @@ mouseyread1
    and #%00001111
    tay
    lda rotationalcompare,y
+ ifconst DRIVINGBOOST
+   beq skipdirection1
+   sta inttemp5
+skipdirection1
+ else  ; !DRIVINGBOOST
+   lda rotationalcompare,y
+ endif ; DRIVINGBOOST
    clc
    adc mousex1
    sta mousex1
@@ -2193,35 +2219,96 @@ mouseyread1
      bne drivingboostdone1
      sec
      lda mousex1
-     sbc mousey1
-     pha 
-     bpl boosttoabsolutedone1
-          eor #$ff
-          clc
-          adc #1
-boosttoabsolutedone1
-     tay
-     pla
-     dey
-     beq leveloneboost1
-     asl
-leveloneboost1
-     asl
+     sbc inttemp6 ; the old mousex1
      clc
-     adc mousey1
+     adc mousex1 ; x2
      sta mousex1
+     lda inttemp5
+     sta mousey1 ; save the direction for next time
 drivingboostdone1
  endif
 
    jmp longcontrollerreadsdone
+
  endif ; MOUSE1SUPPORT
+
+ ifconst MOUSE1SUPPORT
+ ifconst DRIVINGBOOST
+minidrivingread1
+     ldy port1control
+     cpy #6 
+     bne minidrivingread1done
+           lda SWCHA 
+           and #%00000011
+           cmp mousecodex1
+           beq minidrivingread1done
+           asl
+           asl
+           ora mousecodex1
+           and #%00001111
+           tay
+           lda rotationalcompare,y
+           bne skipslidep1
+           lda mousey1 
+skipslidep1
+           asl
+           clc
+           adc mousex1
+           sta mousex1
+           tya
+           lsr
+           lsr
+           sta mousecodex1
+minidrivingread1done
+     rts
+ endif ; DRIVINGBOOST
+ endif ; MOUSE1SUPPORT
+
+ ifconst MOUSE0SUPPORT
+ ifconst DRIVINGBOOST
+minidrivingread0
+     ldy port0control
+     cpy #6 
+     bne minidrivingread0done
+           lda SWCHA 
+           lsr
+           lsr
+           lsr
+           lsr
+           and #%00000011
+           cmp mousecodex0
+           beq minidrivingread0done
+           asl
+           asl
+           ora mousecodex0
+           and #%00001111
+           tay
+           lda rotationalcompare,y
+           bne skipslidep0
+           lda mousey0 
+skipslidep0
+           asl
+           clc
+           adc mousex0
+           sta mousex0
+           tya
+           lsr
+           lsr
+           sta mousecodex0
+minidrivingread0done
+     rts
+ endif ; DRIVINGBOOST
+ endif ; MOUSE0SUPPORT
 
 
 paddleport0update
  ifconst PADDLE0SUPPORT
-  ldy #0
-  sty VBLANK ; start charging the paddle caps
+  lda #0
+  sta VBLANK ; start charging the paddle caps
+
+  ; lda #0 ; use PADDLE timing
   jsr SETTIM64T ; INTIM is in Y
+
 paddleport0updateloop
   lda INPT0                     ; 3
   bmi skippaddle0setposition    ; 2/3
@@ -2281,9 +2368,12 @@ skippaddle1setposition
 
 paddleport1update
  ifconst PADDLE1SUPPORT
-  ldy #0
-  sty VBLANK ; start charging the paddle caps
+  lda #0
+  sta VBLANK ; start charging the paddle caps
+
+  ; lda #0 ; use PADDLE timing
   jsr SETTIM64T ; INTIM is in Y
+
 paddleport1updateloop
   lda INPT2                     ; 3
   bmi skippaddle2setposition    ; 2/3
@@ -2344,9 +2434,12 @@ skippaddle3setposition
 
 paddleport01update
  ifconst FOURPADDLESUPPORT
-  ldy #0
-  sty VBLANK ; start charging the paddle caps
+  lda #0
+  sta VBLANK ; start charging the paddle caps
+
+  ; lda #0 ; use PADDLE timing
   jsr SETTIM64T ; INTIM is in Y
+
 paddleport01updateloop
   lda INPT0                     ; 3
   bmi skippaddle0setposition01  ; 2/3
