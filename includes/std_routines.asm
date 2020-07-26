@@ -2628,6 +2628,8 @@ allpinsinputlut
  .byte $0F, $F0
 
 setonebuttonmode
+   lda #0
+   sta VBLANK ; if we were on paddles, the line is grounded out.
    lda #$14
    sta CTLSWB ; set both 2-button disable bits to writable
    lda CTLSWBs
@@ -2640,6 +2642,8 @@ thisjoy2buttonbit
  .byte $04, $10
 
 settwobuttonmode
+   lda #0
+   sta VBLANK ; if we were on paddles, the line is grounded out.
    lda #$14
    sta CTLSWB ; set both 2-button disable bits to writable
    lda CTLSWBs
