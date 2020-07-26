@@ -2110,7 +2110,6 @@ skipdrivingboost0
      adc mousey0 ; average in the X from
      ror         ; the previous frame
      sta mousex0
-
      ; check to see if the coordinate wrapped. If so, undo the averaging code.
      sbc mousey0
      bpl skipabsolutedrive0
