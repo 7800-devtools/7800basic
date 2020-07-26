@@ -2023,7 +2023,11 @@ skipamigabitsfix0
 skipboostsetupp0
    endif
 
-   lda #(100 + TIMEOFFSET) ; minimum for driving
+ ifnconst MOUSEXONLY
+   lda #(180 + TIMEOFFSET) ; minimum for x+y
+ else
+   lda #(100 + TIMEOFFSET) ; minimum for just x
+ endif
    jsr SETTIM64T ; INTIM is in Y
 
 mouse0updateloop
@@ -2156,7 +2160,11 @@ skipamigabitsfix1
 skipboostsetupp1
    endif
 
-   lda #(100 + TIMEOFFSET) ; minimum for driving
+ ifnconst MOUSEXONLY
+   lda #(180 + TIMEOFFSET) ; minimum for x+y
+ else
+   lda #(100 + TIMEOFFSET) ; minimum for just x
+ endif
    jsr SETTIM64T ; INTIM is in Y
 
 mouse1updateloop
