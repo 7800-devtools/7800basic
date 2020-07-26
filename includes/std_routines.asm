@@ -193,18 +193,6 @@ reallyoffvisible
 
      jsr uninterruptableroutines
 
- ifconst MOUSE0SUPPORT
- ifconst DRIVINGBOOST
-     jsr minidrivingread0
- endif
- endif
-
- ifconst MOUSE1SUPPORT
- ifconst DRIVINGBOOST
-     jsr minidrivingread1
- endif
- endif
-
      ifconst .userinterrupt
          jsr .userinterrupt
      endif
@@ -2031,9 +2019,7 @@ skipamigabitsfix0
        cpy #6  ; DRIVING?
        bne skipboostsetupp0
            lda mousex0
-           sta inttemp6
-           lda mousey0
-           sta inttemp5
+           sta mousey0
 skipboostsetupp0
    endif
 
@@ -2088,13 +2074,6 @@ mouseyread0
    and #%00001111
    tay
    lda rotationalcompare,y
- ifconst DRIVINGBOOST
-   beq skipdirection0
-   sta inttemp5
-skipdirection0
- else  ; !DRIVINGBOOST
-   lda rotationalcompare,y
- endif ; DRIVINGBOOST
    clc
    adc mousex0
    sta mousex0
@@ -2108,17 +2087,49 @@ skipdirection0
    bcs mouse0updateloop          ; 3/2
 
  ifconst DRIVINGBOOST
-     ldy port0control
-     cpy #6 
-     bne drivingboostdone0
+   ldy port0control
+   cpy #6 
+   bne drivingboostdone0
      sec
-     lda mousex0
-     sbc inttemp6 ; the old mousex1
+     lda mousex0  ; get the delta between the new mousex0
+     sbc mousey0  ; and the old mousex0
+     asl ; x2
      clc
-     adc mousex0 ; x2
+drivingboostcarryon0
+     beq skipdrivingboost0
+       adc mousecodey0
+       sta mousecodey0
+skipdrivingboost0
+     clc
+     adc mousex0 
+     tay
+     adc mousey0 ; average in the X from
+     ror         ; the previous frame
      sta mousex0
-     lda inttemp5
-     sta mousey0 ; save the direction for next time
+
+     ; check to see if the coordinate wrapped. If so, undo the averaging code.
+     sbc mousey0
+     bpl skipabsolutedrive0
+     eor #$ff
+skipabsolutedrive0
+     cmp #64 ; just an unreasonably large change
+     bcc skipdrivewrapfix0
+     sty mousex0
+skipdrivewrapfix0
+
+drivingboostreductioncheck0
+     ; every 8th frame we divide the boost value by 2.
+     ; this means quick turns will boost more than slow turns.
+     lda framecounter
+     and #7
+     bne drivingboostdone0
+       lda mousecodey0
+       asl ; get top bit of mousecodey0 in carry
+       ror mousecodey0 ; signed divide by 2
+       cmp #%11111110
+       bne drivingboostdone0
+         lda #0
+         sta mousecodey0
 drivingboostdone0
  endif
 
@@ -2141,9 +2152,7 @@ skipamigabitsfix1
        cpy #6  ; DRIVING?
        bne skipboostsetupp1
            lda mousex1
-           sta inttemp6
-           lda mousey1
-           sta inttemp5
+           sta mousey1
 skipboostsetupp1
    endif
 
@@ -2181,7 +2190,7 @@ mouse1updateloop
      tya
      lsr
      lsr
-     sta mousecodey1
+     sta mousecodey0
 mouseyread1
  endif ; !MOUSEXONLY
 
@@ -2194,13 +2203,6 @@ mouseyread1
    and #%00001111
    tay
    lda rotationalcompare,y
- ifconst DRIVINGBOOST
-   beq skipdirection1
-   sta inttemp5
-skipdirection1
- else  ; !DRIVINGBOOST
-   lda rotationalcompare,y
- endif ; DRIVINGBOOST
    clc
    adc mousex1
    sta mousex1
@@ -2214,91 +2216,55 @@ skipdirection1
    bcs mouse1updateloop          ; 3/2
 
  ifconst DRIVINGBOOST
-     ldy port1control
-     cpy #6 
-     bne drivingboostdone1
+   ldy port1control
+   cpy #6 
+   bne drivingboostdone1
      sec
-     lda mousex1
-     sbc inttemp6 ; the old mousex1
+     lda mousex1  ; get the delta between the new mousex1
+     sbc mousey1  ; and the old mousex1
+     asl ; x2
      clc
-     adc mousex1 ; x2
+drivingboostcarryon1
+     beq skipdrivingboost1
+       adc mousecodey1
+       sta mousecodey1
+skipdrivingboost1
+     clc
+     adc mousex1
+     tay
+     adc mousey1 ; average in the X from
+     ror         ; the previous frame
      sta mousex1
-     lda inttemp5
-     sta mousey1 ; save the direction for next time
+
+     ; check to see if the coordinate wrapped. If so, undo the averaging code.
+     sbc mousey1
+     bpl skipabsolutedrive1
+     eor #$ff
+skipabsolutedrive1
+     cmp #64 ; just an unreasonably large change
+     bcc skipdrivewrapfix1
+     sty mousex1
+skipdrivewrapfix1
+
+drivingboostreductioncheck1
+     ; every 8th frame we divide the boost value by 2.
+     ; this means quick turns will boost more than slow turns.
+     lda framecounter
+     and #7
+     bne drivingboostdone1
+       lda mousecodey1
+       asl ; get top bit of mousecodey1 in carry
+       ror mousecodey1 ; signed divide by 2
+       cmp #%11111110
+       bne drivingboostdone1
+         lda #0
+         sta mousecodey1
 drivingboostdone1
  endif
 
    jmp longcontrollerreadsdone
 
  endif ; MOUSE1SUPPORT
-
- ifconst MOUSE1SUPPORT
- ifconst DRIVINGBOOST
-minidrivingread1
-     ldy port1control
-     cpy #6 
-     bne minidrivingread1done
-           lda SWCHA 
-           and #%00000011
-           cmp mousecodex1
-           beq minidrivingread1done
-           asl
-           asl
-           ora mousecodex1
-           and #%00001111
-           tay
-           lda rotationalcompare,y
-           bne skipslidep1
-           lda mousey1 
-skipslidep1
-           asl
-           clc
-           adc mousex1
-           sta mousex1
-           tya
-           lsr
-           lsr
-           sta mousecodex1
-minidrivingread1done
-     rts
- endif ; DRIVINGBOOST
- endif ; MOUSE1SUPPORT
-
- ifconst MOUSE0SUPPORT
- ifconst DRIVINGBOOST
-minidrivingread0
-     ldy port0control
-     cpy #6 
-     bne minidrivingread0done
-           lda SWCHA 
-           lsr
-           lsr
-           lsr
-           lsr
-           and #%00000011
-           cmp mousecodex0
-           beq minidrivingread0done
-           asl
-           asl
-           ora mousecodex0
-           and #%00001111
-           tay
-           lda rotationalcompare,y
-           bne skipslidep0
-           lda mousey0 
-skipslidep0
-           asl
-           clc
-           adc mousex0
-           sta mousex0
-           tya
-           lsr
-           lsr
-           sta mousecodex0
-minidrivingread0done
-     rts
- endif ; DRIVINGBOOST
- endif ; MOUSE0SUPPORT
 
 
 paddleport0update

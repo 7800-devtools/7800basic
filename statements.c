@@ -2362,7 +2362,10 @@ void changecontrol(char **statement)
 	    printf("  ldx #1\n");
 	}
 	printf("  jsr setportforinput\n");
-	printf("  jsr setonebuttonmode\n");
+        if (!strcmp(statement[3], "driving"))
+		printf("  jsr setonebuttonmode\n");
+	else
+		printf("  jsr settwobuttonmode\n");
     }
     else if (!strcmp(statement[3], "atarivox"))
     {
