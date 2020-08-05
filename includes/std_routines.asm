@@ -1988,6 +1988,14 @@ rotationalcompare
      .byte     $01,   $00,   $00,   $ff  ; new=10
      .byte     $00,   $ff,   $01,   $00  ; new=11
 
+LOOPI SET 0
+rotationaldivideby4
+ REPEAT 16
+ .byte (LOOPI/4)
+LOOPI SET (LOOPI+1)
+ REPEND
+
+
    ;  0000YyXx st mouse
    ;  0000xyXY amiga mouse
 amigatoataribits ; swap bits 1 and 4...
@@ -2003,25 +2011,18 @@ amigatoataribits ; swap bits 1 and 4...
  endif ; MOUSESUPPORT
 
 
-
-
 mouse0update
  ifconst MOUSE0SUPPORT
+   ldy port0control
+   cpy #6  ; DRIVING?
+   beq driving0update
    lda #%00010000
    sta inttemp2
-   ldy port0control
    cpy #9 ; AMIGA?
    bne skipamigabitsfix0
    lda #0
    sta inttemp2
 skipamigabitsfix0
-   ifconst DRIVINGBOOST
-       cpy #6  ; DRIVING?
-       bne skipboostsetupp0
-           lda mousex0
-           sta mousey0
-skipboostsetupp0
-   endif
 
  ifnconst MOUSEXONLY
    lda #(180 + TIMEOFFSET) ; minimum for x+y
@@ -2036,7 +2037,7 @@ mouse0updateloop
    lsr
    lsr
    lsr
-   and #%00001111 ; 2
+
    ora inttemp2   ; 3 atari/amiga table selection
 
    ; st mice encode on different bits/joystick-lines than amiga mice...
@@ -2045,17 +2046,12 @@ mouse0updateloop
    ; ...so can shuffle the amiga bits to reuse the st driver.
    tay
    lda amigatoataribits,y
-   sta inttemp1
 
  ifnconst MOUSEXONLY
-   lda port0control
-   cmp #6 ; DRIVING
-   beq mouseyread0
+     tax
      ; first the Y...
-     lda inttemp1
      and #%00001100
      ora mousecodey0
-     and #%00001111
      tay
      lda rotationalcompare,y
      asl ; *2 for y axis, since it has ~double the resolution of x
@@ -2066,20 +2062,18 @@ mouse0updateloop
      lsr
      lsr
      sta mousecodey0
-mouseyread0
+     txa
  endif ; !MOUSEXONLY
 
    ; ...then the X...
-   lda inttemp1
    and #%00000011
    asl
    asl
    ora mousecodex0
-   and #%00001111
    tay
    lda rotationalcompare,y
-   clc
-   adc mousex0
+   ;clc 
+   adc mousex0 ; carry was clear by previous ASL
    sta mousex0
    tya
    lsr
@@ -2090,35 +2084,71 @@ mouseyread0
    cpy #TIMEOFFSET               ; 2
    bcs mouse0updateloop          ; 3/2
 
+   jmp longcontrollerreadsdone
+
+
+driving0update
+   ifconst DRIVINGBOOST
+     ; swap mousex0 and mousey0. mousex seen by the 7800basic program
+     ; trails the actual mousex0, so we can smoothly interpolate. The
+     ; real mousex0 is stored in mousey0 outside of this driver.
+     ldx mousex0
+     lda mousey0
+     stx mousey0
+     sta mousex0
+     ; save pre-update mouseX so we can later calculate the boost...
+     sta inttemp5 
+   endif ; DRIVINGBOOST
+
+   lda #(100 + TIMEOFFSET) ; minimum for just x
+   jsr SETTIM64T           ; INTIM is in Y
+   ldx #(TIMEOFFSET-1)
+
+driving0updateloop
+   lda SWCHA
+   ASR  #%00110000 ; Undocumented. A = A & #IMM, then LSR A.
+   lsr                         ; = 7
+
+   ora mousecodex0
+   tay
+   lda rotationalcompare,y
+   adc mousex0 ; carry still clear via previous mask+LSR
+   sta mousex0
+   lda rotationaldivideby4,y
+   sta mousecodex0             ; = 22
+
+   cpx INTIM
+   bcc driving0updateloop      ; = 6
+
  ifconst DRIVINGBOOST
-   ldy port0control
-   cpy #6 
-   bne drivingboostdone0
      sec
      lda mousex0  ; get the delta between the new mousex0
-     sbc mousey0  ; and the old mousex0
-     asl ; x2
+     sbc inttemp5 ; and the old mousex0
+     ;asl ; x2
      clc
-drivingboostcarryon0
      beq skipdrivingboost0
        adc mousecodey0
        sta mousecodey0
 skipdrivingboost0
      clc
      adc mousex0 
-     tay
-     adc mousey0 ; average in the X from
-     ror         ; the previous frame
-     sta mousex0
+     tay         ; save the target X
+     adc mousey0 ; average in the smoothly-trailing X
+     ror         
+     sta mousex0 ; mousex0 now has the smoothly trailing X
+     sty mousey0 ; and mousey0 has the the target X
+
      ; check to see if the coordinate wrapped. If so, undo the averaging code.
-     sbc mousey0
+     ; A has mousex0, the smoothly trailing X
+     sbc mousey0 ; less the target X
      bpl skipabsolutedrive0
      eor #$ff
 skipabsolutedrive0
      cmp #64 ; just an unreasonably large change
      bcc skipdrivewrapfix0
-     sty mousex0
+     sty mousex0 ; if X wrapped, we catch the trailing X up to the target X
 skipdrivewrapfix0
+
 
 drivingboostreductioncheck0
      ; every 8th frame we divide the boost value by 2.
@@ -2154,8 +2184,15 @@ skipamigabitsfix1
    ifconst DRIVINGBOOST
        cpy #6  ; DRIVING?
        bne skipboostsetupp1
-           lda mousex1
-           sta mousey1
+           ; swap mousex1 and mousey1. The mousex seen by the 7800basic program
+           ; trails the actual mousex1, so we can smoothly interpolate. The
+           ; real mousex1 is stored in mousey1 outside of this driver.
+           ldx mousex1
+           lda mousey1
+           stx mousey1
+           sta mousex1
+           ; save pre-update mouseX so we can later calculate the boost...
+           sta inttemp5 
 skipboostsetupp1
    endif
 
@@ -2197,7 +2234,7 @@ mouse1updateloop
      tya
      lsr
      lsr
-     sta mousecodey0
+     sta mousecodey1
 mouseyread1
  endif ; !MOUSEXONLY
 
@@ -2227,9 +2264,9 @@ mouseyread1
    cpy #6 
    bne drivingboostdone1
      sec
-     lda mousex1  ; get the delta between the new mousex1
-     sbc mousey1  ; and the old mousex1
-     asl ; x2
+     lda mousex1  ; get the delta between the new mousex0
+     sbc inttemp5 ; and the old mousex0
+     ;asl ; x2
      clc
 drivingboostcarryon1
      beq skipdrivingboost1
@@ -2238,19 +2275,21 @@ drivingboostcarryon1
 skipdrivingboost1
      clc
      adc mousex1
-     tay
-     adc mousey1 ; average in the X from
-     ror         ; the previous frame
-     sta mousex1
+     tay         ; save the target X
+     adc mousey1 ; average in the smoothly-trailing X
+     ror         
+     sta mousex1 ; mousex0 now has the smoothly trailing X
+     sty mousey1 ; and mousey0 has the the target X
 
      ; check to see if the coordinate wrapped. If so, undo the averaging code.
-     sbc mousey1
+     ; A has mousex0, the smoothly trailing X
+     sbc mousey1 ; less the target X
      bpl skipabsolutedrive1
      eor #$ff
 skipabsolutedrive1
      cmp #64 ; just an unreasonably large change
      bcc skipdrivewrapfix1
-     sty mousex1
+     sty mousex1 ; if X wrapped, we catch the trailing X up to the target X
 skipdrivewrapfix1
 
 drivingboostreductioncheck1
@@ -2278,7 +2317,6 @@ paddleport0update
  ifconst PADDLE0SUPPORT
   lda #0
   sta VBLANK ; start charging the paddle caps
-
   ; lda #0 ; use PADDLE timing
   jsr SETTIM64T ; INTIM is in Y
 
@@ -2293,8 +2331,8 @@ skippaddle0setposition
      sty paddleposition1          ; 3
 skippaddle1setposition  
   endif
-  ldy INTIM                     ; 3
-  cpy #TIMEOFFSET               ; 2
+  ldy INTIM                     ; 2
+  cpy #TIMEOFFSET
   bcs paddleport0updateloop     ; 3/2
 
  ifconst FOURPADDLESUPPORT
@@ -2358,8 +2396,8 @@ skippaddle2setposition
      sty paddleposition3        ; 3
 skippaddle3setposition
   endif
-  ldy INTIM                     ; 3
-  cpy #TIMEOFFSET               ; 2
+  ldy INTIM                     ; 2
+  cpy #TIMEOFFSET
   bcs paddleport1updateloop     ; 3/2
 
  ifconst FOURPADDLESUPPORT
@@ -2430,8 +2468,8 @@ skippaddle2setposition01
   bmi skippaddle3setposition01 ; 2/3
   sty paddleposition3          ; 3
 skippaddle3setposition01
-  ldy INTIM                     ; 3
-  cpy #TIMEOFFSET               ; 2
+  ldy INTIM                     ; 2
+  cpy #TIMEOFFSET
   bcs paddleport01updateloop     ; 3/2
 
 fourpaddlefixup
