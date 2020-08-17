@@ -2346,19 +2346,30 @@ void changecontrol(char **statement)
 	    sprintf(constants[numconstants++], "LONGCONTROLLERREAD");
         }
         if (!strcmp(statement[3], "stmouse"))
+        {
 	   printf("  lda #8 ; controller=stmouse\n");
+	   printf("  ldx #1 ; mouse default resolution\n");
+        }
         if (!strcmp(statement[3], "amigamouse"))
+        {
 	   printf("  lda #9 ; controller=amigamouse\n");
+	   printf("  ldx #1 ; mouse default resolution\n");
+        }
         if (!strcmp(statement[3], "driving"))
+        {
 	   printf("  lda #6 ; controller=driving\n");
+	   printf("  ldx #3 ; driving default resolution\n");
+        }
 	if (port == 0)
 	{
 	    printf("  sta port0control\n");
+	    printf("  stx port0resolution\n");
 	    printf("  ldx #0\n");
 	}
 	else
 	{
 	    printf("  sta port1control\n");
+	    printf("  stx port1resolution\n");
 	    printf("  ldx #1\n");
 	}
 	printf("  jsr setportforinput\n");

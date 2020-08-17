@@ -34,6 +34,14 @@ carryontopscreenroutine
  ifconst .topscreenroutine
          jsr .topscreenroutine
  endif
+         lda canary
+         beq skipcanarytriggered
+         lda #$45
+         sta BACKGRND
+         lda #$60
+         sta CTRL
+         sta sCTRL
+skipcanarytriggered
          inc frameslost ; this is balanced with a "dec frameslost" when drawscreen is called.
 
        ; ** Other important routines that need to regularly run, and can run onscreen.
@@ -494,7 +502,6 @@ joybuttonhandler
      lda INPT1,y
      and #%10000000
      ora sINPT1,x
-     ;eor genesisdetected0,x ; invert INPT1 if genesis is detected
      sta sINPT1,x
 
      lda INPT4,x
@@ -1515,8 +1522,8 @@ noeor
      eor rand16
      rts
 
-     ; bcd conversion routine courtesy Omegamatrix
-     ; http://atariage.com/forums/blog/563/entry-10832-hex-to-bcd-conversion-0-99/
+ ; *** bcd conversion routine courtesy Omegamatrix
+ ; *** http://atariage.com/forums/blog/563/entry-10832-hex-to-bcd-conversion-0-99/
 converttobcd
      ;value to convert is in the accumulator
      sta temp1
@@ -1981,20 +1988,13 @@ NewPageflipoffset
      endif ; DOUBLEBUFFER
 
  ifconst MOUSESUPPORT
+
 rotationalcompare
      ; old =   00     01      10     11
      .byte     $00,   $01,   $ff,   $00  ; new=00
      .byte     $ff,   $00,   $00,   $01  ; new=01
      .byte     $01,   $00,   $00,   $ff  ; new=10
      .byte     $00,   $ff,   $01,   $00  ; new=11
-
-LOOPI SET 0
-rotationaldivideby4
- REPEAT 16
- .byte (LOOPI/4)
-LOOPI SET (LOOPI+1)
- REPEND
-
 
    ;  0000YyXx st mouse
    ;  0000xyXY amiga mouse
@@ -2010,12 +2010,14 @@ amigatoataribits ; swap bits 1 and 4...
   .byte %00001100, %00001101, %00001110, %00001111
  endif ; MOUSESUPPORT
 
-
 mouse0update
  ifconst MOUSE0SUPPORT
+
+   lda #$ff
+   sta inttemp6
+
    ldy port0control
-   cpy #6  ; DRIVING?
-   beq driving0update
+ 
    lda #%00010000
    sta inttemp2
    cpy #9 ; AMIGA?
@@ -2023,6 +2025,26 @@ mouse0update
    lda #0
    sta inttemp2
 skipamigabitsfix0
+   ifconst DRIVINGBOOST
+   cpy #6  ; DRIVING?
+   bne skipdriving0setup
+     ; swap mousex0 and mousey0. mousex seen by the 7800basic program
+     ; trails the actual mousex0, so we can smoothly interpolate toward
+     ; the actual position. This actual position is stored in mousey0 
+     ; after the driver has run.
+     ldx mousex0
+     lda mousey0
+     stx mousey0
+     sta mousex0
+     ; save pre-update mouseX so we can later calculate the boost...
+skipdriving0setup
+   endif ; DRIVINGBOOST
+
+mousexdelta = inttemp3
+mouseydelta = inttemp4
+   lda #0
+   sta mousexdelta
+   sta mouseydelta
 
  ifnconst MOUSEXONLY
    lda #(180 + TIMEOFFSET) ; minimum for x+y
@@ -2033,7 +2055,14 @@ skipamigabitsfix0
 
 mouse0updateloop
    lda SWCHA      ; 3
-   lsr
+ ifconst MOUSEXONLY
+   asr #%00110000
+ else
+   asr #%11110000
+ endif
+   cmp inttemp6
+   beq mouse0loopcondition
+   sta inttemp6
    lsr
    lsr
    lsr
@@ -2055,9 +2084,9 @@ mouse0updateloop
      tay
      lda rotationalcompare,y
      asl ; *2 for y axis, since it has ~double the resolution of x
-     clc
-     adc mousey0
-     sta mousey0
+     clc 
+     adc mouseydelta
+     sta mouseydelta
      tya
      lsr
      lsr
@@ -2072,71 +2101,93 @@ mouse0updateloop
    ora mousecodex0
    tay
    lda rotationalcompare,y
-   ;clc 
-   adc mousex0 ; carry was clear by previous ASL
-   sta mousex0
+   adc mousexdelta ; carry was clear by previous ASL
+   sta mousexdelta
    tya
    lsr
    lsr
    sta mousecodex0
-
+mouse0loopcondition
    ldy INTIM                     ; 3
    cpy #TIMEOFFSET               ; 2
    bcs mouse0updateloop          ; 3/2
 
-   jmp longcontrollerreadsdone
+   ; *** adapt to selected device resolution. 
+   ldx port0control
 
+ ifconst PRECISIONMOUSING
+   ldy port0resolution
+   bne mouse0halveddone
+     cpx #6 ; half-resolution is no good for driving wheels
+     beq mouse0halveddone 
+     ; resolution=0 is half mouse resolution, necessary for precision 
+     ; mousing on a 160x240 screen with a 1000 dpi mouse.
 
-driving0update
-   ifconst DRIVINGBOOST
-     ; swap mousex0 and mousey0. mousex seen by the 7800basic program
-     ; trails the actual mousex0, so we can smoothly interpolate. The
-     ; real mousex0 is stored in mousey0 outside of this driver.
-     ldx mousex0
-     lda mousey0
-     stx mousey0
+     lda mousexdelta
+     tax
+     asl              ; get bit 7 in carry so we can
+     txa
+     ror ; do a signed divide by 2.
+     clc
+     adc mousex0
      sta mousex0
-     ; save pre-update mouseX so we can later calculate the boost...
-     sta inttemp5 
-   endif ; DRIVINGBOOST
-
-   lda #(100 + TIMEOFFSET) ; minimum for just x
-   jsr SETTIM64T           ; INTIM is in Y
-   ldx #(TIMEOFFSET-1)
-
-driving0updateloop
-   lda SWCHA
-   ASR  #%00110000 ; Undocumented. A = A & #IMM, then LSR A.
-   lsr                         ; = 7
-
-   ora mousecodex0
-   tay
-   lda rotationalcompare,y
-   adc mousex0 ; carry still clear via previous mask+LSR
-   sta mousex0
-   lda rotationaldivideby4,y
-   sta mousecodex0             ; = 22
-
-   cpx INTIM
-   bcc driving0updateloop      ; = 6
-
- ifconst DRIVINGBOOST
-     sec
-     lda mousex0  ; get the delta between the new mousex0
-     sbc inttemp5 ; and the old mousex0
-     ;asl ; x2
+  ifnconst MOUSEXONLY
+     lda mouseydelta
+     tax
+     asl              ; get bit 7 in carry so we can
+     txa
+     ror ; do a signed divide by 2.
      clc
-     beq skipdrivingboost0
-       adc mousecodey0
-       sta mousecodey0
-skipdrivingboost0
+     adc mousey0
+     sta mousey0
+  endif ; MOUSEXONLY
+   ; at half resolution we just exit after updating x and y
+   jmp longcontrollerreadsdone
+mouse0halveddone
+ endif ; PRECISIONMOUSING
+
+  ifnconst MOUSEXONLY
+     ldy port0resolution
+     dey
+     lda #0 
+mousey0resolutionfix
      clc
-     adc mousex0 
-     tay         ; save the target X
-     adc mousey0 ; average in the smoothly-trailing X
-     ror         
-     sta mousex0 ; mousex0 now has the smoothly trailing X
-     sty mousey0 ; and mousey0 has the the target X
+     adc mouseydelta 
+     dey
+     bpl mousey0resolutionfix
+     clc
+     adc mousey0
+     sta mousey0
+  endif ; MOUSEXONLY
+
+   ldy port0resolution
+   dey
+   lda #0
+mousex0resolutionfix
+   clc
+   adc mousexdelta 
+   dey
+   bpl mousex0resolutionfix
+ ifnconst DRIVINGBOOST
+    adc mousex0
+    sta mousex0
+ else
+    clc
+    cpx #6
+    beq carryonmouse0boost
+       adc mousex0
+       sta mousex0
+       jmp longcontrollerreadsdone
+carryonmouse0boost
+    adc mousecodey0
+    sta mousecodey0
+    clc
+    adc mousex0 
+    tay         ; save the target X
+    adc mousey0 ; average in the smoothly-trailing X
+    ror         
+    sta mousex0 ; mousex0 now has the smoothly trailing X
+    sty mousey0 ; and mousey0 has the the target X
 
      ; check to see if the coordinate wrapped. If so, undo the averaging code.
      ; A has mousex0, the smoothly trailing X
@@ -2149,12 +2200,11 @@ skipabsolutedrive0
      sty mousex0 ; if X wrapped, we catch the trailing X up to the target X
 skipdrivewrapfix0
 
-
 drivingboostreductioncheck0
-     ; every 8th frame we divide the boost value by 2.
+     ; every 4th frame we divide the boost value by 2.
      ; this means quick turns will boost more than slow turns.
      lda framecounter
-     and #7
+     and #3
      bne drivingboostdone0
        lda mousecodey0
        asl ; get top bit of mousecodey0 in carry
@@ -2164,7 +2214,7 @@ drivingboostreductioncheck0
          lda #0
          sta mousecodey0
 drivingboostdone0
- endif
+ endif ; DRIVINGBOOST
 
    jmp longcontrollerreadsdone
 
@@ -2331,8 +2381,8 @@ skippaddle0setposition
      sty paddleposition1          ; 3
 skippaddle1setposition  
   endif
-  ldy INTIM                     ; 2
-  cpy #TIMEOFFSET
+  ldy INTIM                     ; 3
+  cpy #TIMEOFFSET               ; 2
   bcs paddleport0updateloop     ; 3/2
 
  ifconst FOURPADDLESUPPORT
