@@ -2172,13 +2172,14 @@ mousex0resolutionfix
     adc mousex0
     sta mousex0
  else
-    clc
     cpx #6
     beq carryonmouse0boost
+       clc
        adc mousex0
        sta mousex0
        jmp longcontrollerreadsdone
 carryonmouse0boost
+    clc
     adc mousecodey0
     sta mousecodey0
     clc
@@ -2188,6 +2189,7 @@ carryonmouse0boost
     ror         
     sta mousex0 ; mousex0 now has the smoothly trailing X
     sty mousey0 ; and mousey0 has the the target X
+
 
      ; check to see if the coordinate wrapped. If so, undo the averaging code.
      ; A has mousex0, the smoothly trailing X
