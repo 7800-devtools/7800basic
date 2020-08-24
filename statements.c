@@ -2358,7 +2358,7 @@ void changecontrol(char **statement)
         if (!strcmp(statement[3], "driving"))
         {
 	   printf("  lda #6 ; controller=driving\n");
-	   printf("  ldx #3 ; driving default resolution\n");
+	   printf("  ldx #1 ; driving default resolution\n");
         }
 	if (port == 0)
 	{
@@ -9405,6 +9405,15 @@ void set(char **statement)
 	{
 	    strcpy(redefined_variables[numredefvars++], "PADDLESCALEX2 = 1");
 	}
+    }
+    else if (!strncmp(statement[2], "mousetime", 9))
+    {
+        char outstr[256];
+	int value = strictatoi(statement[3]);
+        if ((value<1)||(value>240))
+	    prerror("'set mousetime must have an argument >0 and <241");
+        sprintf(outstr,"MOUSETIME = %d",value);
+	strcpy(redefined_variables[numredefvars++], outstr);
     }
     else if (!strncmp(statement[2], "mousexonly", 10))
     {

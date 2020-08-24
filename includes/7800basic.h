@@ -499,6 +499,8 @@ trakballcodey1       =    $1DC
 genesis0detected     =    $1DD
 genesis1detected     =    $1DE
 
+debugVal             =    $1DF
+
 ; $1DF - $1E7 reserved TBD
 
 canary               =    $1E8
