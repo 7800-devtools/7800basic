@@ -2725,12 +2725,12 @@ mousebuttonhandler ; outside of conditional, for button-handler LUT
    txa
    asl
    tay ; y=x*2
-   lda INPT1,y
+   lda INPT4,x
  eor #%10000000
    lsr
    sta sINPT1,x
 
-   lda INPT4,x
+   lda INPT1,y
    and #%10000000
  eor #%10000000
    ora sINPT1,x
