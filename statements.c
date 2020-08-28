@@ -2132,7 +2132,6 @@ void changecontrol(char **statement)
     // changecontrol 0|1 controltype
 
     int port;
-    static int drivingsupport = 0;
     static int mousesupport = 0;
     static int keypadsupport = 0;
     static int paddlesupport = 0;
@@ -4786,6 +4785,14 @@ void data(char **statement)
     data_length[6][0] = '\0';
     keywords(data_length);
     freemem(deallocdata_length);
+
+    char consthilo[200];
+    snprintf(consthilo,200,"%s_lo",statement[2]);
+    strcpy(constants[numconstants++], consthilo); // record to queue
+    snprintf(consthilo,200,"%s_hi",statement[2]);
+    strcpy(constants[numconstants++], consthilo); // record to queue
+    printf("%s_lo = #<%s\n",statement[2],statement[2]);
+    printf("%s_hi = #>%s\n",statement[2],statement[2]);
 }
 
 void speak(char **statement)
