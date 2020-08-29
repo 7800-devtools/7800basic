@@ -34,6 +34,7 @@ carryontopscreenroutine
  ifconst .topscreenroutine
          jsr .topscreenroutine
  endif
+ ifnconst CANARYOFF
          lda canary
          beq skipcanarytriggered
          lda #$45
@@ -41,6 +42,8 @@ carryontopscreenroutine
          lda #$60
          sta CTRL
          sta sCTRL
+         .byte $02 ; KIL/JAM
+ endif
 skipcanarytriggered
          inc frameslost ; this is balanced with a "dec frameslost" when drawscreen is called.
 
