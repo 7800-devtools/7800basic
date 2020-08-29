@@ -886,21 +886,16 @@ continueplotsprite1a
      else
          iny
          sty temp8
-         ;lda #0
-         ;sta (dlpnt),y
      endif
 
      iny
+
      lda temp5 ;Y position
-
-     if WZONEHEIGHT = 16
-         and #$0F
-     else ; WZONEHEIGHT = 8
-         and #$7
-     endif
-
+     and #(WZONEHEIGHT - 1)
+     cmp #1 ; clear carry if our sprite is just in this zone
      ora temp2 ; graphic data, hi byte
      sta (dlpnt),y
+
 
      iny
      lda temp3 ;palette|width
@@ -927,10 +922,7 @@ continueplotsprite1a
 
 checkcontinueplotsprite2
 
-     lda temp5
-     and #(WZONEHEIGHT-1)
-
-     beq doneSPDL ;branch if it is
+     bcc doneSPDL ;branch if the sprite was fully in the last zone
 
      ;Create DL entry for lower part of sprite
 
@@ -974,33 +966,23 @@ continueplotsprite2a
      else
          iny
          sty temp8
-         ;lda #0
-         ;sta (dlpnt),y
      endif
 
      iny
+
      lda temp5 ;Y position
-
-     if WZONEHEIGHT = 16
-         and #$0F
-         eor #$0F
-     endif
-     if WZONEHEIGHT = 8
-         and #$07
-         eor #$07
-     endif
-
-     sta temp9
-     lda temp2 ; graphic data, hi byte
-     clc
-     sbc temp9
+     anc #(WZONEHEIGHT - 1) ; undocumented. A=A&IMM, then move bit 7 into carry
+     ora temp2 ; graphic data, hi byte
+     sbc #(WZONEHEIGHT-1) ; start at the DMA hole. -1 because carry is clear
      sta (dlpnt),y
 
      iny
+
      lda temp3 ;palette|width
      sta (dlpnt),y
 
      iny
+
      lda temp4 ;Horizontal position
      sta (dlpnt),y
 
@@ -1021,6 +1003,7 @@ continueplotsprite2a
 
 doneSPDL
      rts
+
 
 lockzonex
      ifconst ZONELOCKS
@@ -2499,19 +2482,19 @@ paddleport0update
   jsr SETTIM64T ; INTIM is in Y
 
 paddleport0updateloop
-  lda INPT0                     ; 3
-  bmi skippaddle0setposition    ; 2/3
-  sty paddleposition0           ; 3
+  lda INPT0
+  bmi skippaddle0setposition
+  sty paddleposition0
 skippaddle0setposition  
   ifconst TWOPADDLESUPPORT
-     lda INPT1                    ; 3
-     bmi skippaddle1setposition   ; 2/3
-     sty paddleposition1          ; 3
+     lda INPT1
+     bmi skippaddle1setposition
+     sty paddleposition1
 skippaddle1setposition  
   endif
-  ldy INTIM                     ; 3
-  cpy #TIMEOFFSET               ; 2
-  bcs paddleport0updateloop     ; 3/2
+  ldy INTIM
+  cpy #TIMEOFFSET
+  bcs paddleport0updateloop
 
  ifconst FOURPADDLESUPPORT
      jsr fourpaddlefixup
@@ -2564,19 +2547,19 @@ paddleport1update
   jsr SETTIM64T ; INTIM is in Y
 
 paddleport1updateloop
-  lda INPT2                     ; 3
-  bmi skippaddle2setposition    ; 2/3
-  sty paddleposition2           ; 3
+  lda INPT2
+  bmi skippaddle2setposition
+  sty paddleposition2
 skippaddle2setposition
   ifconst TWOPADDLESUPPORT
-     lda INPT3                  ; 3
-     bmi skippaddle3setposition ; 2/3
-     sty paddleposition3        ; 3
+     lda INPT3
+     bmi skippaddle3setposition
+     sty paddleposition3
 skippaddle3setposition
   endif
-  ldy INTIM                     ; 2
+  ldy INTIM
   cpy #TIMEOFFSET
-  bcs paddleport1updateloop     ; 3/2
+  bcs paddleport1updateloop
 
  ifconst FOURPADDLESUPPORT
      jsr fourpaddlefixup
@@ -2630,25 +2613,25 @@ paddleport01update
   jsr SETTIM64T ; INTIM is in Y
 
 paddleport01updateloop
-  lda INPT0                     ; 3
-  bmi skippaddle0setposition01  ; 2/3
-  sty paddleposition0           ; 3
+  lda INPT0
+  bmi skippaddle0setposition01
+  sty paddleposition0
 skippaddle0setposition01
-  lda INPT1                    ; 3
-  bmi skippaddle1setposition01 ; 2/3
-  sty paddleposition1          ; 3
+  lda INPT1
+  bmi skippaddle1setposition01
+  sty paddleposition1
 skippaddle1setposition01
-  lda INPT2                     ; 3
-  bmi skippaddle0setposition01  ; 2/3
-  sty paddleposition2           ; 3
+  lda INPT2
+  bmi skippaddle0setposition01
+  sty paddleposition2
 skippaddle2setposition01
-  lda INPT3                    ; 3
-  bmi skippaddle3setposition01 ; 2/3
-  sty paddleposition3          ; 3
+  lda INPT3
+  bmi skippaddle3setposition01
+  sty paddleposition3
 skippaddle3setposition01
-  ldy INTIM                     ; 2
+  ldy INTIM
   cpy #TIMEOFFSET
-  bcs paddleport01updateloop     ; 3/2
+  bcs paddleport01updateloop
 
 fourpaddlefixup
      lda #%10000000
@@ -2726,13 +2709,13 @@ mousebuttonhandler ; outside of conditional, for button-handler LUT
    asl
    tay ; y=x*2
    lda INPT4,x
- eor #%10000000
+   eor #%10000000
    lsr
    sta sINPT1,x
 
    lda INPT1,y
    and #%10000000
- eor #%10000000
+   eor #%10000000
    ora sINPT1,x
    sta sINPT1,x
    jmp buttonreadloopreturn

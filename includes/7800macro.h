@@ -146,7 +146,7 @@ MedianOrderLUTend
  	ldy dlend,x ; find the next new object position in this zone
 
 	lda #<.GFXLabel
-	adc .ByteOffset
+	adc .ByteOffset ; carry is clear via asr
         sta (dlpnt),y ; #1 - low byte object address
 
 	iny
@@ -158,6 +158,7 @@ MedianOrderLUTend
 
 	lda .SpriteY
 	and #(WZONEHEIGHT - 1)
+	cmp #1 ; clear carry if our sprite is just in this zone
 	ora #>.GFXLabel
 	sta (dlpnt),y ; #3 - hi byte object address
 
@@ -180,6 +181,8 @@ MedianOrderLUTend
          sta (dlpnt),y
      endif
 
+	bcc .PLOTSPRITEend
+
 	inx ; next zone
 
 	lda DLPOINTL,x ; setup DL pointer for this zone
@@ -189,8 +192,7 @@ MedianOrderLUTend
 	
  	ldy dlend,x ; find the next new object position in this zone
 
-	lda #<.GFXLabel
-        clc
+	lda #<(.GFXLabel-1) ; carry is set, so -1 to compensate
 	adc .ByteOffset
         sta (dlpnt),y ; #1 - low byte object address
 
@@ -227,5 +229,4 @@ MedianOrderLUTend
 
 .PLOTSPRITEend
  ENDM
-
 
