@@ -56,9 +56,13 @@ main
  if switchselect then gosub changecontroller
 
  if device=0 then plotchars 'device: paddle' 1 48 0
- if device=1 then plotchars 'device: st mouse' 1 48 0
- if device=2 then plotchars 'device: amiga mouse' 1 48 0
- if device=3 then plotchars 'device: driving controller' 1 48 0
+ if device=1 then plotchars 'device: st mouse x1' 1 48 0
+ if device=2 then plotchars 'device: st mouse x2' 1 48 0
+ if device=3 then plotchars 'device: amiga mouse x1' 1 48 0
+ if device=4 then plotchars 'device: amiga mouse x2' 1 48 0
+ if device=5 then plotchars 'device: driving wheel x1' 1 48 0
+ if device=6 then plotchars 'device: driving wheel x2' 1 48 0
+ if device=7 then plotchars 'device: driving wheel x3' 1 48 0
 
  plotvalue atascii_full 1 mousex0 2 0 0
 
@@ -71,9 +75,13 @@ changecontroller
   clearscreen
   drawscreen
   if switchselect then goto changecontroller ; cheap debounce
-  device=(device+1)&3
+  device=(device+1)&7
   if device=0 then changecontrol 0 paddle
-  if device=1 then changecontrol 0 stmouse
-  if device=2 then changecontrol 0 amigamouse
-  if device=3 then changecontrol 0 driving:port0resolution=3
+  if device=1 then changecontrol 0 stmouse    : rem changecontrol defaults to setting port#resolution=1
+  if device=2 then changecontrol 0 stmouse : port0resolution=2
+  if device=3 then changecontrol 0 amigamouse 
+  if device=4 then changecontrol 0 amigamouse : port0resolution=2
+  if device=5 then changecontrol 0 driving:port0resolution=1
+  if device=6 then changecontrol 0 driving:port0resolution=2
+  if device=7 then changecontrol 0 driving:port0resolution=3
   return
