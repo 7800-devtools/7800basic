@@ -119,6 +119,10 @@ int main(int argc, char *argv[])
 	prerror("couldn't create the 7800.asm file.");
     }
 
+    printf(" ;%s %s %s\n", BASIC_VERSION_INFO, __DATE__, __TIME__);
+
+    printf("SPACEOVERFLOW SET 0\n");
+
     remove("7800hole.0.asm");
     remove("7800hole.1.asm");
     remove("7800hole.2.asm");
@@ -266,6 +270,14 @@ int main(int argc, char *argv[])
     barf_graphic_file();
 
     barfmultiplicationtables();
+
+    printf(" if SPACEOVERFLOW > 0\n");
+    printf(" echo \"\"\n");
+    printf(" echo \"######## ERROR: space overflow detected in\",[SPACEOVERFLOW]d,\"areas.\"\n");
+    printf(" echo \"######## look above for areas with negative ROM space left.\"\n");
+    printf(" echo \"######## Aborting assembly.\"\n");
+    printf(" ERR\n");
+    printf(" endif\n");
 
     printf(" \n\n");
 
