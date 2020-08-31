@@ -1,7 +1,7 @@
 # The bB generic-Unix makefile. Should work with most unixy OSes.
 
 
-all: adventurer/adventurer.bas.a78 atarivoxspeech/atarivoxspeech.bas.a78 banner/banner.bas.a78 boxcollision/boxcollision.bas.a78  doublebuffer/doublebuffer.bas.a78 helloworld/helloworld.bas.a8
+all: adventurer/adventurer.bas.a78 atarivoxspeech/atarivoxspeech.bas.a78 banner/banner.bas.a78 boxcollision/boxcollision.bas.a78  doublebuffer/doublebuffer.bas.a78 helloworld/helloworld.bas.a78 pokey/pokey.bas.a78
 
 test:
 	./make_test.sh
@@ -23,8 +23,12 @@ doublebuffer/doublebuffer.bas.a78:
 	cd doublebuffer ; 7800basic.sh doublebuffer.bas
 	cd ..
 
-helloworld/helloworld.bas.a8: 
+helloworld/helloworld.bas.a78: 
 	cd helloworld ; 7800basic.sh helloworld.bas
+	cd ..
+
+pokey/pokey.bas.a78: 
+	cd pokey ; 7800basic.sh pokey.bas
 	cd ..
 
 clean:

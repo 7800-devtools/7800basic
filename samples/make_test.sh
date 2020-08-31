@@ -1,5 +1,5 @@
 #!/bin/sh
-echo "7800basic build test, using $(which 7800basic.sh)"
+echo "7800basic build test"
 echo "    [$(7800basic.sh -v)]"
 make all >/dev/null 2>&1
 for FILE in $(cat sizes.ref | awk '{print $1}') ; do
