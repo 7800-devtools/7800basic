@@ -9384,6 +9384,17 @@ void set(char **statement)
 	{
 	    strcpy(redefined_variables[numredefvars++], "pokeysupport = 1");
 	    append_a78info("set pokey@450");
+	    sprintf(constants[numconstants++], "PAUDF0");
+	    sprintf(constants[numconstants++], "PAUDC0");
+	    sprintf(constants[numconstants++], "PAUDF1");
+	    sprintf(constants[numconstants++], "PAUDC1");
+	    sprintf(constants[numconstants++], "PAUDF2");
+	    sprintf(constants[numconstants++], "PAUDC2");
+	    sprintf(constants[numconstants++], "PAUDF3");
+	    sprintf(constants[numconstants++], "PAUDC3");
+	    sprintf(constants[numconstants++], "PAUDCTL");
+	    sprintf(constants[numconstants++], "PRANDOM");
+	    sprintf(constants[numconstants++], "PSKCTL");
 	}
     }
     else if (!strncmp(statement[2], "hscsupport\0", 10))
