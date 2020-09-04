@@ -4676,7 +4676,7 @@ int findlabel(char **statement, int i)
 	return 1;
     if (!strncmp(statementcache, "savememory\0", 10))
 	return 1;
-    if (!strncmp(statementcache, "drawhiscroes\0", 13))
+    if (!strncmp(statementcache, "drawhiscores\0", 13))
 	return 1;
     if (!strncmp(statementcache, "memcpy\0", 6))
 	return 1;
