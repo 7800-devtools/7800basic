@@ -529,15 +529,26 @@ void shakescreen(char **statement)
     {
 	printf("    lda #%%01001111\n");
 	printf("    sta DLLMEM\n");
+	printf("  ifconst DOUBLEBUFFER\n");
+	printf("    ldy doublebufferstate\n");
+	printf("    beq [.+5]\n");
+	printf("    sta.w DLLMEM+DBOFFSET\n");
+	printf("  endif ; DOUBLEBUFFER\n");
+
 	return;
     }
     else
 	prerror("unsupported shakescreen argument");
 
-    printf("        jsr randomize\n");
-    printf("        and #%d\n", shakeamount);
-    printf("        ora #%%01000000\n");
+    printf("    jsr randomize\n");
+    printf("    and #%d\n", shakeamount);
+    printf("    eor #%%01001111\n");
     printf("    sta DLLMEM\n");
+    printf("  ifconst DOUBLEBUFFER\n");
+    printf("    ldy doublebufferstate\n");
+    printf("    beq [.+5]\n");
+    printf("    sta.w DLLMEM+DBOFFSET\n");
+    printf("  endif ; DOUBLEBUFFER\n");
 
 
 }
