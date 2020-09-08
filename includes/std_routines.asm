@@ -2481,9 +2481,9 @@ drivingboostdone1
 
 paddleport0update
  ifconst PADDLE0SUPPORT
-  lda #0
+  lda #6
   sta VBLANK ; start charging the paddle caps
-  ; lda #0 ; use PADDLE timing
+  lda #0 ; use PADDLE timing
   jsr SETTIM64T ; INTIM is in Y
 
 paddleport0updateloop
@@ -2504,7 +2504,7 @@ skippaddle1setposition
  ifconst FOURPADDLESUPPORT
      jsr fourpaddlefixup
  else
-     lda #%10000000
+     lda #%10000110
      sta VBLANK ; dump paddles to ground... this may not be great for genesis controllers
      sec
      lda paddleposition0
@@ -2545,10 +2545,10 @@ skippaddle1setposition
 
 paddleport1update
  ifconst PADDLE1SUPPORT
-  lda #0
+  lda #6
   sta VBLANK ; start charging the paddle caps
 
-  ; lda #0 ; use PADDLE timing
+  lda #0 ; use PADDLE timing
   jsr SETTIM64T ; INTIM is in Y
 
 paddleport1updateloop
@@ -2570,7 +2570,7 @@ skippaddle3setposition
      jsr fourpaddlefixup
  else
 
-     lda #%10000000
+     lda #%10000110
      sta VBLANK ; dump paddles to ground... this may not be great for genesis controllers
      sec
      lda paddleposition2
@@ -2611,10 +2611,10 @@ skippaddle3setposition
 
 paddleport01update
  ifconst FOURPADDLESUPPORT
-  lda #0
+  lda #6
   sta VBLANK ; start charging the paddle caps
 
-  ; lda #0 ; use PADDLE timing
+  lda #0 ; use PADDLE timing
   jsr SETTIM64T ; INTIM is in Y
 
 paddleport01updateloop
@@ -2639,7 +2639,7 @@ skippaddle3setposition01
   bcs paddleport01updateloop
 
 fourpaddlefixup
-     lda #%10000000
+     lda #%10000110
      sta VBLANK ; dump paddles to ground... this may not be great for genesis controllers
      ldx #1
 paddlefixuploop
@@ -2647,7 +2647,7 @@ paddlefixuploop
      lda port0control,x
      cmp #3
      bne skippaddlefixup
-     lda #%10000000
+     lda #%10000110
      sta VBLANK ; dump paddles to ground... this may not be great for genesis controllers
      sec
      lda paddleposition0,x
@@ -2831,7 +2831,7 @@ allpinsinputlut
  .byte $0F, $F0
 
 setonebuttonmode
-   lda #0
+   lda #6 ; in case we're in unlocked-bios mode
    sta VBLANK ; if we were on paddles, the line is grounded out.
    lda #$14
    sta CTLSWB ; set both 2-button disable bits to writable
@@ -2845,7 +2845,7 @@ thisjoy2buttonbit
  .byte $04, $10
 
 settwobuttonmode
-   lda #0
+   lda #6 ; in case we're in unlocked-bios mode
    sta VBLANK ; if we were on paddles, the line is grounded out.
    lda #$14
    sta CTLSWB ; set both 2-button disable bits to writable
