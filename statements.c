@@ -422,7 +422,7 @@ void set_romsize(char *size)
 	else
 	    append_a78info("set supergame");
     }
-    else if (!strncmp(size, "272k\0", 4))
+    else if (!strncmp(size, "288k\0", 4))
     {
 	strcpy(redefined_variables[numredefvars++], "ROM272K = 1");
 	strcpy(redefined_variables[numredefvars++], "ROMAT4K = 1");
