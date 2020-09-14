@@ -2276,6 +2276,8 @@ void changecontrol(char **statement)
     }
     else if (!strcmp(statement[3], "trakball"))
     {
+	strcpy(redefined_variables[numredefvars++], "TRAKBALLSUPPORT = 1");
+	sprintf(constants[numconstants++], "TRAKBALLSUPPORT");
 	printf("  lda #4 ; controller=trakball\n");
 	if (port == 0)
 	{
@@ -2284,6 +2286,8 @@ void changecontrol(char **statement)
 	    printf("  sta trakballcodex0\n");
 	    printf("  sta trakballcodey0\n");
 	    printf("  ldx #0\n");
+	    strcpy(redefined_variables[numredefvars++], "TRAKBALL0SUPPORT = 1");
+	    sprintf(constants[numconstants++], "TRAKBALL0SUPPORT");
 	}
 	else
 	{
@@ -2292,9 +2296,17 @@ void changecontrol(char **statement)
 	    printf("  sta trakballcodex1\n");
 	    printf("  sta trakballcodey1\n");
 	    printf("  ldx #1\n");
+	    strcpy(redefined_variables[numredefvars++], "TRAKBALL1SUPPORT = 1");
+	    sprintf(constants[numconstants++], "TRAKBALL1SUPPORT");
 	}
 	printf("  jsr setportforinput\n");
 	printf("  jsr settwobuttonmode\n");
+        if(longcontrollerread == 0)
+        {
+	    strcpy(redefined_variables[numredefvars++], "LONGCONTROLLERREAD = 1");
+	    sprintf(constants[numconstants++], "LONGCONTROLLERREAD");
+            longcontrollerread=1;
+        }
     }
     else if (!strcmp(statement[3], "keypad"))
     {
