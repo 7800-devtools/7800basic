@@ -120,13 +120,14 @@ MedianOrderLUTend
 
 	; A macro version of the plotsprite command. 
 	; This trades off rom space for speed.
-	; It also has no training wheels, and is all sharp edges.
+	; It also doesn't check if the visible screen is displayed or not.
+	; It has no training wheels. It is all rusty sharp edges.
 
 .GFXLabel   SET {1}
 .Palette    SET {2} ; constant
 .SpriteX    SET {3} ; variable
 .SpriteY    SET {4} ; variable
-.ByteOffset SET {5} ; variable (in bytes, to mimimize calculation.)
+.ByteOffset SET {5} ; variable 
 
 	lda .SpriteY
         lsr
@@ -269,70 +270,70 @@ MedianOrderLUTend
         clc
  endif
  if {1}_width = 2
-        asl
+        asl ; carry clear
  endif
  if {1}_width = 3
-        asl
+        asl ; carry clear
         adc .ByteOffset
  endif
  if {1}_width = 4
-        asl
+        asl ; carry clear
         asl
  endif
  if {1}_width = 5
-        asl
+        asl ; carry clear
         asl
         adc .ByteOffset
  endif
  if {1}_width = 6
-        asl
+        asl ; carry clear
         adc .ByteOffset
         asl
  endif
  if {1}_width = 7
-        asl
+        asl ; carry clear
         adc .ByteOffset
         asl
  endif
  if {1}_width = 8
-        asl
+        asl ; carry clear
         asl
         asl
  endif
  if {1}_width = 9
-        asl
+        asl ; carry clear
         asl
         asl
         adc .ByteOffset
  endif
  if {1}_width = 10
-        asl
+        asl ; carry clear
         asl
         adc .ByteOffset
         asl
  endif
  if {1}_width = 11
-        asl
+        asl ; carry clear
         asl
         adc .ByteOffset
         asl
         adc .ByteOffset
  endif
  if {1}_width = 12
-        asl
+        asl ; carry clear
         adc .ByteOffset
         asl
         asl
  endif
  if {1}_width = 13
-        asl
+        asl ; carry clear
         adc .ByteOffset
         asl
         asl
         adc .ByteOffset
  endif
  if {1}_width = 14
-        asl
+        asl ; carry clear
         adc .ByteOffset
         asl
         adc .ByteOffset
