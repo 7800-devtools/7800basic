@@ -81,9 +81,6 @@ TIMEVAL = 160
  endif
 TIMEOFFSET = 10
 
-LLRET 
-
-longcontrollerreadsdone
          endif ; LONGCONTROLLERREAD
 
 
@@ -144,8 +141,8 @@ IRQ
 
 longreadtype
  .byte 0, 0, 0, 1  ; NONE     PROLINE   LIGHTGUN  PADDLE
- .byte 3, 0, 2, 0  ; TRKBALL  VCSSTICK  DRIVING   KEYPAD
- .byte 2, 2, 0     ; STMOUSE  AMOUSE    ATARIVOX
+ .byte 2, 0, 3, 0  ; TRKBALL  VCSSTICK  DRIVING   KEYPAD
+ .byte 3, 3, 0     ; STMOUSE  AMOUSE    ATARIVOX
 
 longreadroutineloP0
  .byte <LLRET0             ;  0 = no routine
@@ -309,9 +306,11 @@ pauseroutine
 
  ifnconst SOFTRESETASPAUSEOFF
  ifnconst MOUSESUPPORT
+ ifnconst TRAKBALLSUPPORT
      lda SWCHA ; then check the soft "RESET" joysick code...
      and #%01110000 ; _LDU
      beq pausepressed
+ endif
  endif
  endif
 
@@ -2479,12 +2478,179 @@ drivingboostdone1
 
  endif ; MOUSE1SUPPORT
 
+
 trakball0update
  ifconst TRAKBALL0SUPPORT
+ ifnconst TRAKTIME
+   ifnconst TRAKXONLY
+     lda #180 ; minimum for x+y
+   else;  !TRAKXONLY
+     lda #100 ; minimum for just x
+   endif; !TRAKXONLY
+ else ; !TRAKTIME
+   lda #TRAKTIME
+ endif ; !TRAKTIME
+   jsr SETTIM64T ; INTIM is in Y
+   ldx #0
+ ifnconst TRAKXONLY
+   ldy #0
+ endif ;  TRAKXONLY
+trakball0updateloop
+   lda SWCHA
+   and #%00110000
+   cmp trakballcodex0
+   sta trakballcodex0
+   beq trakball0movementXdone
+   and #%00010000
+   beq trakball0negativeX
+trakball0positiveX
+                              ;(2 from beq)
+   inx                        ; 2
+   jmp trakball0movementXdone ; 3
+trakball0negativeX
+                              ;(3 from beq)
+   dex                        ; 2
+   nop                        ; 2
+trakball0movementXdone
+
+ ifnconst TRAKXONLY
+      lda SWCHA
+      and #%11000000
+      cmp trakballcodey0
+      sta trakballcodey0
+      beq trakball0movementYdone
+      and #%01000000
+      beq trakball0negativeY
+trakball0positiveY
+                                 ;(2 from beq)
+      iny                        ; 2
+      jmp trakball0movementYdone ; 3
+trakball0negativeY
+                                 ;(3 from beq)
+      dey                        ; 2
+      nop                        ; 2
+trakball0movementYdone
+ endif ; !TRAKXONLY
+
+   lda TIMINT
+   bpl trakball0updateloop
+   lda #0
+   cpx #0
+   beq trakball0skipXadjust
+   clc
+trakball0Xloop
+   adc port0resolution
+   dex
+   bne trakball0Xloop
+   clc
+   adc trakballx0
+   sta trakballx0
+trakball0skipXadjust
+ ifnconst TRAKXONLY
+   lda #0
+   cpy #0
+   beq trakball0skipYadjust
+   clc
+trakball0yloop
+   adc port0resolution
+   dey
+   bne trakball0yloop
+   clc
+   adc trakbally0
+   sta trakbally0
+trakball0skipYadjust
+ endif ; !TRAKXONLY
+
+  jmp LLRET0
  endif
+
+
+
 trakball1update
  ifconst TRAKBALL1SUPPORT
+ ifnconst TRAKTIME
+   ifnconst TRAKXONLY
+     lda #180 ; minimum for x+y
+   else;  !TRAKXONLY
+     lda #100 ; minimum for just x
+   endif; !TRAKXONLY
+ else ; !TRAKTIME
+   lda #TRAKTIME
+ endif ; !TRAKTIME
+   jsr SETTIM64T ; INTIM is in Y
+   ldx #0
+ ifnconst TRAKXONLY
+   ldy #0
+ endif ;  TRAKXONLY
+trakball1updateloop
+   lda SWCHA
+   and #%00000011
+   cmp trakballcodex1
+   sta trakballcodex1
+   beq trakball1movementXdone
+   and #%00000001
+   beq trakball1negativeX
+trakball1positiveX
+                              ;(2 from beq)
+   inx                        ; 2
+   jmp trakball1movementXdone ; 3
+trakball1negativeX
+                              ;(3 from beq)
+   dex                        ; 2
+   nop                        ; 2
+trakball1movementXdone
+
+ ifnconst TRAKXONLY
+      lda SWCHA
+      and #%00001100
+      cmp trakballcodey1
+      sta trakballcodey1
+      beq trakball1movementYdone
+      and #%00000100
+      beq trakball1negativeY
+trakball1positiveY
+                                 ;(2 from beq)
+      iny                        ; 2
+      jmp trakball1movementYdone ; 3
+trakball1negativeY
+                                 ;(3 from beq)
+      dey                        ; 2
+      nop                        ; 2
+trakball1movementYdone
+ endif ; !TRAKXONLY
+
+   lda TIMINT
+   bpl trakball1updateloop
+   lda #0
+   cpx #0
+   beq trakball1skipXadjust
+   clc
+trakball1Xloop
+   adc port1resolution
+   dex
+   bne trakball1Xloop
+   clc
+   adc trakballx1
+   sta trakballx1
+trakball1skipXadjust
+ ifnconst TRAKXONLY
+   lda #0
+   cpy #0
+   beq trakball1skipYadjust
+   clc
+trakball1yloop
+   adc port1resolution
+   dey
+   bne trakball1yloop
+   clc
+   adc trakbally1
+   sta trakbally1
+trakball1skipYadjust
+ endif ; !TRAKXONLY
+
+  jmp LLRET1
  endif
+
 
 paddleport0update
  ifconst PADDLE0SUPPORT

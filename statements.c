@@ -2285,6 +2285,8 @@ void changecontrol(char **statement)
 	    printf("  lda #0\n");
 	    printf("  sta trakballcodex0\n");
 	    printf("  sta trakballcodey0\n");
+	    printf("  lda #2\n");
+	    printf("  sta port0resolution\n");
 	    printf("  ldx #0\n");
 	    strcpy(redefined_variables[numredefvars++], "TRAKBALL0SUPPORT = 1");
 	    sprintf(constants[numconstants++], "TRAKBALL0SUPPORT");
@@ -2295,6 +2297,8 @@ void changecontrol(char **statement)
 	    printf("  lda #0\n");
 	    printf("  sta trakballcodex1\n");
 	    printf("  sta trakballcodey1\n");
+	    printf("  lda #2\n");
+	    printf("  sta port1resolution\n");
 	    printf("  ldx #1\n");
 	    strcpy(redefined_variables[numredefvars++], "TRAKBALL1SUPPORT = 1");
 	    sprintf(constants[numconstants++], "TRAKBALL1SUPPORT");
@@ -9506,6 +9510,22 @@ void set(char **statement)
 	if (!strncmp(statement[3], "on", 2))
 	{
 	    strcpy(redefined_variables[numredefvars++], "MOUSEXONLY = 1");
+	}
+    }
+    else if (!strncmp(statement[2], "traktime", 9))
+    {
+        char outstr[256];
+	int value = strictatoi(statement[3]);
+        if ((value<1)||(value>240))
+	    prerror("'set traktime must have an argument >0 and <241");
+        sprintf(outstr,"TRAKTIME = %d",value);
+	strcpy(redefined_variables[numredefvars++], outstr);
+    }
+    else if (!strncmp(statement[2], "trakxonly", 10))
+    {
+	if (!strncmp(statement[3], "on", 2))
+	{
+	    strcpy(redefined_variables[numredefvars++], "TRAKXONLY = 1");
 	}
     }
     else if (!strncmp(statement[2], "drivingboost", 12))
