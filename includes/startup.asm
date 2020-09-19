@@ -215,6 +215,9 @@ skipSGRAMcheck
      ldx #0
      jsr settwobuttonmode
 
+ ifnconst .altgamestart
      jmp game
-
+ else
+     jmp .altgamestart
+ endif
 
