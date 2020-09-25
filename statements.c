@@ -1003,7 +1003,8 @@ void sinedata(char **statement)
 		printf(" .byte ");
 	}
 	waveindex = (((double) t * wavecycles * 2.0 * M_PI) / (double) wavelength) + (wavephaseoffset * 2.0 * M_PI);
-	value = (sin(waveindex) * ((double) waveamplitude + 0.5)) + (double) waveamplitudeoffset;
+	//value = (sin(waveindex) * ((double) waveamplitude + 0.5)) + (double) waveamplitudeoffset;
+	value = (sin(waveindex) * ((double) waveamplitude) + 0.5) + (double) waveamplitudeoffset;
 	printf("$%02x", (value & 0xff));
 	if ((t % 16 != 15))
 	    printf(",");
