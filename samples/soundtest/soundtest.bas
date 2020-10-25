@@ -25,7 +25,7 @@
  dim sound2play=a
  dim sound2playbcd=b
  dim maxsounds=c
- maxsounds=101
+ maxsounds=104
 
 main 
  clearscreen
@@ -150,6 +150,9 @@ main
  if sound2play=99 then playsfx sfx_activate
  if sound2play=100 then playsfx sfx_hahaha2
  if sound2play=101 then playsfx sfx_wilhelm
+ if sound2play=102 then playsfx sfx_poof1
+ if sound2play=103 then playsfx sfx_poof2
+ if sound2play=104 then playsfx sfx_dragit
  gosub debouncejoyfire
  goto main 
 
@@ -3524,6 +3527,55 @@ end
  $00,$00,$00
 end
 
+ data sfx_poof1
+ $10,$10,$00 ; version, priority, frames per chunk
+ $07,$08,$04 ; first chunk of freq,channel,volume
+ $07,$08,$06
+ $07,$08,$08
+ $09,$08,$08
+ $0c,$08,$0a
+ $09,$08,$0a
+ $0c,$08,$0a
+ $09,$08,$0a
+ $0d,$08,$08
+ $0e,$08,$06
+ $09,$08,$04
+ $09,$08,$02
+ $00,$00,$00
+end
+
+ data sfx_poof2
+ $10,$10,$00 ; version, priority, frames per chunk
+ $0a,$08,$04 ; first chunk of freq,channel,volume
+ $12,$08,$06
+ $09,$08,$08
+ $11,$08,$08
+ $08,$08,$0a
+ $10,$08,$0a
+ $07,$08,$0a
+ $0F,$08,$0a
+ $06,$08,$08
+ $0E,$08,$06
+ $05,$08,$04
+ $0D,$08,$02
+ $00,$00,$00
+end
+
+ data sfx_dragit
+ $10,$10,$00 ; version, priority, frames per chunk
+ $1c,$07,$02 ; first chunk of freq,channel,volume
+ $02,$07,$06
+ $1e,$08,$09
+ $11,$08,$09
+ $1e,$08,$09
+ $11,$07,$06
+ $1e,$08,$09
+ $11,$07,$06
+ $0e,$07,$03
+ $06,$07,$02
+ $00,$00,$00
+end
+
 
  alphadata sounddescriptions atascii
  'salvo laser shot'
@@ -3628,4 +3680,7 @@ end
  'activate        '
  'ha ha ha 2      '
  'wilhelm         '
+ 'poof1           '
+ 'poof2           '
+ 'dragit          '
 end
