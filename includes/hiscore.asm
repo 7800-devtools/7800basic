@@ -664,6 +664,12 @@ skipenterscorecontrol
              bmi returnfromhs
 skiphschasecolors
 
+             ; BUPSYSTEM TIMING BUG FIX - START
+hsvisiblestartwait
+             bit MSTAT
+             bmi hsvisiblestartwait
+             ; BUPSYSTEM TIMING BUG FIX - END
+
              jsr drawscreen
 
              lda countdownseconds
