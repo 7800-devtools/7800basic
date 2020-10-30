@@ -7686,28 +7686,73 @@ void boxcollision(char **statement)
     {
 	//no collision wrapping is selected. we'll work directly with the variables, no prep required.
 	printf("\n");
-	printf("  ldy ");
-	printimmed(statement[6]);
-	printf("%s\n", statement[6]);	//boxy1
-	printf("  lda #(%s-1)\n", statement[8]);	//boxh1
-	printf("  sta temp3\n");
-	printf("  lda #(%s-1)\n", statement[10]);	//boxw1
-	printf("  sta temp4\n");
+
+	// ### boxh1
+	if(isimmed(statement[8]))
+		printf("  ldy #(%s-1)\n", statement[8]);
+	else
+	{
+		printf("  ldy %s\n", statement[8]);
+		printf("  dey\n");
+	}
+	printf("  sty temp3\n");
+
+
+	// ### boxw1
+	if(isimmed(statement[10]))
+		printf("  ldy #(%s-1)\n", statement[10]);
+	else
+	{
+		printf("  ldy %s\n", statement[10]);
+		printf("  dey\n");
+	}
+	printf("  sty temp4\n");
+
+
+	// ### boxx2
 	printf("  lda ");
 	printimmed(statement[12]);
-	printf("%s\n", statement[12]);	//boxx2
+	printf("%s\n", statement[12]);
 	printf("  sta temp5\n");
+
+	// ### boxy2
 	printf("  lda ");
 	printimmed(statement[14]);
-	printf("%s\n", statement[14]);	//boxy2
+	printf("%s\n", statement[14]);
 	printf("  sta temp6\n");
-	printf("  lda #(%s-1)\n", statement[16]);	//boxh2
-	printf("  sta temp7\n");
-	printf("  lda #(%s-1)\n", statement[18]);	//boxw2
-	printf("  sta temp8\n");
+
+	// ### boxh2
+	if(isimmed(statement[16]))
+		printf("  ldy #(%s-1)\n", statement[16]);
+	else
+	{
+		printf("  ldy %s\n", statement[16]);
+		printf("  dey\n");
+	}
+	printf("  sty temp7\n");
+
+
+	// ### boxw2
+	if(isimmed(statement[18]))
+		printf("  ldy #(%s-1)\n", statement[18]);
+	else
+	{
+		printf("  ldy %s\n", statement[18]);
+		printf("  dey\n");
+	}
+	printf("  sty temp8\n");
+
+
+	// ### boxy1
+	printf("  ldy ");
+	printimmed(statement[6]);
+	printf("%s\n", statement[6]);
+
+	// ### boxx1
 	printf("  lda ");
 	printimmed(statement[4]);
-	printf("%s\n", statement[4]);	//boxx1
+	printf("%s\n", statement[4]);
+
 	printf("  jsr boxcollision\n");
 	printf("\n");
     }
@@ -7716,30 +7761,71 @@ void boxcollision(char **statement)
 
 	//collision wrapping is selected. we need to adjust the x and y variables...
 	printf("\n");
+
 	printf("  clc ; one clc only. If we overflow we're screwed anyway.\n");
+
+	// ### boxh1
+	if(isimmed(statement[8]))
+		printf("  ldy #(%s-1)\n", statement[8]);
+	else
+	{
+		printf("  ldy %s)\n", statement[8]);
+		printf("  dey\n");
+	}
+	printf("  sty temp3\n");
+
+
+	// ### boxw1
+	if(isimmed(statement[10]))
+		printf("  ldy #(%s-1)\n", statement[10]);
+	else
+	{
+		printf("  ldy %s\n", statement[10]);
+		printf("  dey\n");
+	}
+	printf("  sty temp4\n");
+
+
+	// ### boxx2
+	printf("  lda ");
+	printimmed(statement[12]);
+	printf("%s\n", statement[12]);
+	printf("  adc #48\n");
+	printf("  sta temp5\n");
+
+	// ### boxy2
+	printf("  lda ");
+	printimmed(statement[14]);
+	printf("%s\n", statement[14]);
+	printf("  adc #((256-WSCREENHEIGHT)/2)\n");
+	printf("  sta temp6\n");
+
+	// ### boxh2
+	if(isimmed(statement[16]))
+		printf("  ldy #(%s-1)\n", statement[16]);
+	else
+	{
+		printf("  ldy %s\n", statement[16]);
+		printf("  dey\n");
+	}
+	printf("  sty temp7\n");
+
+	// ### boxw2
+	if(isimmed(statement[18]))
+		printf("  ldy #(%s-1)\n", statement[18]);
+	else
+	{
+		printf("  ldy %s\n", statement[18]);
+		printf("  dey\n");
+	}
+	printf("  sty temp8\n");
+
 	printf("  lda ");
 	printimmed(statement[6]);
 	printf("%s\n", statement[6]);	//boxy1
 	printf("  adc #((256-WSCREENHEIGHT)/2)\n");
 	printf("  tay\n");
-	printf("  lda #(%s-1)\n", statement[8]);	//boxh1
-	printf("  sta temp3\n");
-	printf("  lda #(%s-1)\n", statement[10]);	//boxw1
-	printf("  sta temp4\n");
-	printf("  lda ");
-	printimmed(statement[12]);
-	printf("%s\n", statement[12]);	//boxx2
-	printf("  adc #48\n");
-	printf("  sta temp5\n");
-	printf("  lda ");
-	printimmed(statement[14]);
-	printf("%s\n", statement[14]);	//boxy2
-	printf("  adc #((256-WSCREENHEIGHT)/2)\n");
-	printf("  sta temp6\n");
-	printf("  lda #(%s-1)\n", statement[16]);	//boxh2
-	printf("  sta temp7\n");
-	printf("  lda #(%s-1)\n", statement[18]);	//boxw2
-	printf("  sta temp8\n");
+
 	printf("  lda ");
 	printimmed(statement[4]);
 	printf("%s\n", statement[4]);	//boxx1
