@@ -528,11 +528,11 @@ void shakescreen(char **statement)
     else if (statement[2][0] == 'o')
     {
 	printf("    lda #%%01001111\n");
-	printf("    sta DLLMEM\n");
+	printf("    sta DLLMEM+3\n");
 	printf("  ifconst DOUBLEBUFFER\n");
 	printf("    ldy doublebufferstate\n");
 	printf("    beq [.+5]\n");
-	printf("    sta.w DLLMEM+DBOFFSET\n");
+	printf("    sta.w DLLMEM+DBOFFSET+3\n");
 	printf("  endif ; DOUBLEBUFFER\n");
 
 	return;
@@ -543,11 +543,11 @@ void shakescreen(char **statement)
     printf("    jsr randomize\n");
     printf("    and #%d\n", shakeamount);
     printf("    eor #%%01001111\n");
-    printf("    sta DLLMEM\n");
+    printf("    sta DLLMEM+3\n");
     printf("  ifconst DOUBLEBUFFER\n");
     printf("    ldy doublebufferstate\n");
     printf("    beq [.+5]\n");
-    printf("    sta.w DLLMEM+DBOFFSET\n");
+    printf("    sta.w DLLMEM+DBOFFSET+3\n");
     printf("  endif ; DOUBLEBUFFER\n");
 
 
