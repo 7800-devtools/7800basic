@@ -660,8 +660,8 @@ void characterset(char **statement)
 
     removeCR(statement[2]);
     printf("    lda #>%s\n", statement[2]);
-    printf("    sta CHARBASE\n");
     printf("    sta sCHARBASE\n\n");
+    printf("    sta CHARBASE\n");
 
     printf("    lda #(%s_mode | %%01100000)\n", statement[2]);
     printf("    sta charactermode\n\n");
@@ -4106,7 +4106,7 @@ void barf_graphic_file(void)
 		if(holefilepointer!=NULL)
                 {
 			printf (" echo \"  \",\"  \",\"  \",\"  \",[(256*WZONEHEIGHT)-(DMAHOLEEND%d - DMAHOLESTART%d)]d , \"bytes of ROM space left in DMA hole %d.\"\n", currentplain,currentplain,currentplain);
-			printf (" if ((256*WZONEHEIGHT)-(DMAHOLEEND%d - DMAHOLESTART%d)) < 0\n", currentplain,currentplain,currentplain);
+			printf (" if ((256*WZONEHEIGHT)-(DMAHOLEEND%d - DMAHOLESTART%d)) < 0\n", currentplain,currentplain);
                         printf("SPACEOVERFLOW SET (SPACEOVERFLOW+1)\n");
                         printf(" endif\n");
                 }
