@@ -748,12 +748,19 @@ void plotsprite(char **statement)
 
     assertminimumargs(statement, "plotsprite", 4);
 
+    int tsi = gettallspriteindex(statement[2]);
+
     if ((statement[6][0] != 0) && (statement[6][0] != ':') && (statement[6][0] != '0'))
     {
 	removeCR(statement[6]);
 
 	printf("    lda #<%s\n", statement[2]);
-	printf("    ldy #%s_width\n", statement[2]);
+	if ((tsi >= 0) && (tallspritemode != 2))
+		printf("    ldy #(%s_width*%d)\n", statement[2],tallspriteheight[tsi]);
+	else if ((statement[6][0] != 0) && (statement[6][0] != ':') && (statement[7][0] != 0) && (statement[7][0] != ':'))
+		printf("    ldy #(%s_width*%s)\n", statement[2],statement[7]);
+	else
+		printf("    ldy #%s_width\n", statement[2]);
 	printf("    clc\n");
 	printf("    beq plotspritewidthskip%d\n", templabel);
 	printf("plotspritewidthloop%d\n", templabel);
@@ -813,10 +820,9 @@ void plotsprite(char **statement)
 
     jsr("plotsprite");
 
-    int tsi = gettallspriteindex(statement[2]);
     if ((statement[6][0] != 0) && (statement[6][0] != ':') && (statement[7][0] != 0) && (statement[7][0] != ':'))
     {
-	int tsheight, t;
+	int tsheight, t,s;
 	removeCR(statement[7]);
 	tsheight = atoi(statement[7]);
 	for (t = 1; t < tsheight; t++)
