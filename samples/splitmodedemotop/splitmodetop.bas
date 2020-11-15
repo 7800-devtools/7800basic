@@ -3,7 +3,7 @@
  rem ** 7800basic. The same technique can be used to just change colors on 
  rem ** the fly.
  rem **
- rem ** To make the demo less CPU-wasteful than the old splitmode demo, we use
+ rem ** To make this demo less CPU-wasteful than the old splitmode demo, we use
  rem ** the "adjustvisible" statement to pretend the text are isn't part of
  rem ** the visible screen. Then we can adjust mode+color using the interrupts
  rem ** that are triggered at the top of the screen (topscreenroutine) and the

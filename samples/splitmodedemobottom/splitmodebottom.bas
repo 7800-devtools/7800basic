@@ -3,7 +3,7 @@
  rem ** 7800basic. The same technique can be used to just change colors on 
  rem ** the fly.
  rem **
- rem ** To make the demo less CPU-wasteful than the old splitmode demo, we use
+ rem ** To make this demo less CPU-wasteful than the old splitmode demo, we use
  rem ** the "adjustvisible" statement to pretend the text area isn't part of
  rem ** the visible screen. Then we can adjust mode+color using the interrupts
  rem ** that are triggered at the top of the screen (topscreenroutine) and the
@@ -82,7 +82,6 @@
 
 main 
 
-
  gosub processjoystick
 
  restorescreen
@@ -98,7 +97,7 @@ topscreenroutine
  rem ** topscreenroutine is called by the display interrupt every frame, 
  rem ** normally at the top of the screen. In this case we've used 
  rem ** "adjustvisible" so it will be called a few zones below the screen
- rem ** top.
+ rem ** top. 
  WSYNC=1 ; wait for the end of the scanline
  displaymode 160A
  WSYNC=1 ; wait for the end of the scanline
