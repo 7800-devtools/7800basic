@@ -73,6 +73,7 @@ char *filterterm[] = {
     "^0.pause",
     "^0.userinterrupt",
     "^0.topscreenroutine",
+    "^0.bottomscreenroutine",
     "^0.altgamestart",
     "^ATOMICSPRITEUPDATE",
     "^FINESCROLLENABLED",
