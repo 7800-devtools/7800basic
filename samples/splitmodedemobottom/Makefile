@@ -1,5 +1,4 @@
-export PROJECT=splitmode
-export PROJECTDIR=`pwd`
+export PROJECT=splitmodebottom
 export COMPILER=7800basic.sh
 
 main: 	${PROJECT}.bas.bin

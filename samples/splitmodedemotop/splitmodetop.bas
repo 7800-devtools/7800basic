@@ -1,14 +1,17 @@
 
  rem ** This is a quick demo on how to split the screen with 2 modes in 
- rem ** 7800basic. The same technique can be used to just change color on 
+ rem ** 7800basic. The same technique can be used to just change colors on 
  rem ** the fly.
  rem **
- rem ** Ideally the split should happen near the top of the screen, as this 
- rem ** technique wastes precious on-screen CPU cycles waiting until the split
- rem ** happens. If you waste cycles for a split near the bottom of the screen,
- rem ** you may not have enough cycles for game logic.
-
+ rem ** To make the demo less CPU-wasteful than the old splitmode demo, we use
+ rem ** the "adjustvisible" statement to pretend the text are isn't part of
+ rem ** the visible screen. Then we can adjust mode+color using the interrupts
+ rem ** that are triggered at the top of the screen (topscreenroutine) and the
+ rem ** bottom of the visible screen (bottomscreenroutine)
+ 
  displaymode 320A
+
+ adjustvisible 2 12
 
  dim lives=a
  dim xpos=b
@@ -16,9 +19,6 @@
  dim frame=d
  dim heroanimframe=e
  dim walkframe=f
-
- rem **background color...
- BACKGRND=$0
 
  rem ** set the height of characters and sprites...
  set zoneheight 16
@@ -95,36 +95,24 @@ main
  goto main 
 
 topscreenroutine
- rem ** topscreenroutine is called by the display interrupt every
- rem ** frame. This is where we can change the display as it's being
- rem ** drawn, 2600 style.
- rem ** This technique may not work right if you completely max out
- rem ** the number of objects that Maria can display.
- rem **
- rem ** We hit the WSYNC register to skip/complete scanlines.
- rem ** Any register changes must immediately follow the previous WSYNC,
- rem ** or else the changes will show up mid-scanline.
- rem **
- rem ** You shouldn't use the temp1-temp9 variables for these routines.
- rem ** Instead you can use the interupt-safe inttemp1-inttemp6 variables.
- rem **
- rem ** Similarly, you should avoid writing to your own important game
- rem ** game variables during this routine.
-
- WSYNC=1 : displaymode 320A
- WSYNC=1 : BACKGRND=$00
-
- rem ** skip over the 320A text area...
- for inttemp1=0 to 23
-   WSYNC=1
- next
-
- rem ** go to 160A
- WSYNC=1 : displaymode 160A
- WSYNC=1 : BACKGRND=$26
-
+ rem ** topscreenroutine is called by the display interrupt every frame, 
+ rem ** normally at the top of the screen. In this case we've used 
+ rem ** "adjustvisible" so it will be called a few zones below the screen
+ rem ** top.
+ WSYNC=1 ; wait for the end of the scanline
+ displaymode 160A
+ WSYNC=1 ; wait for the end of the scanline
+ BACKGRND=$26
  return
 
+bottomscreenroutine
+ rem ** we go to 320A after the screen is completely drawn. That way the
+ rem ** the next frame
+ WSYNC=1 ; wait for the end of the scanline
+ displaymode 320A
+ WSYNC=1 ; wait for the end of the scanline
+ BACKGRND=$00
+ return
 
 processjoystick
     rem ** We move our hero in only the cardinal directions.
