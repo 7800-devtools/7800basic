@@ -24,6 +24,10 @@ NMI
 skipreallyoffvisible
        lda visibleover
        bne carryontopscreenroutine
+       ifconst .bottomscreenroutine
+          jsr .bottomscreenroutine
+       endif
+
        jmp skiptopscreenroutine
 carryontopscreenroutine
          txa ; save X+Y
@@ -203,6 +207,7 @@ reallyoffvisible
      tya
      pha
      cld
+
 
      jsr uninterruptableroutines
 
