@@ -758,7 +758,10 @@ void plotsprite(char **statement)
 	if ((tsi >= 0) && (tallspritemode != 2))
 		printf("    ldy #(%s_width*%d)\n", statement[2],tallspriteheight[tsi]);
 	else if ((statement[6][0] != 0) && (statement[6][0] != ':') && (statement[7][0] != 0) && (statement[7][0] != ':'))
+        {
+		removeCR(statement[7]);
 		printf("    ldy #(%s_width*%s)\n", statement[2],statement[7]);
+        }
 	else
 		printf("    ldy #%s_width\n", statement[2]);
 	printf("    clc\n");
@@ -8979,6 +8982,7 @@ void doublebuffer(char **statement)
 void gosub(char **statement)
 {
     int anotherbank = 0;
+    int permanentreturn = 0;
     invalidate_Areg();
     assertminimumargs(statement, "gosub", 1);
     if (!strncmp(statement[3], "bank", 4))
@@ -9001,8 +9005,14 @@ void gosub(char **statement)
 
     if ((romat4k == 1) && (anotherbank == 0))
     {
-	prerror("bank switch not required to the last bank, since its always present");
+	prerror("bank switch not required to the first bank, since its always present");
     }
+
+    if(romat4k && (currentbank == 0))
+        permanentreturn = 1;
+
+    if(currentbank == (bankcount - 1))
+        permanentreturn = 1;
 
     if (romat4k == 1)
 	anotherbank--;
@@ -9015,14 +9025,18 @@ void gosub(char **statement)
     printf(" lda #<(ret_point%d-1)\n", numjsrs);
     printf(" pha\n");
 
-    //we can detect this from a regular return address, because its less than $100
-    printf(" lda #0\n");
-    printf(" pha\n");
-    if (romat4k == 1)
-	printf(" lda #%d\n", currentbank - 1);
-    else
-	printf(" lda #%d\n", currentbank);
-    printf(" pha\n");
+    // the bank switch return info... don't push this if we're switching from a non-switched bank
+    // we can detect the bank from a regular return address, because its less than $100
+    if (permanentreturn==0)
+    {
+        printf(" lda #0\n");
+        printf(" pha\n");
+        if (romat4k == 1)
+            printf(" lda #%d\n", currentbank - 1);
+        else
+            printf(" lda #%d\n", currentbank);
+        printf(" pha\n");
+    }
 
     printf(" lda #>(.%s-1)\n", statement[2]);
     printf(" pha\n");
