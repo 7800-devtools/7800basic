@@ -28,6 +28,8 @@ int tallspritecount = 0;
 
 int currentdmahole = 0;
 
+int deprecatedframeheight = 0;
+
 #define PNG_DEBUG 3
 #include <png.h>
 
@@ -755,9 +757,9 @@ void plotsprite(char **statement)
 	removeCR(statement[6]);
 
 	printf("    lda #<%s\n", statement[2]);
-	if ((tsi >= 0) && (tallspritemode != 2))
+	if ((tsi >= 0) && (tallspritemode != 2) && (deprecatedframeheight==0))
 		printf("    ldy #(%s_width*%d)\n", statement[2],tallspriteheight[tsi]);
-	else if ((statement[6][0] != 0) && (statement[6][0] != ':') && (statement[7][0] != 0) && (statement[7][0] != ':'))
+	else if ((statement[6][0] != 0) && (statement[6][0] != ':') && (statement[7][0] != 0) && (statement[7][0] != ':') && (deprecatedframeheight==0))
         {
 		removeCR(statement[7]);
 		printf("    ldy #(%s_width*%s)\n", statement[2],statement[7]);
@@ -9137,6 +9139,11 @@ void set(char **statement)
 	    tallspritemode = 1;
 	else if (!strncmp(statement[3], "spritesheet", 11))
 	    tallspritemode = 2;
+    }
+    else if (!strncmp(statement[2], "deprecated", 10))
+    {
+	if (!strncmp(statement[3], "frameheight", 11))
+	    deprecatedframeheight = 1;
     }
     else if (!strncmp(statement[2], "dlmemory\0", 8))
     {
