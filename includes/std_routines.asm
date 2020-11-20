@@ -141,12 +141,16 @@ skiptopscreenroutine
      RTI
 
 IRQ ; the only source of non-nmi is the BRK opcode. The only 
+  ifnconst BREAKPROTECTOFF
      lda #$1A
      sta BACKGRND
      lda #$60
      sta CTRL
      sta sCTRL
      .byte $02 ; KIL/JAM
+  else
+     RTI
+  endif
 
      ifconst LONGCONTROLLERREAD
 

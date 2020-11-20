@@ -9705,8 +9705,13 @@ void set(char **statement)
     }
     else if (!strncmp(statement[2], "canary", 6))
     {
-	if (strncmp(statement[3], "on", 2) != 0)
+	if (strncmp(statement[3], "off", 3) != 0)
 	    strcpy(redefined_variables[numredefvars++], "CANARYOFF = 1");
+    }
+    else if (!strncmp(statement[2], "breakprotect", 12))
+    {
+	if (strncmp(statement[3], "off", 3) != 0)
+	    strcpy(redefined_variables[numredefvars++], "BREAKPROTECTOFF = 1");
     }
     else if (!strncmp(statement[2], "optimization", 12))
     {
