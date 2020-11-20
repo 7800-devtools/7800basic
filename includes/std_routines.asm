@@ -138,8 +138,15 @@ skipdoublebufferminimumframeindexadjust
          tax
 skiptopscreenroutine
      pla
-IRQ
      RTI
+
+IRQ ; the only source of non-nmi is the BRK opcode. The only 
+     lda #$1A
+     sta BACKGRND
+     lda #$60
+     sta CTRL
+     sta sCTRL
+     .byte $02 ; KIL/JAM
 
      ifconst LONGCONTROLLERREAD
 
