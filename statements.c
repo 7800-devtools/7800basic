@@ -4717,6 +4717,8 @@ int findlabel(char **statement, int i)
 	return 1;
     if (!strncmp(statementcache, "drawhiscores\0", 13))
 	return 1;
+    if (!strncmp(statementcache, "hiscoreload\0", 12))
+	return 1;
     if (!strncmp(statementcache, "memcpy\0", 6))
 	return 1;
     if (!strncmp(statementcache, "memset\0", 6))
@@ -5026,6 +5028,12 @@ void savememory(char **statement)
 }
 
 
+void hiscoreload(char **statement)
+{
+    //       1     
+    // hiscoreload 
+    printf(" jsr loaddifficultytable\n");
+}
 
 void drawhiscores(char **statement)
 {
