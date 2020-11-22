@@ -827,7 +827,7 @@ void plotsprite(char **statement)
 
     if ((statement[6][0] != 0) && (statement[6][0] != ':') && (statement[7][0] != 0) && (statement[7][0] != ':'))
     {
-	int tsheight, t,s;
+	int tsheight, t;
 	removeCR(statement[7]);
 	tsheight = atoi(statement[7]);
 	for (t = 1; t < tsheight; t++)
@@ -9212,6 +9212,9 @@ void set(char **statement)
 	    if ((statement[strindex] != 0) && (statement[strindex][0] != 0))
 	    {
 		removeCR(statement[strindex]);
+                char *EOS = strrchr(statement[strindex],'\'');
+		if(EOS)
+                    *EOS = 0;
 		strdelchr(statement[strindex], '\'');
 		if (strindex > 3)
 		    fprintf(outfile, ", ");
