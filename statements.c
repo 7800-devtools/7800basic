@@ -3811,8 +3811,13 @@ void add_includes(char *myinclude)
 
 void add_inline(char *myinclude)
 {
+    removeCR(myinclude);
     printf(" include %s\n", myinclude);
     printf("included.%s = 1\n", myinclude);
+    if ((bankcount&1)&&(currentbank>0))
+        printf("included.%s.bank = %d\n", myinclude,currentbank-1);
+    else
+        printf("included.%s.bank = %d\n", myinclude,currentbank);
 }
 
 void init_includes(char *path)

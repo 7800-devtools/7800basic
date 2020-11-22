@@ -114,6 +114,83 @@ pndetecispal
      lda #<DLLMEM
      sta DPPL
 
+     lda #%00000100 ; leave cartridge plugged in for any testing
+     sta XCTRL1s
+
+     ifconst pokeysupport
+         ; pokey support is compiled in, so try to detect it...
+         jsr detectpokeylocation
+     endif
+
+     lda #1 ; default for port 0 and 1 is a regular joystick
+     sta port0control
+     sta port1control
+
+     ;Setup port A to read mode
+     ;lda #$00
+     ;sta SWCHA
+     ;sta CTLSWA
+
+     ifconst HSSUPPORT
+       ifconst bankswitchmode
+         ifconst included.hiscore.asm.bank
+           ifconst MCPDEVCART
+             lda #($18 | included.hiscore.asm.bank) 
+             sta $3000
+           else
+             lda #(included.hiscore.asm.bank)
+             sta $8000
+           endif
+         endif ; included.hiscore.asm.bank
+       endif ; bankswitchmode
+         ; try to detect HSC
+         jsr detecthsc
+         and #1
+         sta hsdevice
+skipHSCdetect
+         ; try to detect AtariVox eeprom
+         jsr detectatarivoxeeprom
+         and #2
+         ora hsdevice
+         cmp #3
+         bne storeAinhsdevice
+         ; For now, we tie break by giving HSC priority over AtariVox.
+         ; Later we should check each device's priority byte if set, instead, 
+         lda #2 
+storeAinhsdevice
+         sta hsdevice
+         lda #$ff
+         sta hsdifficulty
+         sta hsgameslot
+         sta hsnewscoreline
+     endif ; HSSUPPORT
+
+     ifconst AVOXVOICE
+         jsr silenceavoxvoice
+     endif
+
+     ifconst SGRAM
+         ; check if we actually have SGRAM. If not, probe XM for it...
+         ldy #$EA
+         sty $4000
+         ldy $4000
+         cpy #$EA
+         beq skipSGRAMcheck
+             lda XCTRL1s
+             ora #%01100100
+             sta XCTRL1
+             sty $4000
+             ldy $4000
+             cpy #$EA
+             bne skipSGRAMcheck
+                 ;if we're here, XM memory satisfied our RAM requirement
+                 sta XCTRL1s ; save it
+                 lda #$10
+                 sta XCTRL2
+                 sta XCTRL3
+skipSGRAMcheck
+     endif
+
      ifconst bankswitchmode
          ; we need to switch to the first bank as a default. this needs to
          ; happen before DMA, in case there's a topscreenroutine in bank 0
@@ -143,72 +220,6 @@ pndetecispal
      sta sCTRL
 
      jsr vblankresync
-
-     lda #%00000100 ; leave cartridge plugged in for any testing
-     sta XCTRL1s
-
-     ifconst pokeysupport
-         ; pokey support is compiled in, so try to detect it...
-         jsr detectpokeylocation
-     endif
-
-     lda #1 ; default for port 0 and 1 is a regular joystick
-     sta port0control
-     sta port1control
-
-     ;Setup port A to read mode
-     ;lda #$00
-     ;sta SWCHA
-     ;sta CTLSWA
-
-     ifconst HSSUPPORT
-         ; try to detect HSC
-         jsr detecthsc
-         and #1
-         sta hsdevice
-skipHSCdetect
-         ; try to detect AtariVox eeprom
-         jsr detectatarivoxeeprom
-         and #2
-         ora hsdevice
-         cmp #3
-         bne storeAinhsdevice
-         ; For now, we tie break by giving HSC priority over AtariVox.
-         ; Later we should check each device's priority byte if set, instead, 
-         lda #2 
-storeAinhsdevice
-         sta hsdevice
-         lda #$ff
-         sta hsdifficulty
-         sta hsgameslot
-         sta hsnewscoreline
-     endif
-
-     ifconst AVOXVOICE
-         jsr silenceavoxvoice
-     endif
-
-     ifconst SGRAM
-         ; check if we actually have SGRAM. If not, probe XM for it...
-         ldy #$EA
-         sty $4000
-         ldy $4000
-         cpy #$EA
-         beq skipSGRAMcheck
-             lda XCTRL1s
-             ora #%01100100
-             sta XCTRL1
-             sty $4000
-             ldy $4000
-             cpy #$EA
-             bne skipSGRAMcheck
-                 ;if we're here, XM memory satisfied our RAM requirement
-                 sta XCTRL1s ; save it
-                 lda #$10
-                 sta XCTRL2
-                 sta XCTRL3
-skipSGRAMcheck
-     endif
 
      ldx #1
      jsr settwobuttonmode
