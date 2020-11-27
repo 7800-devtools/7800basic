@@ -4,6 +4,8 @@
 
   displaymode 160A
 
+  set tallsprite off
+
   incgraphic gfx/tileset_ramchars.png 160A
 
   rem ** we're using a bit of math and the "frame" parameter of plotsprite
