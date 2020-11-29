@@ -278,7 +278,7 @@ int switchjoy(char *input_source)
 float immed_fixpoint(char *fixpointval)
 {
     int i = findpoint(fixpointval);
-    if (i == 50)
+    if (i == 500)
 	return 0;		// failsafe
     char decimalpart[50];
     fixpointval[i] = '\0';
@@ -289,10 +289,10 @@ float immed_fixpoint(char *fixpointval)
 int findpoint(char *item)	// determine if fixed point var
 {
     int i;
-    for (i = 0; i < 50; ++i)
+    for (i = 0; i < 500; ++i)
     {
 	if (item[i] == '\0')
-	    return 50;
+	    return 500;
 	if (item[i] == '.')
 	    return i;
     }
@@ -326,7 +326,7 @@ void printfrac(char *item)
 	}
     }
     // must be immediate value
-    if (findpoint(item) < 50)
+    if (findpoint(item) < 500)
 	printf("#%d\n", (int) (immed_fixpoint(item) * 256.0));
     else
 	printf("#0\n");
@@ -343,7 +343,7 @@ int isfixpoint(char *item)
     for (i = 0; i < numfixpoint44; ++i)
 	if (!strcmp(item, fixpoint44[0][i]))
 	    return 4;
-    if (findpoint(item) < 50)
+    if (findpoint(item) < 500)
 	return 12;
     return 0;
 }
@@ -6534,7 +6534,7 @@ void dim(char **statement)
     char fixpointvar2[50];
     // check for fixedpoint variables
     i = findpoint(statement[4]);
-    if (i < 50)
+    if (i < 500)
     {
 	removeCR(statement[4]);
 	strcpy(fixpointvar2, statement[4]);
