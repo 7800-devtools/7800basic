@@ -6742,6 +6742,15 @@ void doend()
 	prerror("extraneous end statement found");
 }
 
+void dosizeof(char **statement)
+{
+    //         1           2 
+    //     sizeof    somelabel
+    removeCR(statement[2]);
+    if ((statement[2] == 0) || (statement[2][0] == 0))
+	prerror("missing argument in sizeof statement");
+    printf(" echo \" \",\"SIZEOF(%s):\",[* - %s]d,[* - .%s]d,\"bytes\"\n", statement[2],statement[2],statement[2]);
+}
 
 void ifconst(char **statement)
 {

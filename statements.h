@@ -107,6 +107,7 @@ void displaymode(char **statement);
 void ifconst(char **statement);
 void doelse(void);
 void endif(void);
+void dosizeof(char **statement);
 void lockzone(char **statement);
 void unlockzone(char **statement);
 void shakescreen(char **statement);
