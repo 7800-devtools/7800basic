@@ -940,6 +940,7 @@ loaddifficultytableHSC
          cmp #$7F
          bne loaddifficultytableHSCcontinue
          ;there was an error. use a new RAM table instead...
+         jsr initializeHSCtableentry
          jmp cleardifficultytablemem
 loaddifficultytableHSCcontinue
          ; parse the data into the HS memory...
