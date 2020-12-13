@@ -25,7 +25,7 @@
  dim sound2play=a
  dim sound2playbcd=b
  dim maxsounds=c
- maxsounds=104
+ maxsounds=109
 
 main 
  clearscreen
@@ -153,6 +153,11 @@ main
  if sound2play=102 then playsfx sfx_poof1
  if sound2play=103 then playsfx sfx_poof2
  if sound2play=104 then playsfx sfx_dragit
+ if sound2play=105 then playsfx sfx_roarcheep
+ if sound2play=106 then playsfx sfx_roarroar
+ if sound2play=107 then playsfx sfx_deeproar
+ if sound2play=108 then playsfx sfx_echobang
+ if sound2play=109 then playsfx sfx_tom
  gosub debouncejoyfire
  goto main 
 
@@ -3576,6 +3581,222 @@ end
  $00,$00,$00
 end
 
+ data sfx_roarcheep
+ $10,$10,$00 ; version, priority, frames per chunk
+ $0a,$06,$00 ; first chunk of freq,channel,volume
+ $0e,$0f,$01
+ $12,$0e,$09
+ $0a,$0e,$07
+ $0a,$0f,$0e
+ $1b,$07,$0f
+ $1b,$06,$0c
+ $13,$0f,$0e
+ $15,$0f,$0d
+ $0f,$0e,$0f
+ $19,$0f,$0f
+ $0d,$0f,$07
+ $0e,$0e,$08
+ $0f,$0f,$08
+ $0a,$01,$09
+ $0d,$0e,$0b
+ $19,$07,$0c
+ $10,$0f,$0f
+ $16,$07,$0f
+ $10,$04,$0f
+ $17,$04,$0f
+ $15,$04,$0e
+ $1b,$07,$0f
+ $1f,$06,$0c
+ $12,$0f,$0b
+ $1a,$06,$04
+ $1f,$01,$04
+ $0a,$0e,$09
+ $0f,$0e,$0b
+ $0f,$0e,$07
+ $0f,$0e,$06
+ $0f,$0e,$05
+ $0f,$0e,$03
+ $0f,$0e,$01
+ $00,$00,$00
+end
+
+ data sfx_roarroar
+ $10,$10,$00 ; version, priority, frames per chunk
+ $1d,$0f,$00 ; first chunk of freq,channel,volume
+ $07,$06,$03
+ $13,$0f,$06
+ $05,$06,$09
+ $1e,$0c,$0c
+ $06,$06,$0f
+ $1e,$0c,$0f
+ $1e,$0c,$0f
+ $05,$06,$0f
+ $1e,$0c,$0f
+ $1f,$0c,$0f
+ $1f,$0c,$0f
+ $1f,$0c,$0f
+ $0f,$0f,$0f
+ $05,$06,$0f
+ $1e,$0c,$0f
+ $1a,$07,$0f
+ $05,$06,$0f
+ $17,$0c,$0f
+ $0a,$0f,$0f
+ $18,$0c,$0f
+ $18,$0c,$0f
+ $05,$06,$0f
+ $08,$06,$0f
+ $04,$06,$0f
+ $05,$06,$0c
+ $1d,$0c,$06
+ $05,$06,$03
+ $17,$0c,$03
+ $17,$0c,$03
+ $17,$0c,$03
+ $1c,$0c,$02
+ $1c,$0c,$02
+ $17,$0c,$02
+ $06,$06,$01
+ $0c,$0f,$01
+ $00,$00,$00
+end
+
+ data sfx_deeproar
+ $10,$10,$00 ; version, priority, frames per chunk
+ $0f,$06,$02 ; first chunk of freq,channel,volume
+ $0b,$06,$0a
+ $1f,$06,$0f
+ $14,$0f,$0f
+ $0c,$06,$0f
+ $13,$06,$0f
+ $0d,$06,$0f
+ $17,$06,$0f
+ $16,$06,$0f
+ $17,$06,$0f
+ $14,$0f,$0f
+ $13,$06,$0f
+ $16,$06,$0f
+ $13,$0f,$0f
+ $16,$06,$0f
+ $13,$06,$0f
+ $17,$06,$0f
+ $13,$0f,$0f
+ $13,$06,$0f
+ $13,$06,$0f
+ $14,$0f,$0f
+ $16,$06,$0f
+ $0d,$06,$0f
+ $17,$06,$0f
+ $13,$0f,$0f
+ $13,$06,$0f
+ $13,$06,$0f
+ $14,$0f,$0f
+ $17,$06,$0f
+ $0d,$06,$0f
+ $14,$0f,$0f
+ $14,$0f,$0f
+ $0d,$06,$0f
+ $17,$06,$0f
+ $14,$0f,$0f
+ $13,$06,$0f
+ $13,$06,$0f
+ $0d,$06,$0f
+ $17,$06,$0f
+ $17,$06,$0f
+ $13,$0f,$0c
+ $14,$0f,$0a
+ $14,$0f,$0a
+ $17,$06,$0a
+ $17,$06,$0a
+ $13,$0f,$0a
+ $0d,$06,$07
+ $13,$06,$07
+ $17,$06,$07
+ $13,$06,$07
+ $13,$06,$07
+ $0d,$06,$07
+ $0d,$06,$05
+ $17,$06,$05
+ $17,$06,$02
+ $0d,$06,$02
+ $0d,$06,$02
+ $0d,$06,$02
+ $1c,$0f,$02
+ $1d,$0f,$02
+ $0d,$06,$02
+ $0d,$06,$02
+ $0c,$06,$02
+ $0d,$06,$02
+ $1b,$0f,$02
+ $17,$06,$02
+ $0d,$06,$02
+ $13,$0f,$02
+ $13,$0f,$02
+ $0c,$06,$02
+ $00,$00,$00
+end
+
+ data sfx_echobang
+ $10,$10,$00 ; version, priority, frames per chunk
+ $19,$07,$0f ; first chunk of freq,channel,volume
+ $13,$07,$0f
+ $1a,$06,$0f
+ $1a,$01,$0f
+ $17,$07,$0f
+ $10,$0c,$0f
+ $14,$07,$0f
+ $04,$07,$0f
+ $0e,$07,$0f
+ $1b,$01,$0f
+ $1b,$01,$0f
+ $1e,$07,$0f
+ $12,$07,$0f
+ $09,$06,$0f
+ $17,$0f,$0f
+ $11,$06,$0f
+ $09,$07,$0b
+ $09,$07,$0e
+ $0b,$0f,$0b
+ $0e,$0f,$0c
+ $1a,$07,$09
+ $13,$0f,$09
+ $14,$0f,$0b
+ $0c,$0e,$07
+ $18,$07,$07
+ $19,$07,$07
+ $0b,$0f,$06
+ $1a,$07,$07
+ $1a,$07,$03
+ $1f,$07,$03
+ $18,$06,$06
+ $17,$06,$04
+ $14,$06,$04
+ $15,$07,$01
+ $00,$00,$00
+end
+
+ data sfx_tom
+ $10,$10,$00 ; version, priority, frames per chunk
+ $19,$06,$04 ; first chunk of freq,channel,volume
+ $0b,$0e,$04
+ $1a,$06,$08
+ $18,$0f,$0f
+ $15,$0f,$0f
+ $1e,$0c,$0f
+ $1e,$0c,$0f
+ $1e,$0c,$0f
+ $10,$0f,$0f
+ $12,$0f,$0f
+ $1e,$0c,$0c
+ $1e,$0c,$08
+ $1e,$0c,$08
+ $1e,$0c,$04
+ $1e,$0c,$04
+ $06,$06,$04
+ $00,$00,$00
+end
+
+
 
  alphadata sounddescriptions atascii
  'salvo laser shot'
@@ -3683,4 +3904,9 @@ end
  'poof1           '
  'poof2           '
  'dragit          '
+ 'roarcheep       '
+ 'roarroar        '
+ 'deeproar        '
+ 'echobang        '
+ 'tom             '
 end
