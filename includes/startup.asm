@@ -20,6 +20,7 @@ start
      sta OFFSET
   ifnconst NOTIALOCK
      sta INPTCTRL
+     sta BACKGRND ; black default, in case a flash cart is using something else
   endif
      ldx #$FF
      txs
