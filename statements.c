@@ -2018,6 +2018,7 @@ void tsound(char **statement)
     if ((channel < 0) || (channel > 1))
 	prerror("illegal channel for tsound");
     nextindex = 4;
+    printf(" ifnconst NOTIALOCKMUTE\n");
     if (statement[nextindex][0] == ',')
 	nextindex = nextindex + 1;
     else
@@ -2040,7 +2041,10 @@ void tsound(char **statement)
     }
     removeCR(statement[nextindex]);
     if (statement[nextindex][0] == '\0')
+    {
+        printf(" endif ; NOTIALOCKMUTE\n");
 	return;
+    }
     if (statement[nextindex][0] == ',')
 	nextindex = nextindex + 1;
     else
@@ -2051,6 +2055,7 @@ void tsound(char **statement)
 	printf(" sta AUDV%d\n", channel);
 	nextindex = nextindex + 2;
     }
+    printf(" endif ; NOTIALOCKMUTE\n");
 }
 
 void psound(char **statement)
@@ -2440,6 +2445,7 @@ void playsfx(char **statement)
     removeCR(statement[2]);
     removeCR(statement[3]);
 
+    printf(" ifnconst NOTIALOCKMUTE\n");
     printf("    lda #1\n");
     printf("    sta sfxschedulelock\n");
 
@@ -2468,6 +2474,7 @@ void playsfx(char **statement)
     printf("    jsr schedulesfx\n");
     printf("    lda #0\n");
     printf("    sta sfxschedulelock\n");
+    printf(" endif ; NOTIALOCKMUTE\n");
 }
 
 void mutesfx(char **statement)
@@ -2484,7 +2491,9 @@ void mutesfx(char **statement)
     }
     else if (strncmp(statement[2], "tia", 3) == 0)
     {
+        printf(" ifnconst NOTIALOCKMUTE\n");
 	printf("         jsr mutetia\n");
+        printf(" endif ; NOTIALOCKMUTE\n");
     }
 }
 
