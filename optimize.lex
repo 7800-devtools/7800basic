@@ -7,6 +7,8 @@ char *mychar;
 
 //void yyerror(char *);  
 %}    
+%option nounput
+%option noinput
 %x rlda
 %%    
 [ \t]+ putchar(' ');
