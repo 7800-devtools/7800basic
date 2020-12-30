@@ -5088,6 +5088,14 @@ void drawhiscores(char **statement)
 	printf(" jsr hscdrawscreen\n");
 	printf(" jsr savedifficultytable\n");
     }
+    else if (strcmp(statement[2], "player2joy1") == 0)
+    {
+	printf(" lda #4\n");
+	printf(" sta hsdisplaymode\n");
+	printf(" jsr loaddifficultytable\n");
+	printf(" jsr hscdrawscreen\n");
+	printf(" jsr savedifficultytable\n");
+    }
     else
 	prerror("unsupported argument for drawscores:%s", statement[2]);
 }
