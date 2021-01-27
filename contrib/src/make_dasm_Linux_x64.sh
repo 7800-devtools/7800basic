@@ -1,14 +1,13 @@
 #!/bin/sh
-# /data/fun/Atari/7800basic.0.1/contrib/lib/linux
-# rebuild dasm for linux x86 32-bit
+# rebuild dasm for linux x86 64-bit
 
 rm -fr dasm*
 
 # determine DASMRELEASE and DASMSOURCE
 . ./version_dasm.sh
 
-export LDFLAGS=' -m32 -L/usr/lib32'
-export CFLAGS=' -m32'
+export LDFLAGS=' -m64 '
+export CFLAGS=' -m64'
 
 mkdir dasmtmp
 TAR=$(basename "$DASMSOURCE")
@@ -17,6 +16,6 @@ wget "$DASMSOURCE"
 tar -xvzf "$TAR" && rm "$TAR"
 cd *
 make
-cp src/dasm ../../../../dasm.Linux.x86
+cp src/dasm ../../../../dasm.Linux.x64
 cd ../..
 rm -fr dasm*

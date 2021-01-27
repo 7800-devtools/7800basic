@@ -10,8 +10,8 @@ rm -fr dasm*
 export PATH=/usr/i686-apple-darwin10/bin:$PATH
 export CC=i686-apple-darwin10-gcc
 export LD=$CC
-export CFLAGS=' -m32 -arch i386 '
-export LDFLAGS='-m32 -L/usr/i686-apple-darwin10/lib -arch i386'
+export CFLAGS=' -m64 -arch i386 '
+export LDFLAGS='-m64 -L/usr/i686-apple-darwin10/lib -arch i386'
 
 mkdir dasmtmp
 TAR=$(basename "$DASMSOURCE")
@@ -21,6 +21,6 @@ tar -xvzf "$TAR" && rm $TAR
 cd *
 
 make
-cp src/dasm ../../../../dasm.Darwin.x86
+cp src/dasm ../../../../dasm.Darwin.x64
 cd ../..
 rm -fr dasm*

@@ -7,16 +7,17 @@ rm -fr dasm*
 # determine DASMRELEASE and DASMSOURCE
 . ./version_dasm.sh
 
-export LDFLAGS=' -m32 -L/usr/lib32'
-export CFLAGS=' -m32'
+export CC=x86_64-w64-mingw32-gcc
+export CFLAGS=' -O2'
 
 mkdir dasmtmp
 TAR=$(basename "$DASMSOURCE")
 cd dasmtmp
 wget "$DASMSOURCE"
-tar -xvzf "$TAR" && rm "$TAR"
+tar -xvzf "$TAR" && rm $TAR
 cd *
 make
-cp src/dasm ../../../../dasm.Linux.x86
+
+cp src/dasm ../../../../dasm.Windows.x64.exe
 cd ../..
 rm -fr dasm*
