@@ -19,10 +19,10 @@ detecthsc
          sta XCTRL1s
          sta XCTRL1
          lda $3900
-         cmp #$C6
+         eor #$C6
          bne detecthscfail
          lda $3904
-         cmp #$FE
+         eor #$FE
          bne detecthscfail
          ; check if it's initialized...
          ldy #0
