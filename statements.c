@@ -2790,7 +2790,7 @@ void add_graphic(char **statement, int incbanner)
     }
 
     //check if the user is setting the color mode...
-    if ((statement[3][0] != 0) && (statement[3][0] != ':'))
+    if ((statement[3][0] != 0) && (statement[3][0] != ':') && (statement[3][0] != ';'))
     {
 	removeCR(statement[3]);
 	if (strcasecmp(statement[3], "160A") == 0)
@@ -2846,7 +2846,7 @@ void add_graphic(char **statement, int incbanner)
     }
 
     //chech if the user is reordering the color indexes of the imported graphic
-    if (statement[4][0] != 0)
+    if ((statement[4][0] != 0) && (statement[3][0] != ':')&& (statement[3][0] != ';'))
     {
 	for (t = 0; t < 16; t++)
 	{
@@ -9296,6 +9296,14 @@ void set(char **statement)
 		    fprintf(outfile, "$%02x", 27);
 		    s++;
 		}
+		if (c == '"')
+		{
+
+		    if (s > 0)
+			fprintf(outfile, ",");
+		    fprintf(outfile, "$%02x", 30);
+		    s++;
+		}
 		if ((c >= '0') && (c <= '9'))
 		{
 		    if (s > 0)
@@ -9382,6 +9390,14 @@ void set(char **statement)
 		    if (s > 0)
 			fprintf(outfile, ",");
 		    fprintf(outfile, "$%02x", 28);
+		    s++;
+		}
+		if (c == '"')
+		{
+
+		    if (s > 0)
+			fprintf(outfile, ",");
+		    fprintf(outfile, "$%02x", 30);
 		    s++;
 		}
 
