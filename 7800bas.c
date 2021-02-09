@@ -66,6 +66,7 @@ int main(int argc, char *argv[])
     bankcount = 0;
     currentbank = 0;
     doublebufferused = 0;
+    boxcollisionused = 0;
     dmaplain = 0;
     templabel = 0;
     doublewide = 0;

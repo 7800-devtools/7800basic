@@ -137,9 +137,15 @@ pndetecispal
          ifconst included.hiscore.asm.bank
            ifconst MCPDEVCART
              lda #($18 | included.hiscore.asm.bank) 
+             ifconst dumpbankswitch
+                 sta dumpbankswitch
+             endif
              sta $3000
            else
              lda #(included.hiscore.asm.bank)
+             ifconst dumpbankswitch
+                 sta dumpbankswitch
+             endif
              sta $8000
            endif
          endif ; included.hiscore.asm.bank
@@ -197,9 +203,15 @@ skipSGRAMcheck
          ; happen before DMA, in case there's a topscreenroutine in bank 0
          ifconst MCPDEVCART
              lda #$18 ; xxx11nnn - switch to bank 0
+             ifconst dumpbankswitch
+                 sta dumpbankswitch
+             endif
              sta $3000
          else
              lda #0
+             ifconst dumpbankswitch
+                 sta dumpbankswitch
+             endif
              sta $8000
          endif
      endif

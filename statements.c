@@ -7725,6 +7725,14 @@ void boxcollision(char **statement)
 
     invalidate_Areg();
 
+    // enable the compile-time optional code
+    if (boxcollisionused == 0)
+    {
+	strcpy(redefined_variables[numredefvars++], "BOXCOLLISION = 1");
+	boxcollisionused = 1;
+    }
+
+
     for (t = 4; t < 19; t = t + 2)
     {
 	if ((statement[t][0] == 0) || (statement[t][0] == ')') || (statement[t][0] == ',')

@@ -17,6 +17,7 @@ int includesfile_already_done;
 int bankcount;
 int currentbank;
 int doublebufferused;
+int boxcollisionused;
 int multisprite;
 int lifekernel;
 int numfors;
