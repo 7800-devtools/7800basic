@@ -229,6 +229,9 @@ skipSGRAMcheck
      else
          lda #%01000000 ;Enable DMA, mode=160x2/160x4
      endif
+
+     jsr waitforvblankstart ; give the some vblank time to minimally update the display
+
      sta CTRL
      sta sCTRL
 
