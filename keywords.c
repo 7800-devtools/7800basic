@@ -327,6 +327,8 @@ void keywords(char **cstatement)
 	    dogoto(statement);
 	else if (!strncmp(statement[1], "hiscoreload", 11))
 	    hiscoreload(statement);
+	else if (!strncmp(statement[1], "hiscoreclear", 12))
+	    hiscoreclear(statement);
 	else if (!strncmp(statement[1], "drawhiscores", 11))
 	    drawhiscores(statement);
 	else if (!strncmp(statement[1], "loadmemory\0", 11))

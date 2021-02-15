@@ -4733,6 +4733,8 @@ int findlabel(char **statement, int i)
 	return 1;
     if (!strncmp(statementcache, "hiscoreload\0", 12))
 	return 1;
+    if (!strncmp(statementcache, "hiscoreclear\0", 13))
+	return 1;
     if (!strncmp(statementcache, "memcpy\0", 6))
 	return 1;
     if (!strncmp(statementcache, "memset\0", 6))
@@ -5048,6 +5050,16 @@ void hiscoreload(char **statement)
     // hiscoreload 
     printf(" jsr loaddifficultytable\n");
 }
+
+void hiscoreclear(char **statement)
+{
+    //       1     
+    // hiscoreclear 
+    printf(" jsr loaddifficultytable\n");
+    printf(" jsr cleardifficultytablemem\n");
+    printf(" jsr savedifficultytable\n");
+}
+
 
 void drawhiscores(char **statement)
 {
@@ -9773,6 +9785,11 @@ void set(char **statement)
     {
 	if (strncmp(statement[3], "off", 3) != 0)
 	    strcpy(redefined_variables[numredefvars++], "CANARYOFF = 1");
+    }
+    else if (!strncmp(statement[2], "crashdump", 6))
+    {
+	if (strncmp(statement[3], "off", 3) != 0)
+	    strcpy(redefined_variables[numredefvars++], "CRASHDUMP = 1");
     }
     else if (!strncmp(statement[2], "breakprotect", 12))
     {
