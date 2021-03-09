@@ -169,10 +169,11 @@ int main(int argc, char **argv)
 	printf("          \"name game name\" Set the game name in the header.\n");
 	printf("          \"exit\"           Exit the utility. Unsaved changes will be lost.\n");
 	printf("\n");
-	printf("Options:  rom@4000 ram@4000 bank6@4000 pokey@450 pokey@4000 mram@4000\n");
-	printf("          supergame supergameram supergamebankram absolute activision\n");
-	printf("          tvpal tvntsc savekey hsc xm 7800joy1 7800joy2 lightgun1 lightgun2\n");
-	printf("          paddle1 paddle2 tball1 tball2 2600joy1 2600joy2 driving1 driving2\n");
+	printf("Options:  rom@4000 ram@4000 bank6@4000 pokey@450 pokey@4000 mram@4000 \n");
+	printf("          pokey@440 ym2151@460 supergame supergameram supergamebankram\n");
+	printf("          absolute activision tvpal tvntsc savekey hsc xm \n");
+	printf("          7800joy1 7800joy2 lightgun1 lightgun2 paddle1 paddle2\n");
+	printf("          tball1 tball2 2600joy1 2600joy2 driving1 driving2\n");
 	printf("          keypad1 keypad2 stmouse1 stmouse2 amouse1 amouse2\n");
 	printf("> ");
 
@@ -331,15 +332,19 @@ void setupheaderdefaults()
     myheader.romsize3 = (headergamesize >> 8) & 0xff;
     myheader.romsize4 = (headergamesize >> 0) & 0xff;
 
-    // bit 0    = pokey at $4000
-    // bit 1    = supergame bank switched
-    // bit 2    = supergame ram at $4000
-    // bit 3    = rom at $4000
-    // bit 4    = bank 6 at $4000
-    // bit 5    = supergame banked ram
-    // bit 6    = pokey at $450
-    // bit 7    = mirror ram at $4000
-    // bit 8-15 = special
+    // bit 0     = pokey at $4000
+    // bit 1     = supergame bank switched
+    // bit 2     = supergame ram at $4000
+    // bit 3     = rom at $4000
+    // bit 4     = bank 6 at $4000
+    // bit 5     = supergame banked ram
+    // bit 6     = pokey at $450
+    // bit 7     = mirror ram at $4000
+    // bit 8     = activision banking
+    // bit 9     = absolute banking
+    // bit 10    = pokey at $440
+    // bit 11    = ym2151 at $440/$441
+    // bit 12-15 = special
     myheader.carttype1 = 0;
     myheader.carttype2 = 0;
 
@@ -531,6 +536,20 @@ void setunset(char *command)
 	}
 	else
 	    myheader.carttype1 = myheader.carttype1 & (2 ^ 0xff);
+    }
+    else if (strcmp(noun, "pokey@440") == 0)
+    {
+	if (set)
+	    myheader.carttype1 = myheader.carttype1 | 4;
+	else
+	    myheader.carttype1 = myheader.carttype1 & (4 ^ 0xff);
+    }
+    else if (strcmp(noun, "ym2151@460") == 0)
+    {
+	if (set)
+	    myheader.carttype1 = myheader.carttype1 | 8;
+	else
+	    myheader.carttype1 = myheader.carttype1 & (8 ^ 0xff);
     }
     else if (strcmp(noun, "tvpal") == 0)
     {
@@ -787,6 +806,10 @@ void report(void)
 	printf("Activision ");
     if ((myheader.carttype1 & 2) > 0)
 	printf("Absolute ");
+    if ((myheader.carttype1 & 4) > 0)
+	printf("pokey@440 ");
+    if ((myheader.carttype1 & 8) > 0)
+	printf("ym2151@460 ");
     printf("\n");
 
     printf("    controllers        : ");
