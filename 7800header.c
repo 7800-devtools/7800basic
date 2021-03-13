@@ -12,7 +12,7 @@
 //      7800header - a simple app to generate/interrogate a a78 header.
 //                      Michael Saarna (aka RevEng@AtariAge)
 
-#define HEADER_VERSION_INFO "7800header 0.12"
+#define HEADER_VERSION_INFO "7800header 0.13"
 
 void usage(char *binaryname);
 uint32_t phtole32(uint32_t value);
@@ -143,9 +143,11 @@ int main(int argc, char **argv)
 	    myheader.controller1 = 1;
 	if (myheader.controller2 > 9)
 	    myheader.controller2 = 1;
-	myheader.tvformat &= 1;
+        if(myheader.version<3)
+	    myheader.tvformat &= 1;
 	myheader.saveperipheral &= 3;
 	myheader.xm &= 1;
+	myheader.version = 3;
     }
 
 
@@ -171,8 +173,8 @@ int main(int argc, char **argv)
 	printf("\n");
 	printf("Options:  rom@4000 ram@4000 bank6@4000 pokey@450 pokey@4000 mram@4000 \n");
 	printf("          pokey@440 ym2151@460 supergame supergameram supergamebankram\n");
-	printf("          absolute activision souper tvpal tvntsc savekey hsc xm \n");
-	printf("          7800joy1 7800joy2 lightgun1 lightgun2 paddle1 paddle2\n");
+	printf("          absolute activision souper tvpal tvntsc composite savekey\n");
+	printf("          hsc xm 7800joy1 7800joy2 lightgun1 lightgun2 paddle1 paddle2\n");
 	printf("          tball1 tball2 2600joy1 2600joy2 driving1 driving2\n");
 	printf("          keypad1 keypad2 stmouse1 stmouse2 amouse1 amouse2\n");
 	printf("> ");
@@ -322,7 +324,7 @@ void setupheaderdefaults()
     headergamesize = phtole32(gamesize);
 
     // a78 header format version...
-    myheader.version = 1;
+    myheader.version = 3;
 
     strncpy(myheader.console, "ATARI7800        ", 16);
     strncpy(myheader.gamename, "My Game                          ", 32);
@@ -571,16 +573,23 @@ void setunset(char *command)
     else if (strcmp(noun, "tvpal") == 0)
     {
 	if (set)
-	    myheader.tvformat = 1;
+	    myheader.tvformat = myheader.tvformat | 1;
 	else
-	    myheader.tvformat = 0;
+	    myheader.tvformat = myheader.tvformat & 0xfe;
     }
     else if (strcmp(noun, "tvntsc") == 0)
     {
 	if (set)
-	    myheader.tvformat = 0;
+	    myheader.tvformat = myheader.tvformat & 0xfe;
 	else
-	    myheader.tvformat = 1;
+	    myheader.tvformat = myheader.tvformat | 1;
+    }
+    else if (strcmp(noun, "composite") == 0)
+    {
+	if (set)
+	    myheader.tvformat = myheader.tvformat | 2;
+	else
+	    myheader.tvformat = myheader.tvformat & 0xfd;
     }
     else if (strcmp(noun, "savekey") == 0)
     {
@@ -827,6 +836,8 @@ void report(void)
 	printf("pokey@440 ");
     if ((myheader.carttype1 & 8) > 0)
 	printf("ym2151@460 ");
+    if ((myheader.carttype1 & 16) > 0)
+	printf("souper ");
     printf("\n");
 
     printf("    controllers        : ");
@@ -890,12 +901,13 @@ void report(void)
     printf("\n");
 
     printf("    tv format          : ");
-    if (myheader.tvformat == 0)
+    if ((myheader.tvformat & 1) == 0)
 	printf("NTSC");
-    else if (myheader.tvformat == 1)
+    else if ((myheader.tvformat & 1) == 1)
 	printf("PAL");
-    else
-	printf("unknown");
+    if (myheader.tvformat & 2)
+	printf(" composite");
+   
     printf("\n\n");
 }
 
