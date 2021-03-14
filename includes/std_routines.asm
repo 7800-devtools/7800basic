@@ -365,8 +365,10 @@ savescreenrts
 
 drawscreen
 
+  ifconst interrupthold
      lda #$FF
      sta interrupthold ; if the user called drawscreen, we're ready for interrupts
+  endif
 
      lda #0
      sta temp1 ; not B&W if we're here...
@@ -1988,8 +1990,10 @@ vblankstartwait
 flipdisplaybufferreturn
      rts
 flipdisplaybuffer
+ ifconst interrupthold
      lda #$FF
      sta interrupthold
+ endif
      lda doublebufferstate
      beq flipdisplaybufferreturn ; exit if we're not in double-buffer
 
