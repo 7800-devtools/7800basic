@@ -1755,9 +1755,11 @@ checkselectswitch
      lda SWCHB ; first check the real select switch...
      and #%00000010
  ifnconst MOUSESUPPORT
+ ifnconst TRAKBALLSUPPORT
      beq checkselectswitchreturn ; switch is pressed
      lda SWCHA ; then check the soft "select" joysick code...
      and #%10110000 ; R_DU
+ endif ; TRAKBALLSUPPORT
  endif ; MOUSESUPPORT
 checkselectswitchreturn
      rts
@@ -1766,9 +1768,11 @@ checkresetswitch
      lda SWCHB ; first check the real reset switch...
      and #%00000001
  ifnconst MOUSESUPPORT
+ ifnconst TRAKBALLSUPPORT
      beq checkresetswitchreturn ; switch is pressed
      lda SWCHA ; then check the soft "reset" joysick code...
      and #%01110000 ; _LDU
+ endif ; TRAKBALLSUPPORT
  endif ; MOUSESUPPORT
 checkresetswitchreturn
      rts
