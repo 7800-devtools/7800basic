@@ -474,7 +474,7 @@ void set_romsize(char *size)
 
 void lockzone(char **statement)
 {
-    //  1       2 
+    //  1       2
     // lockzone #
 
     assertminimumargs(statement, "lockzone", 1);
@@ -494,7 +494,7 @@ void lockzone(char **statement)
 
 void unlockzone(char **statement)
 {
-    //  1         2 
+    //  1         2
     // unlockzone #
 
     assertminimumargs(statement, "unlockzone", 1);
@@ -513,7 +513,7 @@ void unlockzone(char **statement)
 
 void shakescreen(char **statement)
 {
-    //  1          2 
+    //  1          2
     // shakescreen lo|med|hi|off
 
     int shakeamount = 15;
@@ -559,7 +559,7 @@ void shakescreen(char **statement)
 
 void bank(char **statement)
 {
-    //  1   2 
+    //  1   2
     // bank #
 
     assertminimumargs(statement, "bank", 1);
@@ -641,7 +641,7 @@ void dmahole(char **statement)
 
 void voice(char **statement)
 {
-    //  1      2 
+    //  1      2
     // voice on/off
 
     assertminimumargs(statement, "voice", 1);
@@ -1312,7 +1312,7 @@ void plotvalue(char **statement)
 
 void plotmapfile(char **statement)
 {
-    //         1           2             3           4        5          6             7       
+    //         1           2             3           4        5          6             7
     //     plotmapfile map_file.tmx  display_mem  screen_x screen_y screen_width screen_height
 
     // Overview
@@ -2060,7 +2060,7 @@ void tsound(char **statement)
 
 void psound(char **statement)
 {
-    //   1      2     3   4      
+    //   1      2     3   4
     // psound channel , [freq] [ , waveform , volume ]
 
     int nextindex;
@@ -2156,7 +2156,7 @@ void psound(char **statement)
 
 void changecontrol(char **statement)
 {
-    //   1            2     3  
+    //   1            2     3
     // changecontrol 0|1 controltype
 
     int port;
@@ -2437,7 +2437,7 @@ void changecontrol(char **statement)
 
 void playsfx(char **statement)
 {
-    //   1       2     3  
+    //   1       2     3
     // playsfx data [pitch]
 
     assertminimumargs(statement, "playsfx", 1);
@@ -2903,7 +2903,7 @@ void add_graphic(char **statement, int incbanner)
 
 	if (istallsprite)
 	{
-	    //remember sprite height 
+	    //remember sprite height
 	    strcpy(tallspritelabel[tallspritecount], generalname);
 	    tallspriteheight[tallspritecount] = height / zoneheight;
 	    tallspritecount++;
@@ -2920,7 +2920,7 @@ void add_graphic(char **statement, int incbanner)
 		    t = 0;
 		    break;
 		}
-		removeCR(statement[t]);	//remove CR 
+		removeCR(statement[t]);	//remove CR
 		if ((statement[t][0] == 0) || (statement[t][0] == ':'))
 		{
 		    t = 0;
@@ -3267,11 +3267,6 @@ void incgraphic(char *file_name, int offset)
     color_type = png_get_color_type(png_ptr, info_ptr);
     bit_depth = png_get_bit_depth(png_ptr, info_ptr);
 
-    if (bit_depth > 4)
-    {
-	prerror("the png file '%s' has too many colors", file_name);
-    }
-
     if (!png_get_tRNS(png_ptr, info_ptr, &trans, &num_trans, NULL))
 	num_trans = -1;
 
@@ -3294,6 +3289,10 @@ void incgraphic(char *file_name, int offset)
 		num_unique_palette = num_unique_palette + 1;
 	}
 
+    if ((bit_depth > 4) && ((num_palette > 4) || (num_palette < 2)))
+   	{
+		prerror("the png file '%s' has too many colors: bit depth: %d, palette size: %d", file_name, bit_depth, num_palette);
+    }
 
 	const double convertval = 7.5 / M_PI;
 
@@ -3361,7 +3360,6 @@ void incgraphic(char *file_name, int offset)
     //TODO: accurate warning for pixel width on non-byte boundary
 
     //change png to one byte per pixel, rather than tight packing...
-    if (bit_depth < 8)		//not really needed.
 	png_set_packing(png_ptr);
 
 
@@ -3960,7 +3958,7 @@ void barf_graphic_file(void)
             printf(" endif\n");
         }
     }
-    else 
+    else
     {
 	if ((graphicsdatawidth[dmaplain] > 0) || (dmaplain > 0))	//calculate from graphics area...
         {
@@ -4667,7 +4665,7 @@ int findlabel(char **statement, int i)
     if ((statement[i + 1][0] == ':') && (strncmp(statement[i + 2], "rem\0", 3)))
 	return 1;
 
-    // a single command followed by a rem is automatically turned into a label. 
+    // a single command followed by a rem is automatically turned into a label.
     //if ((statement[i+1][0]==':') && (!strncmp(statement[i+2],"rem\0",3))) return 0;
 
     if (!strncmp(statement[i + 1], "else\0", 4))
@@ -5046,15 +5044,15 @@ void savememory(char **statement)
 
 void hiscoreload(char **statement)
 {
-    //       1     
-    // hiscoreload 
+    //       1
+    // hiscoreload
     printf(" jsr loaddifficultytable\n");
 }
 
 void hiscoreclear(char **statement)
 {
-    //       1     
-    // hiscoreclear 
+    //       1
+    // hiscoreclear
     printf(" jsr loaddifficultytable\n");
     printf(" jsr cleardifficultytablemem\n");
     printf(" jsr savedifficultytable\n");
@@ -5297,7 +5295,7 @@ void songdata(char **statement)
 	    if (songstatements[t][0] == 0)
 		break;		//all done
 	    if (songstatements[t][0] == ';')
-		break;		//comment. ignore the rest. 
+		break;		//comment. ignore the rest.
 	    if (savepatternname[0] == 0)
 		prerror("songdata has data without pattern label '%s'", songstatements[t]);
 
@@ -5433,7 +5431,7 @@ void songdata(char **statement)
 
 		    else
 		    {
-			// The second character doesn't match a note or any of our commands. 
+			// The second character doesn't match a note or any of our commands.
 			// Assume it's a pattern call.
 			loopcount = getpatternloops(songstatements[t]);
 			if ((loopcount > 8) || (loopcount < 1))
@@ -6164,7 +6162,7 @@ void printphonemes(char *word, int inflection, int lastpitch)
 void alphachars(char **statement)
 {
     //   1            2
-    //alphachars 'characters' 
+    //alphachars 'characters'
     //N.B. if 'characters' has a space, it will be split across 2 and 3.
 
     //alphachars ASCII
@@ -6467,7 +6465,7 @@ void next(char **statement)
 	{
 	    printf("	LDA %s\n", forvar[numfors]);
 	    printf("	CMP ");
-	    if (!strncmp(forend[numfors], "0\0", 2)) 
+	    if (!strncmp(forend[numfors], "0\0", 2))
             {
                 // the special case of 0 as end, since we can't check to see if it was smaller than 0
                 printf("#255\n");
@@ -6773,7 +6771,7 @@ void doend()
 
 void dosizeof(char **statement)
 {
-    //         1           2 
+    //         1           2
     //     sizeof    somelabel
     removeCR(statement[2]);
     if ((statement[2] == 0) || (statement[2][0] == 0))
@@ -6783,7 +6781,7 @@ void dosizeof(char **statement)
 
 void ifconst(char **statement)
 {
-    //         1           2 
+    //         1           2
     //     ifconst   somelabel
     removeCR(statement[2]);
     if ((statement[2] == 0) || (statement[2][0] == 0))
