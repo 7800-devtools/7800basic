@@ -25,7 +25,7 @@
  dim sound2play=a
  dim sound2playbcd=b
  dim maxsounds=c
- maxsounds=109
+ maxsounds=113
 
 main 
  clearscreen
@@ -158,6 +158,10 @@ main
  if sound2play=107 then playsfx sfx_deeproar
  if sound2play=108 then playsfx sfx_echobang
  if sound2play=109 then playsfx sfx_tom
+ if sound2play=110 then playsfx sfx_clopclop
+ if sound2play=111 then playsfx sfx_museboom
+ if sound2play=112 then playsfx sfx_bigboom
+ if sound2play=113 then playsfx sfx_thud
  gosub debouncejoyfire
  goto main 
 
@@ -3797,6 +3801,203 @@ end
 end
 
 
+ data sfx_clopclop
+ $10,$10,$00 ; version, priority, frames per chunk
+ $1e,$04,$08 ; first chunk of freq,channel,volume
+ $1c,$04,$0b
+ $15,$04,$0d
+ $1a,$0c,$0d
+ $17,$0c,$0d
+ $1c,$04,$0d
+ $16,$04,$0d
+ $10,$04,$0d
+ $17,$0c,$0d
+ $10,$0c,$0d
+ $10,$0c,$02
+ $13,$04,$0d
+ $04,$06,$0d
+ $17,$0c,$0d
+ $1c,$04,$0c
+ $17,$04,$0c
+ $10,$04,$0d
+ $16,$0c,$0d
+ $10,$0c,$0b
+ $0b,$0c,$02
+ $00,$00,$00
+end
+
+ data sfx_museboom
+ $10,$10,$00 ; version, priority, frames per chunk
+ $15,$04,$0b ; first chunk of freq,channel,volume
+ $12,$0c,$0b
+ $1e,$04,$0d
+ $16,$04,$0b
+ $04,$06,$0c
+ $1c,$0c,$0d
+ $0a,$0c,$0b
+ $15,$04,$0c
+ $1a,$0c,$0a
+ $0c,$0c,$0d
+ $13,$0c,$0a
+ $15,$04,$0a
+ $1a,$0c,$0a
+ $05,$06,$09
+ $0b,$0c,$09
+ $16,$04,$0d
+ $13,$0c,$08
+ $13,$0c,$0d
+ $0b,$0c,$0d
+ $06,$06,$0b
+ $1d,$0c,$09
+ $10,$0c,$0b
+ $1e,$04,$0c
+ $05,$06,$0a
+ $05,$06,$0b
+ $0b,$0c,$0a
+ $1c,$04,$0d
+ $05,$06,$0b
+ $18,$0c,$0c
+ $0c,$0c,$0c
+ $1b,$07,$0d
+ $15,$0c,$0d
+ $14,$0c,$0b
+ $0b,$0c,$0d
+ $1e,$0c,$0b
+ $1b,$0c,$0c
+ $0b,$0c,$0c
+ $0d,$0c,$0d
+ $1a,$0c,$09
+ $15,$0c,$09
+ $0a,$0c,$0a
+ $06,$06,$07
+ $17,$0c,$09
+ $10,$0c,$08
+ $1b,$0c,$07
+ $06,$06,$06
+ $17,$0c,$07
+ $0c,$0c,$07
+ $06,$06,$07
+ $0e,$0f,$07
+ $14,$0c,$07
+ $10,$0c,$04
+ $1a,$0c,$05
+ $12,$0c,$04
+ $1c,$0c,$03
+ $14,$0c,$03
+ $1e,$0c,$03
+ $1d,$07,$02
+ $08,$06,$01
+ $16,$0c,$01
+ $15,$0c,$01
+ $00,$00,$00
+end
+
+ data sfx_bigboom
+ $10,$10,$00 ; version, priority, frames per chunk
+ $1d,$07,$0f ; first chunk of freq,channel,volume
+ $1e,$06,$0f
+ $00,$06,$0f
+ $14,$07,$0f
+ $13,$0f,$0f
+ $1b,$07,$0f
+ $0e,$07,$0f
+ $1b,$07,$0f
+ $0f,$07,$0f
+ $10,$07,$0f
+ $10,$06,$0f
+ $16,$07,$0f
+ $0d,$0f,$0f
+ $1e,$0c,$0f
+ $16,$01,$0f
+ $17,$01,$0f
+ $10,$07,$0f
+ $10,$0f,$0f
+ $15,$07,$0d
+ $1a,$07,$0f
+ $1a,$01,$0f
+ $1a,$07,$0f
+ $14,$0f,$0f
+ $16,$07,$0f
+ $16,$07,$0f
+ $15,$07,$0f
+ $17,$07,$0f
+ $13,$0f,$0f
+ $13,$0f,$0f
+ $19,$0f,$0f
+ $18,$07,$0c
+ $0b,$06,$0c
+ $1e,$01,$0d
+ $10,$01,$0d
+ $14,$07,$0f
+ $16,$06,$0c
+ $17,$07,$0c
+ $1a,$01,$0c
+ $12,$06,$0d
+ $17,$07,$0c
+ $0b,$0f,$0c
+ $19,$07,$09
+ $19,$07,$0b
+ $0b,$0f,$09
+ $0d,$0e,$0b
+ $0d,$0e,$0b
+ $19,$0f,$09
+ $0e,$0f,$06
+ $1b,$0c,$08
+ $18,$0f,$08
+ $13,$07,$05
+ $1a,$01,$05
+ $17,$0f,$08
+ $16,$06,$08
+ $0c,$06,$05
+ $1c,$0f,$06
+ $16,$06,$08
+ $0b,$06,$06
+ $12,$06,$04
+ $0f,$0f,$05
+ $11,$07,$06
+ $09,$06,$05
+ $10,$06,$05
+ $10,$06,$05
+ $10,$06,$05
+ $11,$0f,$04
+ $15,$0f,$04
+ $1e,$07,$05
+ $16,$01,$04
+ $16,$01,$04
+ $1a,$0f,$04
+ $19,$0f,$02
+ $1e,$0f,$02
+ $1b,$0f,$02
+ $1e,$0f,$02
+ $1c,$0f,$02
+ $0d,$0f,$01
+ $0f,$06,$02
+ $0e,$06,$01
+ $18,$0f,$01
+ $0b,$06,$02
+ $16,$0f,$01
+ $17,$0f,$01
+ $13,$06,$01
+ $0f,$0e,$01
+ $00,$00,$00
+end
+
+ data sfx_thud
+ $10,$10,$00 ; version, priority, frames per chunk
+ $1e,$07,$0f ; first chunk of freq,channel,volume
+ $1e,$07,$0e
+ $12,$0f,$0e
+ $1f,$07,$0e
+ $1f,$0f,$0c
+ $0f,$0f,$09
+ $0e,$0f,$07
+ $11,$0f,$07
+ $10,$0f,$04
+ $11,$0e,$04
+ $0c,$0e,$02
+ $00,$00,$00
+end
+
 
  alphadata sounddescriptions atascii
  'salvo laser shot'
@@ -3909,4 +4110,8 @@ end
  'deeproar        '
  'echobang        '
  'tom             '
+ 'clopclop        '
+ 'museboom        '
+ 'bigboom         '
+ 'thud            '
 end
