@@ -8865,7 +8865,7 @@ void loadrombank(char **statement)
     if (anotherbank == (bankcount - 1))
 	prerror("loadrombank can not switch the last bank");
 
-    printf(" lda #%d\n", currentbank);
+    printf(" lda #%d\n", anotherbank);
     printf(" ifconst BANKRAM\n");
     printf("   sta currentbank\n");
     printf("   ora currentrambank\n");
