@@ -2802,21 +2802,6 @@ void add_graphic(char **statement, int incbanner)
 	{
 	    graphiccolormode = MODE160B;
 	    palettestatement = 17;
-	    // We need to reorder the default color indexes. For 160B the 7800 makes color
-	    // indexes 0, 4, 8, and 12 transparent, but A 16 color PNG will likely have
-	    // non-transparent colors in slots 4, 8, and 12, so we move these to the end.
-	    s = 1;
-	    for (t = 1; t < 12; t++)
-	    {
-		if (s % 4 == 0)
-		    s = s + 1;
-		graphiccolorindex[t] = s;
-		s = s + 1;
-	    }
-	    graphiccolorindex[12] = 15;
-	    graphiccolorindex[13] = 4;
-	    graphiccolorindex[14] = 8;
-	    graphiccolorindex[15] = 12;
 	}
 	else if (strcasecmp(statement[3], "320A") == 0)
 	{
@@ -2845,7 +2830,7 @@ void add_graphic(char **statement, int incbanner)
 	prerror("'%s' is wider than 256 bytes", statement[2]);
     }
 
-    //chech if the user is reordering the color indexes of the imported graphic
+    //check if the user is reordering the color indexes of the imported graphic
     if ((statement[4][0] != 0) && (statement[3][0] != ':')&& (statement[3][0] != ';'))
     {
 	for (t = 0; t < 16; t++)
@@ -2859,6 +2844,36 @@ void add_graphic(char **statement, int incbanner)
 		    graphiccolorindex[t] = strictatoi(statement[t + 4]);
 	    }
 	}
+    }
+
+ if (strcasecmp(statement[3], "160B") == 0)
+    {
+	// We need to reorder the color indexes some more. For 160B the 7800 makes color
+	// indexes 0, 4, 8, and 12 transparent, but a 16 color PNG will likely have
+	// non-transparent colors in slots 4, 8, and 12.
+        // We assume 0 is aligned correctly and the background/transparent color.
+
+	// move indexes 4+ to 5+
+	for (t = 1; t < 16; t++)
+            if(graphiccolorindex[t]>=4)
+                graphiccolorindex[t]++;
+
+	// move indexes 8+ to 9+
+	for (t = 1; t < 16; t++)
+            if(graphiccolorindex[t]>=8)
+                graphiccolorindex[t]++;
+
+	// move indexes 12+ to 13+
+	for (t = 1; t < 16; t++)
+            if(graphiccolorindex[t]>=12)
+                graphiccolorindex[t]++;
+ 
+	graphiccolorindex[13] = 4;
+	graphiccolorindex[14] = 8;
+	graphiccolorindex[15] = 12;
+
+
+
     }
 
     if (!incbanner)
