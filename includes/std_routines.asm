@@ -741,6 +741,17 @@ servicesfxchannelsloop
      jmp servicesfxchannelsloop
 servicesfx_cont1
 
+     ldy #1 ; check to see if they're changing the frame countdown
+     lda (inttemp5),y
+     cmp #$10
+     bne servicesfx_cont1a
+     ldy #2
+     lda (inttemp5),y
+     sta sfx1frames,x ; change the frame countdown
+     sta sfx1tick,x
+     jmp advancesfxpointer
+servicesfx_cont1a
+
      lda sfx1frames,x ; set the frame countdown for this sound chunk
      sta sfx1tick,x
 
