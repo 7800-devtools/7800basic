@@ -748,8 +748,19 @@ servicesfx_cont1
      ldy #2
      lda (inttemp5),y
      sta sfx1frames,x ; change the frame countdown
+     lda #0
      sta sfx1tick,x
-     jmp advancesfxpointer
+     ; advance the sound pointer by 3...
+     lda sfx1pointlo,x
+     clc
+     adc #3
+     sta sfx1pointlo,x
+     lda sfx1pointhi,x
+     adc #0
+     sta sfx1pointhi,x
+     ; and then fetch another sample for this channel...
+     dex 
+     jmp servicesfxchannelsloop
 servicesfx_cont1a
 
      lda sfx1frames,x ; set the frame countdown for this sound chunk
