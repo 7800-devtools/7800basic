@@ -728,6 +728,9 @@ servicesfxchannelsloop
      endif
      beq servicesfxchannelsdone
 
+     lda sfxschedulelock ; =1 if locked
+     bne servicesfxchannelsdone ; exit if a pointer may be mid-way change
+
      lda sfx1pointlo,x
      sta inttemp5
      ora sfx1pointhi,x
