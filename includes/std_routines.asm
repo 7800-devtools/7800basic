@@ -697,9 +697,15 @@ buttonhandlerlo
      .byte <joybuttonhandler    ; 10=atarivox
 
 drawwait
-     lda visibleover
-     bne drawwait ; make sure the visible screen isn't being drawn
+     bit visibleover ; 255 if screen is being drawn, 0 when not.
+     bmi drawwait ; make sure the visible screen isn't being drawn
      rts
+
+drawoverwait
+     bit visibleover ; 255 if screen is being drawn, 0 when not.
+     bpl drawwait ; make sure the visible screen is being drawn
+     rts
+
 
 mutetia
      lda #0
