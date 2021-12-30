@@ -703,7 +703,7 @@ drawwait
 
 drawoverwait
      bit visibleover ; 255 if screen is being drawn, 0 when not.
-     bpl drawwait ; make sure the visible screen is being drawn
+     bpl drawoverwait ; make sure the visible screen is being drawn
      rts
 
 
