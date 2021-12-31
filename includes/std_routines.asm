@@ -750,11 +750,14 @@ servicesfxchannelsloop
      jmp servicesfxchannelsloop
 servicesfx_cont1
 
-     ldy #1 ; check to see if they're changing the frame countdown
+     ldy #1 ; check to see if they're changing the priority/frame countdown
      lda (inttemp5),y
-     cmp #$10
+     cmp #$20
      bne servicesfx_cont1a
-     ldy #2
+     iny
+     lda (inttemp5),y
+     sta sfx1priority,x
+     iny
      lda (inttemp5),y
      sta sfx1frames,x ; change the frame countdown
      lda #0
