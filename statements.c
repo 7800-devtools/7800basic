@@ -250,6 +250,15 @@ int switchjoy(char *input_source)
     // SNES2ATARI low byte bits...
     // At the end:     7     6     5  4    3    2    1    0
     // LowDataByte:   RSH   LSH    X  A  RIGHT LEFT DOWN  UP
+    // HighDataByte: START SELECT  Y  B    x    x    x    x
+    if (!strncmp(input_source, "snes1any\0", 8))
+    {
+	printf(" lda snes2atari1hi\n");
+	printf(" ora #%%00001111\n");
+	printf(" and snes2atari1lo\n");
+	printf(" eor #$FF\n");
+	return 4;
+    }
     if (!strncmp(input_source, "snes1up\0", 7))
     {
 	printf(" lda snes2atari1lo\n");
