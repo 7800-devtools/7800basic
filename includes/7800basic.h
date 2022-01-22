@@ -477,6 +477,7 @@ drivingposition1    =      paddleposition2
 trakballx1          =      paddleposition2
 mousex1             =      paddleposition2
 lightgunx1          =      paddleposition2
+snes2atari1lo       =      paddleposition2
 
  ; controller 0 altdata...
 paddleposition1     DS 1 ; $1D7 
@@ -491,6 +492,7 @@ keypadmatrix1b      =      paddleposition3
 trakbally1          =      paddleposition3
 mousey1             =      paddleposition3
 lightguny1          =      paddleposition3
+snes2atari1hi       =      paddleposition3
 
 ; controller state save. for trakball state+dir codes, rotary position codes
 controller0statesave DS 1 ; $1D9

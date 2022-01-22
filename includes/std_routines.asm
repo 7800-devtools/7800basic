@@ -244,7 +244,7 @@ show2700
 longreadtype
  .byte 0, 0, 0, 1  ; NONE     PROLINE   LIGHTGUN  PADDLE
  .byte 2, 0, 3, 0  ; TRKBALL  VCSSTICK  DRIVING   KEYPAD
- .byte 3, 3, 0     ; STMOUSE  AMOUSE    ATARIVOX
+ .byte 3, 3, 0, 0  ; STMOUSE  AMOUSE    ATARIVOX  SNES
 
 longreadroutineloP0
  .byte <LLRET0             ;  0 = no routine
@@ -635,6 +635,30 @@ joybuttonhandler
 twobuttonmask
  .byte %00000100,%00010000
 
+snes2atarihandler
+ ifconst SNES2ATARISUPPORT
+     lda #$03
+     sta CTLSWA    ; enable pins UP/DOWN to work as outputs
+     lda #$0
+     sta SWCHA     ; make both latch and clock down
+     ldx #$01      ; clock up, latch down
+     ldy #12       ; 12 bits
+SNES2ATARILOOP
+     rol INPT5     ; sample data
+     stx SWCHA     ; clock up
+     ror snes2atari1lo
+     ror snes2atari1hi
+     sta SWCHA     ; clock up
+     dey           ; next bit
+     bne SNES2ATARILOOP
+     lda #$03
+     sta CTLSWA    ; enable pins UP/DOWN to work as outputs
+     sta SWCHA     ; make pins clock (UP) and latch (DOWN) to go high
+     lda #0
+     sta CTLSWA    ; avoid conflict with avox
+     jmp buttonreadloopreturn
+ endif
+
 gunbuttonhandler ; outside of the conditional, so our button handler LUT is valid
  ifconst LIGHTGUNSUPPORT
      cpx #0
@@ -670,6 +694,7 @@ controlsusing2buttoncode
      .byte 0 ; 08=st mouse/cx80
      .byte 0 ; 09=amiga mouse
      .byte 1 ; 10=atarivox
+     .byte 0 ; 11=snes2atari
 
 buttonhandlerhi
      .byte 0                    ; 00=no controller plugged in
@@ -683,6 +708,7 @@ buttonhandlerhi
      .byte >mousebuttonhandler  ; 08=st mouse
      .byte >mousebuttonhandler  ; 09=amiga mouse
      .byte >joybuttonhandler    ; 10=atarivox
+     .byte >snes2atarihandler   ; 11=atarivox
 buttonhandlerlo
      .byte 0                    ; 00=no controller plugged in
      .byte <joybuttonhandler    ; 01=proline joystick
@@ -695,6 +721,7 @@ buttonhandlerlo
      .byte <mousebuttonhandler  ; 08=st mouse
      .byte <mousebuttonhandler  ; 09=amiga mouse
      .byte <joybuttonhandler    ; 10=atarivox
+     .byte <snes2atarihandler   ; 11=atarivox
 
 drawwait
      bit visibleover ; 255 if screen is being drawn, 0 when not.

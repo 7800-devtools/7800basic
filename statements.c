@@ -247,6 +247,84 @@ int switchjoy(char *input_source)
 	printf(" bit sINPT3\n");
 	return 3;
     }
+    // SNES2ATARI low byte bits...
+    // At the end:     7     6     5  4    3    2    1    0
+    // LowDataByte:   RSH   LSH    X  A  RIGHT LEFT DOWN  UP
+    if (!strncmp(input_source, "snes1up\0", 7))
+    {
+	printf(" lda snes2atari1lo\n");
+	printf(" and #%%00000001\n");
+	return 6;
+    }
+    if (!strncmp(input_source, "snes1down\0", 9))
+    {
+	printf(" lda snes2atari1lo\n");
+	printf(" and #%%00000010\n");
+	return 6;
+    }
+    if (!strncmp(input_source, "snes1left\0", 9))
+    {
+	printf(" lda snes2atari1lo\n");
+	printf(" and #%%00000100\n");
+	return 6;
+    }
+    if (!strncmp(input_source, "snes1right\0", 10))
+    {
+	printf(" lda snes2atari1lo\n");
+	printf(" and #%%00001000\n");
+	return 6;
+    }
+    if (!strncmp(input_source, "snes1A\0", 6))
+    {
+	printf(" lda snes2atari1lo\n");
+	printf(" and #%%00010000\n");
+	return 6;
+    }
+    if (!strncmp(input_source, "snes1X\0", 6))
+    {
+	printf(" lda snes2atari1lo\n");
+	printf(" and #%%00100000\n");
+	return 6;
+    }
+    if (!strncmp(input_source, "snes1lsh\0", 8))
+    {
+	printf(" lda snes2atari1lo\n");
+	printf(" and #%%01000000\n");
+	return 6;
+    }
+    if (!strncmp(input_source, "snes1rsh\0", 8))
+    {
+	printf(" lda snes2atari1lo\n");
+	printf(" and #%%10000000\n");
+	return 6;
+    }
+    // SNES2ATARI high byte bits...
+    // At the end:     7     6     5  4    3    2    1    0
+    // HighDataByte: START SELECT  Y  B    x    x    x    x
+    if (!strncmp(input_source, "snes1B\0", 6))
+    {
+	printf(" lda snes2atari1hi\n");
+	printf(" and #%%00010000\n");
+	return 6;
+    }
+    if (!strncmp(input_source, "snes1Y\0", 6))
+    {
+	printf(" lda snes2atari1hi\n");
+	printf(" and #%%00100000\n");
+	return 6;
+    }
+    if (!strncmp(input_source, "snes1select\0", 11))
+    {
+	printf(" lda snes2atari1hi\n");
+	printf(" and #%%01000000\n");
+	return 6;
+    }
+    if (!strncmp(input_source, "snes1start\0", 10))
+    {
+	printf(" lda snes2atari1hi\n");
+	printf(" and #%%10000000\n");
+	return 6;
+    }
     if (!strncmp(input_source, "keypad", 6))
     {
 	// 1 2 3   keypad layout
@@ -2221,6 +2299,25 @@ void changecontrol(char **statement)
 	printf("  jsr setportforinput\n");
 	printf("  jsr setonebuttonmode\n");
     }
+    else if (!strcmp(statement[3], "snes"))
+    {
+	printf("  lda #11 ; controller=snes2atari\n");
+	if (port == 0)
+	{
+	    prerror("snes is only supported in port 1");
+	}
+	else
+	{
+	    printf("  sta port1control\n");
+	    printf("  ldx #1\n");
+	}
+	printf("  jsr setportforinput\n");
+	printf("  jsr setonebuttonmode\n");
+
+	strcpy(redefined_variables[numredefvars++], "SNES2ATARISUPPORT = 1");
+	sprintf(constants[numconstants++], "SNES2ATARISUPPORT");
+    }
+
     else if (!strcmp(statement[3], "lightgun"))
     {
 	printf("  lda #2 ; controller=lightgun\n");
@@ -6906,6 +7003,7 @@ void doif(char **statement)
 	|| (!strncmp(statement[2], "keypad0key\0", 10))
 	|| (!strncmp(statement[2], "keypad1key\0", 10))
 	|| (!strncmp(statement[2], "switch\0", 6))
+	|| (!strncmp(statement[2], "snes1\0", 5))
 	|| (!strncmp(statement[2], "softswitches\0", 12))
 	|| (!strncmp(statement[2], "softselect\0", 10)) || (!strncmp(statement[2], "softreset\0", 9)))
     {
@@ -6947,12 +7045,19 @@ void doif(char **statement)
 		else
 		    bne(statement[4]);
 	    }
-	    else if (i == 5)	// bvs/bvc
+	    else if (i == 5)	// bvs/bvc
 	    {
 		if (not)
 		    bvc(statement[4]);
 		else
 		    bvs(statement[4]);
+	    }
+	    else if (i == 6)	// beq/bne
+	    {
+		if (not)
+		    bne(statement[4]);
+		else
+		    beq(statement[4]);
 	    }
 
 
@@ -6989,7 +7094,7 @@ void doif(char **statement)
 		else
 		    printf("	BPL ");
 	    }
-	    else if (i == 4)	// bmi/bpl
+	    else if (i == 4)	// bne/beq
 	    {
 		if (not)
 		    printf("	BNE ");
@@ -7002,6 +7107,13 @@ void doif(char **statement)
 		    printf("	BVS ");
 		else
 		    printf("	BVC ");
+	    }
+	    else if (i == 6)	// beq/bne
+	    {
+		if (not)
+		    printf("	BEQ ");
+		else
+		    printf("	BNE ");
 	    }
 
 	    printf(".skip%s\n", statement[0]);
