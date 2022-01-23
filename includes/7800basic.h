@@ -542,6 +542,10 @@ pokeykeycode       DS 1
 pokeykeydebounce   DS 1
  endif
 
+ ifconst SNES2ATARISUPPORT
+snesdetected       DS 1
+ endif
+
  ; see if we need an interrupthold byte...
 INTERRUPTNEEDED SET 0
  ifconst .topscreenroutine

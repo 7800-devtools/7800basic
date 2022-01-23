@@ -645,12 +645,27 @@ snes2atarihandler
      ldy #12       ; 12 bits
 SNES2ATARILOOP
      rol INPT5     ; sample data
-     stx SWCHA     ; clock up
+     stx SWCHA     ; clock low
      ror snes2atari1lo
      ror snes2atari1hi
-     sta SWCHA     ; clock up
+     sta SWCHA     ; clock high
      dey           ; next bit
      bne SNES2ATARILOOP
+
+     sta snesdetected
+
+     ldy #5        ; 17th bit should be low if controller is in
+SNES2ATARIDETECTLOOP
+     rol INPT5     ; sample data
+     stx SWCHA     ; clock low
+     nop
+     sta SWCHA     ; clock high
+     dey
+     bne SNES2ATARIDETECTLOOP
+     rol 
+     eor #1
+     sta snesdetected
+
      lda #$03
      sta CTLSWA    ; enable pins UP/DOWN to work as outputs
      sta SWCHA     ; make pins clock (UP) and latch (DOWN) to go high
