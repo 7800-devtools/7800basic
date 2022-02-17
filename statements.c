@@ -9730,13 +9730,16 @@ void set(char **statement)
 	{
 	    strcpy(redefined_variables[numredefvars++], "MUSICTRACKER = 1");
 	}
+	else if (!strncmp(statement[3], "rmt", 5))
+	{
+	    strcpy(redefined_variables[numredefvars++], "RMT = 1");
+	}
     }
     else if (!strncmp(statement[2], "pokeysupport\0", 12))
     {
-	if (!strncmp(statement[3], "on", 2))
-	{
+	if (strncmp(statement[3], "off", 3))
+        {
 	    strcpy(redefined_variables[numredefvars++], "pokeysupport = 1");
-	    append_a78info("set pokey@450");
 	    sprintf(constants[numconstants++], "PAUDF0");
 	    sprintf(constants[numconstants++], "PAUDC0");
 	    sprintf(constants[numconstants++], "PAUDF1");
@@ -9748,7 +9751,26 @@ void set(char **statement)
 	    sprintf(constants[numconstants++], "PAUDCTL");
 	    sprintf(constants[numconstants++], "PRANDOM");
 	    sprintf(constants[numconstants++], "PSKCTL");
+
+            if ((!strncmp(statement[3], "on", 2))||(!strncmp(statement[3], "auto", 4)))
+            {
+                strcpy(redefined_variables[numredefvars++], "pokeysupport = 1");
+                append_a78info("set pokey@450");
+            }
+            else if (!strncmp(statement[3], "$450", 4))
+            {
+                strcpy(redefined_variables[numredefvars++], "pokeysupport = 1");
+	        strcpy(redefined_variables[numredefvars++], "pokeyaddress = $450");
+                append_a78info("set pokey@450");
+            }
+            else if (!strncmp(statement[3], "$4000", 5))
+            {
+                strcpy(redefined_variables[numredefvars++], "pokeysupport = 1");
+	        strcpy(redefined_variables[numredefvars++], "pokeyaddress = $4000");
+                append_a78info("set pokey@4000");
+            }
 	}
+
     }
     else if (!strncmp(statement[2], "hscsupport\0", 10))
     {
