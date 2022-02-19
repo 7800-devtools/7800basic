@@ -5575,7 +5575,7 @@ void songdata(char **statement)
 	printf("   .word $0000\n");
 	printf(" endif\n");
     }
-    printf(" echo \"   \",[(. - songdatastart_%s)]d , \"bytes of ROM used by the song '%s'\"\n", statement[2],
+    printf(" echo \" \",\"(tracker song '%s' used \" ,[(. - songdatastart_%s)]d , \"bytes)\"\n", statement[2],
 	   statement[2]);
 
     if (!(optimization & 4))
