@@ -47,6 +47,9 @@
  ; they're always included here, they don't take up rom unless the user
  ; explicitly enables support for the feature.
 
+ ifnconst included.rmtplayer.asm
+     include rmtplayer.asm ; requires page alignment
+ endif
  ifnconst included.7800vox.asm
      include 7800vox.asm
  endif

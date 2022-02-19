@@ -95,6 +95,18 @@ TIMEOFFSET = 10
          ifconst MUSICTRACKER
            jsr servicesong
          endif ; MUSICTRACKER
+         ifconst RMT
+           lda rmt_intcount
+           eor #1
+           sta rmt_intcount
+           bne RMT1_INT1
+           lda rmt_ispeed
+           cmp #1
+           beq RMT1_Iend
+RMT1_INT1
+           jsr RASTERMUSICTRACKER+3
+RMT1_Iend
+         endif
 
          inc framecounter
          lda framecounter
@@ -574,6 +586,19 @@ skippalframeadjusting
          jsr servicesong
 servicesongwasnotmissed
      endif ; MUSICTRACKER
+
+     ifconst RMT
+         lda rmt_intcount
+         eor #1
+         sta rmt_intcount
+         bne RMT2_INT1
+         lda rmt_ispeed
+         cmp #1
+         beq RMT2_Iend
+RMT2_INT1
+         jsr RASTERMUSICTRACKER+3
+RMT2_Iend
+     endif
 
      rts
 

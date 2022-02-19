@@ -9730,7 +9730,7 @@ void set(char **statement)
 	{
 	    strcpy(redefined_variables[numredefvars++], "MUSICTRACKER = 1");
 	}
-	else if (!strncmp(statement[3], "rmt", 5))
+	else if (!strncmp(statement[3], "rmt", 3))
 	{
 	    strcpy(redefined_variables[numredefvars++], "RMT = 1");
 	}

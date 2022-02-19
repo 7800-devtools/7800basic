@@ -168,7 +168,6 @@ songdatahi = $be
 
 inactivechannelcount = $bf
 
-
 songchannel1transpose    = $c0
 songchannel2transpose    = $c1
 songchannel3transpose    = $c2

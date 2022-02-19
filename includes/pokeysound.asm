@@ -282,6 +282,6 @@ nopokeydetected
 
 pokeysoundmoduleend
 
- echo "  pokeysound assembly: ",[(pokeysoundmoduleend-pokeysoundmodulestart)]d," bytes"
+ echo "  (pokeysound module is using ",[(pokeysoundmoduleend-pokeysoundmodulestart)]d," bytes)"
 
  endif
