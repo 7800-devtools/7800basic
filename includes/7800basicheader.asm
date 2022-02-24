@@ -26,7 +26,7 @@ BD4000  = %00000110
 BEADHEADER = 1
  endif
  ifconst ROM48K
-BEADHEADER = 1
+;BEADHEADER = 1
  endif
 
  ifconst BEADHEADER
@@ -49,8 +49,49 @@ BEADHARDWARE SET (BEADHARDWARE|BDHSC)
  endif
 
  ;start address of cart...
+
+BANK_WAS_SET SET 0
+
+ ifconst ROM8K
+   ORG $E000,0
+BANK_WAS_SET SET 1
+ endif ; ROM8K
+
+ ifconst ROM16K
+   ORG $C000,0
+BANK_WAS_SET SET 1
+   ifconst BEADHEADER
+     .byte $BE,$AD,BEADHARDWARE
+     ifconst GAMEDESCRIPTION
+       CLC
+       BCC _SKIPDESCRIPTION
+       .byte GAMEDESCRIPTION,0
+_SKIPDESCRIPTION
+       endif
+       jmp ($FFFC)
+     endif ; GAMEDESCRIPTION
+   endif ; BEADHEADER
+ endif ; ROM16K
+
+ ifconst ROM32K
+   ORG $8000,0
+BANK_WAS_SET SET 1
+   ifconst BEADHEADER
+     .byte $BE,$AD,BEADHARDWARE
+     ifconst GAMEDESCRIPTION
+       CLC
+       BCC _SKIPDESCRIPTION
+       .byte GAMEDESCRIPTION,0
+_SKIPDESCRIPTION
+       endif
+       jmp ($FFFC)
+     endif ; GAMEDESCRIPTION
+   endif ; BEADHEADER
+ endif ; ROM32K
+
  ifconst ROM48K
    ORG $4000,0
+BANK_WAS_SET SET 1
    ifconst BEADHEADER
       .byte $BE,$AD,BEADHARDWARE
          ifconst GAMEDESCRIPTIONSET
@@ -58,48 +99,29 @@ BEADHARDWARE SET (BEADHARDWARE|BDHSC)
             BCC _SKIPDESCRIPTION
             .byte GAMEDESCRIPTION,0
 _SKIPDESCRIPTION
-         endif
+         endif ; GAMEDESCRIPTIONSET
       jmp ($FFFC)
+   endif ; BEADHEADER
+ endif ; ROM48K
+
+  ifconst ROM52K
+BANK_WAS_SET SET 1
+   ORG $3000,0
+ endif ; ROM52K
+
+ ifconst bankswitchmode
+   ifconst ROMAT4K
+BANK_WAS_SET SET 1
+     ORG  $4000,0
+     RORG $4000
+   else ; ROMAT4K
+BANK_WAS_SET SET 1
+     ORG  $8000,0
+     RORG $8000
    endif
- else
-   ifconst bankswitchmode
-     ifconst ROMAT4K
-       ORG  $4000,0
-       RORG $4000
-     else
-       ORG  $8000,0
-       RORG $8000
-     endif
-   else ; not bankswitchmode
-     ifconst ROM16K
-       ORG $C000,0
-       ifconst BEADHEADER
-         .byte $BE,$AD,BEADHARDWARE
-         ifconst GAMEDESCRIPTION
-            CLC
-            BCC _SKIPDESCRIPTION
-            .byte GAMEDESCRIPTION,0
-_SKIPDESCRIPTION
-         endif
-         jmp ($FFFC)
-       endif
-     else
-       ifconst ROM8K
-         ORG $E000,0
-       else
-         ORG $8000,0
-         ifconst BEADHEADER
-           .byte $BE,$AD,BEADHARDWARE
-           ifconst GAMEDESCRIPTION
-            CLC
-            BCC _SKIPDESCRIPTION
-              .byte GAMEDESCRIPTION,0
-_SKIPDESCRIPTION
-           endif
-           jmp ($FFFC)
-         endif
-       endif
-     endif
-   endif
+ endif
+
+ if BANK_WAS_SET = 0
+   ORG $8000,0 ; default is 32K
  endif
 

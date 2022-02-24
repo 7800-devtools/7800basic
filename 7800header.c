@@ -172,7 +172,7 @@ int main(int argc, char **argv)
 	printf("          \"exit\"           Exit the utility. Unsaved changes will be lost.\n");
 	printf("\n");
 	printf("Options:  rom@4000 ram@4000 bank6@4000 pokey@450 pokey@4000 mram@4000 \n");
-	printf("          pokey@440 ym2151@460 supergame supergameram supergamebankram\n");
+	printf("          pokey@440 ym2151@460 supergame supergameram bankram\n");
 	printf("          absolute activision souper bankset tvpal tvntsc composite\n");
 	printf("          7800joy1 7800joy2 lightgun1 lightgun2 paddle1 paddle2\n");
 	printf("          tball1 tball2 2600joy1 2600joy2 driving1 driving2 keypad1\n");
@@ -436,7 +436,6 @@ void setunset(char *command)
 	{
 	    myheader.carttype2 = myheader.carttype2 & (2 ^ 0xff);
 	    setunset("unset supergameram");
-	    setunset("unset supergamebankram");
 	}
     }
     else if (strcmp(noun, "supergameram") == 0)
@@ -449,12 +448,11 @@ void setunset(char *command)
 	else
 	    myheader.carttype2 = myheader.carttype2 & (4 ^ 0xff);
     }
-    else if (strcmp(noun, "supergamebankram") == 0)
+    else if (strcmp(noun, "bankram") == 0)
     {
 	if (set)
 	{
 	    myheader.carttype2 = myheader.carttype2 | 32;
-	    setunset("set supergame");
 	}
 	else
 	    myheader.carttype2 = myheader.carttype2 & (32 ^ 0xff);
@@ -839,7 +837,7 @@ void report(void)
     if ((myheader.carttype2 & 4) > 0)
 	printf("ram@4000 ");
     if ((myheader.carttype2 & 32) > 0)
-	printf("SuperGameBankRam ");
+	printf("BankRam ");
     if ((myheader.carttype2 & 64) > 0)
 	printf("pokey@450 ");
     if ((myheader.carttype2 & 128) > 0)

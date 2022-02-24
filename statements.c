@@ -460,7 +460,11 @@ void set_romsize(char *size)
     {
 	strcpy(redefined_variables[numredefvars++], "ROM48K = 1");
     }
-    else if (!strncmp(size, "144k\0", 4))
+    else if (!strncmp(size, "52k\0", 3))
+    {
+	strcpy(redefined_variables[numredefvars++], "ROM52K = 1");
+    }
+   else if (!strncmp(size, "144k\0", 4))
     {
 	strcpy(redefined_variables[numredefvars++], "ROM144K = 1");
 	strcpy(redefined_variables[numredefvars++], "ROMAT4K = 1");
