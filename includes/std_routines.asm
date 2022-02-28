@@ -660,43 +660,70 @@ joybuttonhandler
 twobuttonmask
  .byte %00000100,%00010000
 
+ ifconst SNES2ATARISUPPORT
+
+SNES_CLOCK_PORT_BIT
+   .byte $10,$01 
+SNES_CTLSWA_MASK
+   .byte $30,$03
+
+    ; Probe each port for SNES, and see if autodetection succeeds anywhere.
+SNES_AUTODETECT
+     ldx #1
+SNES_AUTODETECT_LOOP
+     lda #1 ; proline
+     sta port0control,x
+     jsr setportforinput
+     jsr setonebuttonmode
+     jsr SNES_READ
+     lda snesdetected0,x
+     bne SNES_AUTODETECT_FOUND
+     ; detection failed
+     jsr settwobuttonmode
+     dex
+     bpl SNES_AUTODETECT_LOOP
+     rts
+SNES_AUTODETECT_FOUND
+     lda #11 ; formally set the snes controller
+     sta port0control,x
+     stx snesport
+     rts
+ endif ; SNES2ATARISUPPORT
+     
 snes2atarihandler
  ifconst SNES2ATARISUPPORT
-     lda #$03
+SNES2ATARI
+     jsr SNES_READ 
+     jmp buttonreadloopreturn
+SNES_READ
+     ; x=0 for left port, x=1 for right
+     lda SNES_CTLSWA_MASK,x
      sta CTLSWA    ; enable pins UP/DOWN to work as outputs
      lda #$0
      sta SWCHA     ; make both latch and clock down
-     ldx #$01      ; clock up, latch down
-     ldy #12       ; 12 bits
+     ldy #16 ; 16 bits 
 SNES2ATARILOOP
-     rol INPT5     ; sample data
-     stx SWCHA     ; clock low
-     ror snes2atari1lo
-     ror snes2atari1hi
-     sta SWCHA     ; clock high
-     dey           ; next bit
+         rol INPT4,x     ; sample data
+         lda SNES_CLOCK_PORT_BIT,x
+         sta SWCHA     ; clock low
+         ror snes2atari0lo,x
+         ror snes2atari0hi,x
+         lda #0
+         sta SWCHA     ; clock high
+         dey           ; next bit
      bne SNES2ATARILOOP
-
-     sta snesdetected
-
-     ldy #5        ; 17th bit should be low if controller is in
-SNES2ATARIDETECTLOOP
-     rol INPT5     ; sample data
-     stx SWCHA     ; clock low
-     nop
-     sta SWCHA     ; clock high
-     dey
-     bne SNES2ATARIDETECTLOOP
-     rol 
+     rol INPT4,x     ; sample data
+     rol
+     and #1
      eor #1
-     sta snesdetected
-
-     lda #$03
-     sta CTLSWA    ; enable pins UP/DOWN to work as outputs
-     sta SWCHA     ; make pins clock (UP) and latch (DOWN) to go high
-     lda #0
-     sta CTLSWA    ; avoid conflict with avox
-     jmp buttonreadloopreturn
+     sta snesdetected0,x
+     beq SNES_STOP_CLOCK ; if snes isn't detected, leave port in default state
+     stx snesport ; snesport keeps the index of the latest autodetected controller
+     lda SNES_CLOCK_PORT_BIT,x
+SNES_STOP_CLOCK
+     sta SWCHA     ; clock low
+     sta CTLSWA    ; set port bits to input avoid conflict with other drivers
+     rts
  endif
 
 gunbuttonhandler ; outside of the conditional, so our button handler LUT is valid
@@ -748,7 +775,7 @@ buttonhandlerhi
      .byte >mousebuttonhandler  ; 08=st mouse
      .byte >mousebuttonhandler  ; 09=amiga mouse
      .byte >joybuttonhandler    ; 10=atarivox
-     .byte >snes2atarihandler   ; 11=atarivox
+     .byte >snes2atarihandler   ; 11=snes
 buttonhandlerlo
      .byte 0                    ; 00=no controller plugged in
      .byte <joybuttonhandler    ; 01=proline joystick
@@ -761,7 +788,7 @@ buttonhandlerlo
      .byte <mousebuttonhandler  ; 08=st mouse
      .byte <mousebuttonhandler  ; 09=amiga mouse
      .byte <joybuttonhandler    ; 10=atarivox
-     .byte <snes2atarihandler   ; 11=atarivox
+     .byte <snes2atarihandler   ; 11=snes
 
 drawwait
      bit visibleover ; 255 if screen is being drawn, 0 when not.

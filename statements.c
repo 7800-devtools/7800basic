@@ -247,93 +247,282 @@ int switchjoy(char *input_source)
 	printf(" bit sINPT3\n");
 	return 3;
     }
-    // SNES2ATARI low byte bits...
-    // At the end:     7     6     5  4    3    2    1    0
-    // LowDataByte:   RSH   LSH    X  A  RIGHT LEFT DOWN  UP
-    // HighDataByte: START SELECT  Y  B    x    x    x    x
+
+    // SNES2ATARI byte bits...
+    // At the end:     7     6     5  4    3    2       1    0
+    // LowDataByte:    x     x     x  x    RSH  LSH     X    A
+    // HighDataByte: RIGHT LEFT DOWN UP   START SELECT  Y    B    
     if (!strncmp(input_source, "snes1any\0", 8))
     {
 	printf(" lda snes2atari1hi\n");
-	printf(" ora #%%00001111\n");
 	printf(" and snes2atari1lo\n");
 	printf(" eor #$FF\n");
 	return 4;
     }
     if (!strncmp(input_source, "snes1up\0", 7))
     {
-	printf(" lda snes2atari1lo\n");
-	printf(" and #%%00000001\n");
+	printf(" lda snes2atari1hi\n");
+	printf(" and #%%00010000\n");
 	return 6;
     }
     if (!strncmp(input_source, "snes1down\0", 9))
     {
-	printf(" lda snes2atari1lo\n");
-	printf(" and #%%00000010\n");
+	printf(" lda snes2atari1hi\n");
+	printf(" and #%%00100000\n");
 	return 6;
     }
     if (!strncmp(input_source, "snes1left\0", 9))
     {
-	printf(" lda snes2atari1lo\n");
-	printf(" and #%%00000100\n");
+	printf(" lda snes2atari1hi\n");
+	printf(" and #%%01000000\n");
 	return 6;
     }
     if (!strncmp(input_source, "snes1right\0", 10))
     {
-	printf(" lda snes2atari1lo\n");
-	printf(" and #%%00001000\n");
+	printf(" lda snes2atari1hi\n");
+	printf(" and #%%10000000\n");
 	return 6;
     }
+
     if (!strncmp(input_source, "snes1A\0", 6))
     {
 	printf(" lda snes2atari1lo\n");
-	printf(" and #%%00010000\n");
+	printf(" and #%%00000001\n");
 	return 6;
     }
     if (!strncmp(input_source, "snes1X\0", 6))
     {
 	printf(" lda snes2atari1lo\n");
-	printf(" and #%%00100000\n");
+	printf(" and #%%00000010\n");
 	return 6;
     }
     if (!strncmp(input_source, "snes1lsh\0", 8))
     {
 	printf(" lda snes2atari1lo\n");
-	printf(" and #%%01000000\n");
+	printf(" and #%%00000100\n");
 	return 6;
     }
     if (!strncmp(input_source, "snes1rsh\0", 8))
     {
 	printf(" lda snes2atari1lo\n");
-	printf(" and #%%10000000\n");
+	printf(" and #%%00001000\n");
 	return 6;
     }
-    // SNES2ATARI high byte bits...
-    // At the end:     7     6     5  4    3    2    1    0
-    // HighDataByte: START SELECT  Y  B    x    x    x    x
+
+    // SNES2ATARI byte bits...
+    // At the end:     7     6     5  4    3    2       1    0
+    // LowDataByte:    x     x     x  x    RSH  LSH     X    A
+    // HighDataByte: RIGHT LEFT DOWN UP   START SELECT  Y    B    
+ 
     if (!strncmp(input_source, "snes1B\0", 6))
     {
 	printf(" lda snes2atari1hi\n");
-	printf(" and #%%00010000\n");
+	printf(" and #%%00000001\n");
 	return 6;
     }
     if (!strncmp(input_source, "snes1Y\0", 6))
     {
 	printf(" lda snes2atari1hi\n");
-	printf(" and #%%00100000\n");
+	printf(" and #%%00000010\n");
 	return 6;
     }
     if (!strncmp(input_source, "snes1select\0", 11))
     {
 	printf(" lda snes2atari1hi\n");
-	printf(" and #%%01000000\n");
+	printf(" and #%%00000100\n");
 	return 6;
     }
     if (!strncmp(input_source, "snes1start\0", 10))
     {
 	printf(" lda snes2atari1hi\n");
+	printf(" and #%%00001000\n");
+	return 6;
+    }
+
+    // SNES2ATARI byte bits...
+    // At the end:     7     6     5  4    3    2       1    0
+    // LowDataByte:    x     x     x  x    RSH  LSH     X    A
+    // HighDataByte: RIGHT LEFT DOWN UP   START SELECT  Y    B    
+    if (!strncmp(input_source, "snes0any\0", 8))
+    {
+	printf(" lda snes2atari0hi\n");
+	printf(" and snes2atari0lo\n");
+	printf(" eor #$FF\n");
+	return 4;
+    }
+    if (!strncmp(input_source, "snes0up\0", 7))
+    {
+	printf(" lda snes2atari0hi\n");
+	printf(" and #%%00010000\n");
+	return 6;
+    }
+    if (!strncmp(input_source, "snes0down\0", 9))
+    {
+	printf(" lda snes2atari0hi\n");
+	printf(" and #%%00100000\n");
+	return 6;
+    }
+    if (!strncmp(input_source, "snes0left\0", 9))
+    {
+	printf(" lda snes2atari0hi\n");
+	printf(" and #%%01000000\n");
+	return 6;
+    }
+    if (!strncmp(input_source, "snes0right\0", 10))
+    {
+	printf(" lda snes2atari0hi\n");
 	printf(" and #%%10000000\n");
 	return 6;
     }
+
+    if (!strncmp(input_source, "snes0A\0", 6))
+    {
+	printf(" lda snes2atari0lo\n");
+	printf(" and #%%00000001\n");
+	return 6;
+    }
+    if (!strncmp(input_source, "snes0X\0", 6))
+    {
+	printf(" lda snes2atari0lo\n");
+	printf(" and #%%00000010\n");
+	return 6;
+    }
+    if (!strncmp(input_source, "snes0lsh\0", 8))
+    {
+	printf(" lda snes2atari0lo\n");
+	printf(" and #%%00000100\n");
+	return 6;
+    }
+    if (!strncmp(input_source, "snes0rsh\0", 8))
+    {
+	printf(" lda snes2atari0lo\n");
+	printf(" and #%%00001000\n");
+	return 6;
+    }
+
+    if (!strncmp(input_source, "snes0B\0", 6))
+    {
+	printf(" lda snes2atari0hi\n");
+	printf(" and #%%00000001\n");
+	return 6;
+    }
+    if (!strncmp(input_source, "snes0Y\0", 6))
+    {
+	printf(" lda snes2atari0hi\n");
+	printf(" and #%%00000010\n");
+	return 6;
+    }
+    if (!strncmp(input_source, "snes0select\0", 11))
+    {
+	printf(" lda snes2atari0hi\n");
+	printf(" and #%%00000100\n");
+	return 6;
+    }
+    if (!strncmp(input_source, "snes0start\0", 10))
+    {
+	printf(" lda snes2atari0hi\n");
+	printf(" and #%%00001000\n");
+	return 6;
+    }
+
+    // SNES2ATARI byte bits...
+    // At the end:     7     6     5  4    3    2       1    0
+    // LowDataByte:    x     x     x  x    RSH  LSH     X    A
+    // HighDataByte: RIGHT LEFT DOWN UP   START SELECT  Y    B    
+    if (!strncmp(input_source, "snes_any\0", 8))
+    {
+	printf(" ldx snesport\n");
+	printf(" and snes2atari0lo,x\n");
+	printf(" eor #$FF\n");
+	return 4;
+    }
+    if (!strncmp(input_source, "snes_up\0", 7))
+    {
+	printf(" ldx snesport\n");
+	printf(" lda snes2atari0hi,x\n");
+	printf(" and #%%00010000\n");
+	return 6;
+    }
+    if (!strncmp(input_source, "snes_down\0", 9))
+    {
+	printf(" ldx snesport\n");
+	printf(" lda snes2atari0hi,x\n");
+	printf(" and #%%00100000\n");
+	return 6;
+    }
+    if (!strncmp(input_source, "snes_left\0", 9))
+    {
+	printf(" ldx snesport\n");
+	printf(" lda snes2atari0hi,x\n");
+	printf(" and #%%01000000\n");
+	return 6;
+    }
+    if (!strncmp(input_source, "snes_right\0", 10))
+    {
+	printf(" ldx snesport\n");
+	printf(" lda snes2atari0hi,x\n");
+	printf(" and #%%10000000\n");
+	return 6;
+    }
+
+    if (!strncmp(input_source, "snes_A\0", 6))
+    {
+	printf(" ldx snesport\n");
+	printf(" lda snes2atari0lo,x\n");
+	printf(" and #%%00000001\n");
+	return 6;
+    }
+    if (!strncmp(input_source, "snes_X\0", 6))
+    {
+	printf(" ldx snesport\n");
+	printf(" lda snes2atari0lo,x\n");
+	printf(" and #%%00000010\n");
+	return 6;
+    }
+    if (!strncmp(input_source, "snes_lsh\0", 8))
+    {
+	printf(" ldx snesport\n");
+	printf(" lda snes2atari0lo,x\n");
+	printf(" and #%%00000100\n");
+	return 6;
+    }
+    if (!strncmp(input_source, "snes_rsh\0", 8))
+    {
+	printf(" ldx snesport\n");
+	printf(" lda snes2atari0lo,x\n");
+	printf(" and #%%00001000\n");
+	return 6;
+    }
+
+    if (!strncmp(input_source, "snes_B\0", 6))
+    {
+	printf(" ldx snesport\n");
+	printf(" lda snes2atari0hi,x\n");
+	printf(" and #%%00000001\n");
+	return 6;
+    }
+    if (!strncmp(input_source, "snes_Y\0", 6))
+    {
+	printf(" ldx snesport\n");
+	printf(" lda snes2atari0hi,x\n");
+	printf(" and #%%00000010\n");
+	return 6;
+    }
+    if (!strncmp(input_source, "snes_select\0", 11))
+    {
+	printf(" ldx snesport\n");
+	printf(" lda snes2atari0hi,x\n");
+	printf(" and #%%00000100\n");
+	return 6;
+    }
+    if (!strncmp(input_source, "snes_start\0", 10))
+    {
+	printf(" ldx snesport\n");
+	printf(" lda snes2atari0hi,x\n");
+	printf(" and #%%00001000\n");
+	return 6;
+    }
+
     if (!strncmp(input_source, "keypad", 6))
     {
 	// 1 2 3   keypad layout
@@ -2245,6 +2434,16 @@ void psound(char **statement)
 
 }
 
+void snesdetect()
+{
+    printf(" jsr SNES_AUTODETECT\n");
+    //if(!isimmed("SNES2ATARISUPPORT"))
+    //{
+        strcpy(redefined_variables[numredefvars++], "SNES2ATARISUPPORT = 1");
+        sprintf(constants[numconstants++], "SNES2ATARISUPPORT");
+    //}
+}
+
 void changecontrol(char **statement)
 {
     //   1            2     3
@@ -2317,7 +2516,8 @@ void changecontrol(char **statement)
 	printf("  lda #11 ; controller=snes2atari\n");
 	if (port == 0)
 	{
-	    prerror("snes is only supported in port 1");
+	    printf("  sta port0control\n");
+	    printf("  ldx #0\n");
 	}
 	else
 	{
@@ -7016,7 +7216,9 @@ void doif(char **statement)
 	|| (!strncmp(statement[2], "keypad0key\0", 10))
 	|| (!strncmp(statement[2], "keypad1key\0", 10))
 	|| (!strncmp(statement[2], "switch\0", 6))
+	|| (!strncmp(statement[2], "snes0\0", 5))
 	|| (!strncmp(statement[2], "snes1\0", 5))
+	|| (!strncmp(statement[2], "snes_\0", 5))
 	|| (!strncmp(statement[2], "softswitches\0", 12))
 	|| (!strncmp(statement[2], "softselect\0", 10)) || (!strncmp(statement[2], "softreset\0", 9)))
     {

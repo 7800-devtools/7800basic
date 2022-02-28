@@ -468,6 +468,7 @@ drivingposition0    =      paddleposition0
 trakballx0          =      paddleposition0
 mousex0             =      paddleposition0
 lighttgunx0         =      paddleposition0
+snes2atari0lo       =      paddleposition0
 
  ; controller 1 data...
 paddleposition2     DS 1 ; $1D6
@@ -484,6 +485,7 @@ keypadmatrix0b      =      paddleposition1
 trakbally0          =      paddleposition1
 mousey0             =      paddleposition1
 lightguny0          =      paddleposition1
+snes2atari0hi       =      paddleposition1
 
  ; controller 1 altdata...
 paddleposition3     DS 1 ; $1D8 
@@ -499,12 +501,14 @@ paddleprevious0      =      controller0statesave
 mousecodex0          =      controller0statesave
 trakballcodex0       =      controller0statesave
 keypadmatrix0c       =      controller0statesave
+snesdetected0        =      controller0statesave
 
 controller1statesave DS 1 ; $1DA
 paddleprevious2      =      controller1statesave
 mousecodex1          =      controller1statesave
 trakballcodex1       =      controller1statesave
 keypadmatrix1c       =      controller1statesave
+snesdetected1        =      controller1statesave
 
 paddleprevious1      DS 1 ; $1DB
 keypadmatrix0d       =      paddleprevious1
@@ -542,7 +546,7 @@ pokeykeydebounce   DS 1
  endif
 
  ifconst SNES2ATARISUPPORT
-snesdetected       DS 1
+snesport           DS 1
  endif
 
  ; see if we need an interrupthold byte...

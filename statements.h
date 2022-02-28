@@ -113,6 +113,7 @@ void lockzone(char **statement);
 void unlockzone(char **statement);
 void shakescreen(char **statement);
 void changecontrol(char **statement);
+void snesdetect();
 void incgraphic(char *file_name, int offset);
 void newblock();
 void voice(char **statement);
