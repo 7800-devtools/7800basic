@@ -706,16 +706,16 @@ SNES2ATARILOOP
          rol INPT4,x     ; sample data
          lda SNES_CLOCK_PORT_BIT,x
          sta SWCHA     ; clock low
-         ror snes2atari0lo,x
-         ror snes2atari0hi,x
+         rol snes2atari0lo,x
+         rol snes2atari0hi,x
          lda #0
          sta SWCHA     ; clock high
          dey           ; next bit
      bne SNES2ATARILOOP
      rol INPT4,x     ; sample data
      rol
+     eor snes2atari0lo,x ; last 4 bits out of 16 should always be hi, 17th bit should always be lo
      and #1
-     eor #1
      sta snesdetected0,x
      beq SNES_STOP_CLOCK ; if snes isn't detected, leave port in default state
      stx snesport ; snesport keeps the index of the latest autodetected controller
