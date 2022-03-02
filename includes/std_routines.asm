@@ -679,6 +679,7 @@ SNES_AUTODETECT_LOOP
      lda snesdetected0,x
      bne SNES_AUTODETECT_FOUND
      ; detection failed
+     jsr setportforinput
      jsr settwobuttonmode
      dex
      bpl SNES_AUTODETECT_LOOP
