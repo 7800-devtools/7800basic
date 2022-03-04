@@ -2430,11 +2430,11 @@ void psound(char **statement)
 void snesdetect()
 {
     printf(" jsr SNES_AUTODETECT\n");
-    //if(!isimmed("SNES2ATARISUPPORT"))
-    //{
+    if(!isimmed("SNES2ATARISUPPORT"))
+    {
         strcpy(redefined_variables[numredefvars++], "SNES2ATARISUPPORT = 1");
         sprintf(constants[numconstants++], "SNES2ATARISUPPORT");
-    //}
+    }
 }
 
 void changecontrol(char **statement)
@@ -2443,11 +2443,6 @@ void changecontrol(char **statement)
     // changecontrol 0|1 controltype
 
     int port;
-    static int mousesupport = 0;
-    static int keypadsupport = 0;
-    static int paddlesupport = 0;
-    static int longcontrollerread = 0;
-
 
     assertminimumargs(statement, "changecontrol", 2);
     removeCR(statement[2]);
@@ -2543,43 +2538,30 @@ void changecontrol(char **statement)
 
     if (!strcmp(statement[3], "paddle"))
     {
-        if(paddlesupport == 0)
+    	if (!isimmed("PADDLESUPPORT"))
 	{
-            paddlesupport = paddlesupport | (port+1);
 	    strcpy(redefined_variables[numredefvars++], "PADDLESUPPORT = 1");
 	    sprintf(constants[numconstants++], "PADDLESUPPORT");
-            if(port == 0)
-            {
-	        strcpy(redefined_variables[numredefvars++], "PADDLE0SUPPORT = 1");
-	        sprintf(constants[numconstants++], "PADDLE0SUPPORT");
-            }
-            else
-            {
-	        strcpy(redefined_variables[numredefvars++], "PADDLE1SUPPORT = 1");
-	        sprintf(constants[numconstants++], "PADDLE1SUPPORT");
-            }
-        }
-        else if((paddlesupport|(port+1)) == 0) // check to see if both ports can be controlled with paddles
+	}
+	if ((port==0) && (!isimmed("PADDLE0SUPPORT")) )
 	{
-            paddlesupport = paddlesupport | (port+1);
+	    strcpy(redefined_variables[numredefvars++], "PADDLE0SUPPORT = 1");
+	    sprintf(constants[numconstants++], "PADDLE0SUPPORT");
+	}
+	if ((port==1) && (!isimmed("PADDLE1SUPPORT")) )
+        {
+	    strcpy(redefined_variables[numredefvars++], "PADDLE1SUPPORT = 1");
+	    sprintf(constants[numconstants++], "PADDLE1SUPPORT");
+        }
+	if( (isimmed("PADDLE1SUPPORT"))&&(isimmed("PADDLE1SUPPORT")) && (!isimmed("FOURPADDLESUPPORT")) )
+	{
 	    strcpy(redefined_variables[numredefvars++], "FOURPADDLESUPPORT = 1"); // if so, enable four paddle reads
 	    sprintf(constants[numconstants++], "FOURPADDLESUPPORT");
-            if(port == 0)
-            {
-	        strcpy(redefined_variables[numredefvars++], "PADDLE0SUPPORT = 1");
-	        sprintf(constants[numconstants++], "PADDLE0SUPPORT");
-            }
-            else
-            {
-	        strcpy(redefined_variables[numredefvars++], "PADDLE1SUPPORT = 1");
-	        sprintf(constants[numconstants++], "PADDLE1SUPPORT");
-            }
-        }
-        if(longcontrollerread == 0)
+	}
+	if (!isimmed("LONGCONTROLLERREAD"))
         {
 	    strcpy(redefined_variables[numredefvars++], "LONGCONTROLLERREAD = 1");
 	    sprintf(constants[numconstants++], "LONGCONTROLLERREAD");
-            longcontrollerread=1;
         }
 	printf("  lda #3 ; controller=paddle\n");
 	if (port == 0)
@@ -2596,8 +2578,11 @@ void changecontrol(char **statement)
     }
     else if (!strcmp(statement[3], "trakball"))
     {
-	strcpy(redefined_variables[numredefvars++], "TRAKBALLSUPPORT = 1");
-	sprintf(constants[numconstants++], "TRAKBALLSUPPORT");
+	if (!isimmed("TRAKBALLSUPPORT"))
+	{
+	    strcpy(redefined_variables[numredefvars++], "TRAKBALLSUPPORT = 1");
+	    sprintf(constants[numconstants++], "TRAKBALLSUPPORT");
+        }
 	printf("  lda #4 ; controller=trakball\n");
 	if (port == 0)
 	{
@@ -2608,8 +2593,12 @@ void changecontrol(char **statement)
 	    printf("  lda #2\n");
 	    printf("  sta port0resolution\n");
 	    printf("  ldx #0\n");
-	    strcpy(redefined_variables[numredefvars++], "TRAKBALL0SUPPORT = 1");
-	    sprintf(constants[numconstants++], "TRAKBALL0SUPPORT");
+
+	    if (!isimmed("TRAKBALL0SUPPORT"))
+            {
+	        strcpy(redefined_variables[numredefvars++], "TRAKBALL0SUPPORT = 1");
+	        sprintf(constants[numconstants++], "TRAKBALL0SUPPORT");
+            }
 	}
 	else
 	{
@@ -2620,23 +2609,24 @@ void changecontrol(char **statement)
 	    printf("  lda #2\n");
 	    printf("  sta port1resolution\n");
 	    printf("  ldx #1\n");
-	    strcpy(redefined_variables[numredefvars++], "TRAKBALL1SUPPORT = 1");
-	    sprintf(constants[numconstants++], "TRAKBALL1SUPPORT");
+	    if (!isimmed("TRAKBALL1SUPPORT"))
+            {
+	        strcpy(redefined_variables[numredefvars++], "TRAKBALL1SUPPORT = 1");
+	        sprintf(constants[numconstants++], "TRAKBALL1SUPPORT");
+            }
 	}
 	printf("  jsr setportforinput\n");
 	printf("  jsr settwobuttonmode\n");
-        if(longcontrollerread == 0)
+	if (!isimmed("LONGCONTROLLERREAD"))
         {
 	    strcpy(redefined_variables[numredefvars++], "LONGCONTROLLERREAD = 1");
 	    sprintf(constants[numconstants++], "LONGCONTROLLERREAD");
-            longcontrollerread=1;
         }
     }
     else if (!strcmp(statement[3], "keypad"))
     {
-        if(keypadsupport==0)
+	if (!isimmed("KEYPADSUPPORT"))
         {
-            keypadsupport=1;
             strcpy(redefined_variables[numredefvars++], "KEYPADSUPPORT = 1");
 	    sprintf(constants[numconstants++], "KEYPADSUPPORT");
         }
@@ -2656,38 +2646,23 @@ void changecontrol(char **statement)
     }
     else if ( (!strcmp(statement[3], "stmouse")) || (!strcmp(statement[3], "amigamouse")) || (!strcmp(statement[3], "driving")) )
     {
-        if(mousesupport == 0)
+	if (!isimmed("MOUSESUPPORT"))
 	{
-            mousesupport = mousesupport | (port+1);
 	    strcpy(redefined_variables[numredefvars++], "MOUSESUPPORT = 1");
 	    sprintf(constants[numconstants++], "MOUSESUPPORT");
-            if(port==0)
-            {
-	        strcpy(redefined_variables[numredefvars++], "MOUSE0SUPPORT = 1");
-	        sprintf(constants[numconstants++], "MOUSE0SUPPORT");
-            }
-            else
-            {
-	        strcpy(redefined_variables[numredefvars++], "MOUSE1SUPPORT = 1");
-	        sprintf(constants[numconstants++], "MOUSE1SUPPORT");
-            }
         }
-        else if ( (mousesupport|(port+1))==0) // one port was enable previously
+        if((port==0)&&(!isimmed("MOUSE0SUPPORT")))
         {
-            if(port==0)
-            {
-	        strcpy(redefined_variables[numredefvars++], "MOUSE0SUPPORT = 1");
-	        sprintf(constants[numconstants++], "MOUSE0SUPPORT");
-            }
-            else
-            {
-	        strcpy(redefined_variables[numredefvars++], "MOUSE1SUPPORT = 1");
-	        sprintf(constants[numconstants++], "MOUSE1SUPPORT");
-            }
+	    strcpy(redefined_variables[numredefvars++], "MOUSE0SUPPORT = 1");
+	    sprintf(constants[numconstants++], "MOUSE0SUPPORT");
         }
-        if(longcontrollerread == 0)
+        if((port==1)&&(!isimmed("MOUSE1SUPPORT")))
         {
-            longcontrollerread=1;
+	    strcpy(redefined_variables[numredefvars++], "MOUSE1SUPPORT = 1");
+	    sprintf(constants[numconstants++], "MOUSE1SUPPORT");
+        }
+	if (!isimmed("LONGCONTROLLERREAD"))
+        {
 	    strcpy(redefined_variables[numredefvars++], "LONGCONTROLLERREAD = 1");
 	    sprintf(constants[numconstants++], "LONGCONTROLLERREAD");
         }
