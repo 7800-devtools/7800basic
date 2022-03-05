@@ -658,11 +658,11 @@ SNES_AUTODETECT_LOOP
      lda snesdetected0,x
      bne SNES_AUTODETECT_FOUND
      ; detection failed
-     ;jsr setportforinput
-     ;jsr settwobuttonmode
-     ;dex
-     ;bpl SNES_AUTODETECT_LOOP
-     ;rts
+     jsr setportforinput
+     jsr settwobuttonmode
+     dex
+     bpl SNES_AUTODETECT_LOOP
+     rts
 SNES_AUTODETECT_FOUND
      lda #11 ; formally set the snes controller
      sta port0control,x
