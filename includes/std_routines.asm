@@ -96,16 +96,8 @@ TIMEOFFSET = 10
            jsr servicesong
          endif ; MUSICTRACKER
          ifconst RMT
-           lda rmt_intcount
-           eor #1
-           sta rmt_intcount
-           bne RMT1_INT1
-           lda rmt_ispeed
-           cmp #1
-           beq RMT1_Iend
-RMT1_INT1
+           ; we always call once per frame
            jsr RASTERMUSICTRACKER+3
-RMT1_Iend
          endif
 
          inc framecounter
@@ -587,19 +579,6 @@ skippalframeadjusting
 servicesongwasnotmissed
      endif ; MUSICTRACKER
 
-     ifconst RMT
-         lda rmt_intcount
-         eor #1
-         sta rmt_intcount
-         bne RMT2_INT1
-         lda rmt_ispeed
-         cmp #1
-         beq RMT2_Iend
-RMT2_INT1
-         jsr RASTERMUSICTRACKER+3
-RMT2_Iend
-     endif
-
      rts
 
 serviceatarivoxqueue
@@ -679,11 +658,11 @@ SNES_AUTODETECT_LOOP
      lda snesdetected0,x
      bne SNES_AUTODETECT_FOUND
      ; detection failed
-     jsr setportforinput
-     jsr settwobuttonmode
-     dex
-     bpl SNES_AUTODETECT_LOOP
-     rts
+     ;jsr setportforinput
+     ;jsr settwobuttonmode
+     ;dex
+     ;bpl SNES_AUTODETECT_LOOP
+     ;rts
 SNES_AUTODETECT_FOUND
      lda #11 ; formally set the snes controller
      sta port0control,x
