@@ -151,7 +151,7 @@ int main(int argc, char **argv)
     }
 
 
-    for (;;)			//loop infinitly through the report until the user explicitly exits
+    for (;;)			//loop infinitely through the report until the user explicitly exits
     {
 #ifdef _WIN32
 	if (printinfo == 0)
