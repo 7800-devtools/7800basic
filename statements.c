@@ -7460,7 +7460,7 @@ void doif(char **statement)
     }
     if (i < 200)		// found array
     {
-	// extract expression in parantheses - for now just whole numbers allowed
+	// extract expression in parentheses - for now just whole numbers allowed
 	bit = (int) statement[2][i - 1] - '0';
 	if ((bit > 9) || (bit < 0))
 	{
@@ -8520,7 +8520,7 @@ void let(char **cstatement)
     if (i < 200)		// found bit
     {
 	strcpy(Areg, "invalid");
-	// extract expression in parantheses - for now just whole numbers allowed
+	// extract expression in parentheses - for now just whole numbers allowed
 	bit = (int) statement[2][i - 1] - '0';
 	if ((bit > 9) || (bit < 0))
 	{
