@@ -9939,6 +9939,12 @@ void set(char **statement)
 	        strcpy(redefined_variables[numredefvars++], "pokeyaddress = $450");
                 append_a78info("set pokey@450");
             }
+            else if (!strncmp(statement[3], "$800", 4))
+            {
+                strcpy(redefined_variables[numredefvars++], "pokeysupport = 1");
+	        strcpy(redefined_variables[numredefvars++], "pokeyaddress = $800");
+                append_a78info("set pokey@800");
+            }
             else if (!strncmp(statement[3], "$4000", 5))
             {
                 strcpy(redefined_variables[numredefvars++], "pokeysupport = 1");

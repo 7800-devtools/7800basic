@@ -96,8 +96,8 @@ TIMEOFFSET = 10
            jsr servicesong
          endif ; MUSICTRACKER
          ifconst RMT
-           ; we always call once per frame
            jsr RASTERMUSICTRACKER+3
+RMT_Iend
          endif
 
          inc framecounter

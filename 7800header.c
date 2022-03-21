@@ -12,7 +12,7 @@
 //      7800header - a simple app to generate/interrogate a a78 header.
 //                      Michael Saarna (aka RevEng@AtariAge)
 
-#define HEADER_VERSION_INFO "7800header 0.13"
+#define HEADER_VERSION_INFO "7800header 0.15"
 
 void usage(char *binaryname);
 uint32_t phtole32(uint32_t value);
@@ -171,12 +171,12 @@ int main(int argc, char **argv)
 	printf("          \"name game name\" Set the game name in the header.\n");
 	printf("          \"exit\"           Exit the utility. Unsaved changes will be lost.\n");
 	printf("\n");
-	printf("Options:  rom@4000 ram@4000 bank6@4000 pokey@450 pokey@4000 mram@4000 \n");
-	printf("          pokey@440 ym2151@460 supergame supergameram bankram\n");
-	printf("          absolute activision souper bankset tvpal tvntsc composite\n");
-	printf("          7800joy1 7800joy2 lightgun1 lightgun2 paddle1 paddle2\n");
-	printf("          tball1 tball2 2600joy1 2600joy2 driving1 driving2 keypad1\n");
-	printf("          keypad2 stmouse1 stmouse2 amouse1 amouse2 hsc savekey xm\n");
+	printf("Options:  rom@4000 bank6@4000 pokey@440 pokey@450 pokey@800 pokey@4000\n");
+	printf("   ram@4000 mram@4000 hram@4000 ym2151@460 supergame bankram\n");
+	printf("   absolute activision souper bankset tvpal tvntsc composite\n");
+	printf("   7800joy1 7800joy2 lightgun1 lightgun2 paddle1 paddle2\n");
+	printf("   tball1 tball2 2600joy1 2600joy2 driving1 driving2 keypad1\n");
+	printf("   keypad2 stmouse1 stmouse2 amouse1 amouse2 hsc savekey xm\n");
 	printf("> ");
 
 	if (fgets(usercommand, 1024, stdin))
@@ -438,12 +438,12 @@ void setunset(char *command)
 	    setunset("unset supergameram");
 	}
     }
-    else if (strcmp(noun, "supergameram") == 0)
+    else if ( (strcmp(noun, "supergameram") == 0) || (strcmp(noun, "ram@4000") == 0))
     {
 	if (set)
 	{
-	    myheader.carttype2 = myheader.carttype2 | 4;	//SG+SGRAM
-	    setunset("set supergame");
+	    myheader.carttype2 = myheader.carttype2 | 4;
+	    //setunset("set supergame");
 	}
 	else
 	    myheader.carttype2 = myheader.carttype2 & (4 ^ 0xff);
@@ -456,15 +456,6 @@ void setunset(char *command)
 	}
 	else
 	    myheader.carttype2 = myheader.carttype2 & (32 ^ 0xff);
-    }
-    else if (strcmp(noun, "ram@4000") == 0)
-    {
-	if (set)
-	{
-	    myheader.carttype2 = myheader.carttype2 | 4;	//SG+SGRAM
-	}
-	else
-	    myheader.carttype2 = myheader.carttype2 & (4 ^ 0xff);
     }
     else if (strcmp(noun, "rom@4000") == 0)
     {
@@ -495,8 +486,10 @@ void setunset(char *command)
 	if (set)
 	{
 	    myheader.carttype2 = myheader.carttype2 | 1;
-	    setunset("unset rom@4000");
-	    setunset("unset bank6@4000");
+	    //setunset("unset rom@4000");
+	    //setunset("unset bank6@4000");
+	    setunset("unset ram@4000");
+	    setunset("unset hram@4000");
 	}
 	else
 	    myheader.carttype2 = myheader.carttype2 & (1 ^ 0xff);
@@ -506,9 +499,20 @@ void setunset(char *command)
 	if (set)
 	{
 	    myheader.carttype2 = myheader.carttype2 | 128;
+	    setunset("unset pokey@4000");
 	}
 	else
 	    myheader.carttype2 = myheader.carttype2 & (128 ^ 0xff);
+    }
+    else if (strcmp(noun, "hram@4000") == 0)
+    {
+	if (set)
+	{
+	    myheader.carttype1 = myheader.carttype1 | 64;
+	    setunset("unset pokey@4000");
+	}
+	else
+	    myheader.carttype1 = myheader.carttype1 & (64 ^ 0xff);
     }
     else if (strcmp(noun, "pokey@450") == 0)
     {
@@ -516,6 +520,13 @@ void setunset(char *command)
 	    myheader.carttype2 = myheader.carttype2 | 64;
 	else
 	    myheader.carttype2 = myheader.carttype2 & (64 ^ 0xff);
+    }
+    else if (strcmp(noun, "pokey@800") == 0)
+    {
+	if (set)
+	    myheader.carttype1 = myheader.carttype1 | 128;
+	else
+	    myheader.carttype1 = myheader.carttype1 & (128 ^ 0xff);
     }
     else if (strcmp(noun, "activision") == 0)
     {
@@ -858,6 +869,10 @@ void report(void)
 	printf("Souper ");
     if ((myheader.carttype1 & 32) > 0)
 	printf("Bankset ");
+    if ((myheader.carttype1 & 64) > 0)
+	printf("hram@4000 ");
+    if ((myheader.carttype1 & 128) > 0)
+	printf("pokey@800 ");
     printf("\n");
 
     printf("    controllers        : ");
