@@ -862,7 +862,7 @@ memdeviceisntHSC
          jmp loaddifficultytableAVOX
 
 savedifficultytable
-         ;*** we need to check wich device we should use...
+         ;*** we need to check which device we should use...
          lda hsdevice
          bne savedifficultytablerealdevice
          rts ; its a ram device

@@ -9,7 +9,7 @@
 ; available at https://github.com/dasm-assembler/dasm
 
 
-; ******************** 7800 Hardware Adresses ***************************
+; ******************** 7800 Hardware Addresses ***************************
 ;
 ;       MEMORY MAP USAGE OF THE 7800
 ;

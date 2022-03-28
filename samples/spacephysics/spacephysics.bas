@@ -446,7 +446,7 @@ check_bullet_boundary
   next
   return
 
- rem ** this is a 16-bit sine+cosine table, used for intial bullet velocity,
+ rem ** this is a 16-bit sine+cosine table, used for initial bullet velocity,
  rem ** based on the ship angle...
 /*
 ; slow bullet velocity 
