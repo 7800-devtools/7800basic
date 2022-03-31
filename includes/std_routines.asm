@@ -645,6 +645,10 @@ SNES_CLOCK_PORT_BIT
    .byte $10,$01 
 SNES_CTLSWA_MASK
    .byte $30,$03
+SWCHA_DIRMASK
+   .byte $F0,$0F
+SWCHA_INVDIRMASK
+   .byte $0F,$F0
 
     ; Probe each port for SNES, and see if autodetection succeeds anywhere.
 SNES_AUTODETECT
@@ -677,6 +681,18 @@ SNES2ATARI
      jmp buttonreadloopreturn
 SNES_READ
      ; x=0 for left port, x=1 for right
+
+     ; Start by checking if any port directions are pressed. 
+     ; Abort the autodetect for this port if so, as snes2atari doesn't ground any 
+     ; direction pins. if directions are pressed and the port is changed to output,
+     ; that means the output is direct-shorted, and nobody seems to know if riot's
+     ; output mode has current protection.
+
+     lda SWCHA
+     ora SWCHA_INVDIRMASK,x
+     eor SWCHA_DIRMASK,x
+     beq SNES_ABORT
+
      lda SNES_CTLSWA_MASK,x
      sta CTLSWA    ; enable pins UP/DOWN to work as outputs
      lda #$0
@@ -703,6 +719,9 @@ SNES2ATARILOOP
 SNES_STOP_CLOCK
      sta SWCHA     ; clock low
      sta CTLSWA    ; set port bits to input avoid conflict with other drivers
+     rts
+SNES_ABORT
+     sta snesdetected0,x
      rts
  endif
 

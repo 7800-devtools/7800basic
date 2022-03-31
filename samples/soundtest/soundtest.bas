@@ -25,7 +25,7 @@
  dim sound2play=a
  dim sound2playbcd=b
  dim maxsounds=c
- maxsounds=113
+ maxsounds=115
 
 main 
  clearscreen
@@ -162,6 +162,8 @@ main
  if sound2play=111 then playsfx sfx_museboom
  if sound2play=112 then playsfx sfx_bigboom
  if sound2play=113 then playsfx sfx_thud
+ if sound2play=114 then playsfx sfx_bump
+ if sound2play=115 then playsfx sfx_shouty
  gosub debouncejoyfire
  goto main 
 
@@ -3998,6 +4000,79 @@ end
  $00,$00,$00
 end
 
+ data sfx_bump
+ $10,$10,$00 ; version, priority, frames per chunk
+ $0b,$0f,$00 ; first chunk of freq,channel,volume
+ $0c,$06,$0b
+ $0a,$06,$0f
+ $0b,$06,$0f
+ $0a,$06,$0e
+ $15,$0f,$0d
+ $0e,$06,$0c
+ $0d,$06,$0b
+ $19,$0f,$0a
+ $16,$0f,$09
+ $19,$0f,$08
+ $10,$06,$07
+ $0d,$0c,$06
+ $19,$0c,$05
+ $1c,$0c,$04
+ $1e,$0c,$03
+ $06,$06,$02
+ $06,$06,$01
+ $00,$00,$00
+end
+
+ data sfx_shouty
+ $10,$10,$00 ; version, priority, frames per chunk
+ $19,$04,$01 ; first chunk of freq,channel,volume
+ $19,$04,$04
+ $12,$04,$09
+ $12,$04,$09
+ $12,$04,$09
+ $11,$04,$07
+ $11,$04,$07
+ $12,$04,$08
+ $12,$04,$08
+ $12,$04,$07
+ $12,$04,$07
+ $12,$04,$0b
+ $0f,$04,$09
+ $0f,$04,$09
+ $0f,$04,$09
+ $0f,$04,$09
+ $12,$04,$08
+ $11,$04,$0b
+ $0f,$04,$0b
+ $11,$04,$0d
+ $11,$04,$0e
+ $11,$04,$0e
+ $12,$04,$0d
+ $11,$04,$0f
+ $11,$04,$0f
+ $11,$04,$0f
+ $11,$04,$0f
+ $11,$04,$0c
+ $11,$04,$0b
+ $11,$04,$0b
+ $12,$04,$0b
+ $11,$04,$0a
+ $11,$04,$0b
+ $12,$04,$0b
+ $12,$04,$0d
+ $12,$04,$0d
+ $0f,$04,$0a
+ $12,$04,$0a
+ $12,$04,$07
+ $15,$04,$06
+ $15,$04,$06
+ $19,$04,$04
+ $1b,$04,$02
+ $01,$06,$01
+ $0d,$06,$01
+ $00,$00,$00
+end
+
 
  alphadata sounddescriptions atascii
  'salvo laser shot'
@@ -4114,4 +4189,6 @@ end
  'museboom        '
  'bigboom         '
  'thud            '
+ 'bump            '
+ 'shouty          '
 end

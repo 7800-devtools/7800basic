@@ -165,12 +165,16 @@ detectpokeylocation
      sta pokeybasehi
      lda #$ff
      sta pokeydetected
+
+/*
  if pokeyaddress = $450
      lda XCTRL1s
      ora #%00010100
      sta XCTRL1s
      sta XCTRL1
  endif
+*/
+
      lda #0
      ldy #15
 clearpokeyloop
