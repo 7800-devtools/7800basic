@@ -184,7 +184,7 @@ skipSGRAMcheck
      ; 6,5 dma ctrl 2=normal DMA, 3=no DMA
      ; 4 character width 1=2 byte chars, 0=1 byte chars
      ; 3 border control 0=background color border, 1=black border
-     ; 2 kangaroo mode 0=transparancy, 1=kangaroo
+     ; 2 kangaroo mode 0=transparency, 1=kangaroo
      ; 1,0 read mode 0=160x2/160x4 1=N/A 2=320B/320D 3=320A/320C
 
      ifconst DOUBLEWIDE
