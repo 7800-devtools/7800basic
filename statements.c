@@ -5460,7 +5460,7 @@ int getnotelength(char *command)
 
 int getnoteoctave(char *command)
 {
-    // ** Return an absolue note index from a note+octave
+    // ** Return an absolute note index from a note+octave
     // ** If so, return its code, otherwise return negative.
 
     int notevalue;
