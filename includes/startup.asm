@@ -78,8 +78,10 @@ pndetecispal
      lda #<DLLMEM
      sta DPPL
 
+/*
      lda #%00000100 ; leave cartridge plugged in for any testing
      sta XCTRL1s
+*/
 
      ifconst pokeysupport
          ; pokey support is compiled in, so try to detect it...
@@ -139,6 +141,7 @@ storeAinhsdevice
          jsr silenceavoxvoice
      endif
 
+/*
      ifconst SGRAM
          ; check if we actually have SGRAM. If not, probe XM for it...
          ldy #$EA
@@ -160,6 +163,7 @@ storeAinhsdevice
                  sta XCTRL3
 skipSGRAMcheck
      endif
+*/
 
      ifconst bankswitchmode
          ; we need to switch to the first bank as a default. this needs to

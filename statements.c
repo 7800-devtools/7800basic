@@ -663,6 +663,7 @@ void set_romsize(char *size)
 	strcpy(redefined_variables[numredefvars++], "bankswitchmode = 8");
 	bankcount = 8;
 	currentbank = 0;
+	append_a78info("set supergame");
 	if (strncmp(size + 4, "BANKRAM", 7) == 0)
 	{
 	    append_a78info("set supergamebankram");
@@ -674,8 +675,6 @@ void set_romsize(char *size)
 	    append_a78info("set supergameram");
 	    strcpy(redefined_variables[numredefvars++], "SGRAM = 1");
 	}
-	else
-	    append_a78info("set supergame");
     }
     else if (!strncmp(size, "256k\0", 4))
     {
