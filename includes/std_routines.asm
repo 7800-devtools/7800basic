@@ -96,7 +96,10 @@ TIMEOFFSET = 10
            jsr servicesong
          endif ; MUSICTRACKER
          ifconst RMT
+           lda rasterpause
+           beq skiprasterupdate
            jsr RASTERMUSICTRACKER+3
+skiprasterupdate
 RMT_Iend
          endif
 

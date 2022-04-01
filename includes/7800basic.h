@@ -545,6 +545,10 @@ pokeykeycode       DS 1
 pokeykeydebounce   DS 1
  endif
 
+ ifconst RMT
+rasterpause        DS 1
+ endif
+
  ifconst SNES2ATARISUPPORT
 snesport           DS 1
  endif
