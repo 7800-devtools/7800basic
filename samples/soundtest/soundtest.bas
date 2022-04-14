@@ -25,7 +25,7 @@
  dim sound2play=a
  dim sound2playbcd=b
  dim maxsounds=c
- maxsounds=115
+ maxsounds=116
 
 main 
  clearscreen
@@ -164,6 +164,7 @@ main
  if sound2play=113 then playsfx sfx_thud
  if sound2play=114 then playsfx sfx_bump
  if sound2play=115 then playsfx sfx_shouty
+ if sound2play=116 then playsfx sfx_quack
  gosub debouncejoyfire
  goto main 
 
@@ -4073,6 +4074,22 @@ end
  $00,$00,$00
 end
 
+ data sfx_quack
+ $10, $10, $00
+ $15, $06, $08
+ $15, $06, $09
+ $15, $06, $0A
+ $14, $06, $0B
+ $14, $06, $0C
+ $14, $06, $0D
+ $14, $06, $0E
+ $13, $06, $0F
+ $13, $06, $0F
+ $13, $06, $0F
+ $13, $06, $0F
+ $13, $06, $0F
+ $00,$00,$00
+end
 
  alphadata sounddescriptions atascii
  'salvo laser shot'
@@ -4191,4 +4208,5 @@ end
  'thud            '
  'bump            '
  'shouty          '
+ 'quack           '
 end
