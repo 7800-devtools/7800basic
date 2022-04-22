@@ -2867,7 +2867,9 @@ void incmapfile(char **statement)
     for (t = (strlen(datalabelname) - 3); t > 0; t--)
 	if (strcasecmp(datalabelname + t, ".tmx") == 0)
 	    datalabelname[t] = 0;
-    printf("	JMP skipmapdata%d\n", templabel);
+
+    if (!(optimization & 4))
+        printf("	JMP skipmapdata%d\n", templabel);
 
     printf("%s\n", datalabelname);
 
