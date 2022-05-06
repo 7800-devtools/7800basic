@@ -9901,7 +9901,7 @@ void set(char **statement)
 	    append_a78info("set xm");
 	}
     }
-    else if (!strncmp(statement[2], "trackersupport", 6))
+    else if (!strncmp(statement[2], "trackersupport", 14))
     {
 	if (!strncmp(statement[3], "basic", 5))
 	{
@@ -9912,7 +9912,22 @@ void set(char **statement)
 	    strcpy(redefined_variables[numredefvars++], "RMT = 1");
 	}
     }
-    else if (!strncmp(statement[2], "pokeysupport\0", 12))
+    else if (!strncmp(statement[2], "rmtvolume", 9))
+    {
+	if (!strncmp(statement[3], "on", 2))
+	{
+	    strcpy(redefined_variables[numredefvars++], "RMTVOLUME = 1");
+	    strcpy(redefined_variables[numredefvars++], "FOURBITFADE = 1");
+        }
+    }
+    else if (!strncmp(statement[2], "fourbitfade", 11))
+    {
+	if (!strncmp(statement[3], "on", 2))
+	{
+	    strcpy(redefined_variables[numredefvars++], "FOURBITFADE = 1");
+        }
+    }
+    else if (!strncmp(statement[2], "pokeysupport", 12))
     {
 	if (strncmp(statement[3], "off", 3))
         {
@@ -9955,7 +9970,7 @@ void set(char **statement)
 	}
 
     }
-    else if (!strncmp(statement[2], "hscsupport\0", 10))
+    else if (!strncmp(statement[2], "hscsupport", 10))
     {
 	if (!strncmp(statement[3], "on", 2))
 	{

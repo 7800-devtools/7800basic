@@ -1186,24 +1186,46 @@ SetPokey
 	sty POKEY_BASE_S+$08
 	sta POKEY_BASE+$08
 	ELSE
+
+ ifconst RMTVOLUME
+        lda rmtvolume
+        sta fourbitfadevalue
+ endif
 	ldy v_audctl
-	lda trackn_audf+0
-	ldx trackn_audc+0
-	sta POKEY_BASE+$00
-	stx POKEY_BASE+$01
-	lda trackn_audf+1
-	ldx trackn_audc+1
-	sta POKEY_BASE+$00+2
-	stx POKEY_BASE+$01+2
-	lda trackn_audf+2
-	ldx trackn_audc+2
-	sta POKEY_BASE+$00+4
-	stx POKEY_BASE+$01+4
-	lda trackn_audf+3
-	ldx trackn_audc+3
-	sta POKEY_BASE+$00+6
-	stx POKEY_BASE+$01+6
+	ldx trackn_audf+0
+	lda trackn_audc+0
+ ifconst RMTVOLUME
+        jsr fourbitfade
+ endif
+	stx POKEY_BASE+$00+0
+	sta POKEY_BASE+$01+0
+
+	ldx trackn_audf+1
+	lda trackn_audc+1
+ ifconst RMTVOLUME
+        jsr fourbitfade
+ endif
+	stx POKEY_BASE+$00+2
+	sta POKEY_BASE+$01+2
+
+	ldx trackn_audf+2
+	lda trackn_audc+2
+ ifconst RMTVOLUME
+        jsr fourbitfade
+ endif
+	stx POKEY_BASE+$00+4
+	sta POKEY_BASE+$01+4
+
+	ldx trackn_audf+3
+	lda trackn_audc+3
+ ifconst RMTVOLUME
+        jsr fourbitfade
+ endif
+	stx POKEY_BASE+$00+6
+	sta POKEY_BASE+$01+6
+
 	sty POKEY_BASE+$08
+
 	EIF
 	rts
 SetUpInstrumentY2

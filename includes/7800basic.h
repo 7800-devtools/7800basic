@@ -547,7 +547,15 @@ pokeykeydebounce   DS 1
 
  ifconst RMT
 rasterpause        DS 1
- endif
+ ifconst RMTVOLUME
+rmtvolume          DS 1
+ endif ; RMTVOLUME
+ endif ; RMT
+
+ ifconst FOURBITFADE
+fourbittemp1       DS 1
+fourbitfadevalue   DS 1
+ endif ; FOURBITFADE
 
  ifconst SNES2ATARISUPPORT
 snesport           DS 1
