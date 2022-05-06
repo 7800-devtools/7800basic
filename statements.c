@@ -9920,6 +9920,14 @@ void set(char **statement)
 	    strcpy(redefined_variables[numredefvars++], "FOURBITFADE = 1");
         }
     }
+    else if (!strncmp(statement[2], "tiavolume", 9))
+    {
+	if (!strncmp(statement[3], "on", 2))
+	{
+	    strcpy(redefined_variables[numredefvars++], "TIAVOLUME = 1");
+	    strcpy(redefined_variables[numredefvars++], "FOURBITFADE = 1");
+        }
+    }
     else if (!strncmp(statement[2], "fourbitfade", 11))
     {
 	if (!strncmp(statement[3], "on", 2))

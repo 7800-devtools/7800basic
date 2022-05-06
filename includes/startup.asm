@@ -137,10 +137,18 @@ storeAinhsdevice
      endif
 
      ifconst RMT
-     ifconst RMTVOLUME
-         lda #$F0 ; default to full RMT volume
-         sta rmtvolume
-     endif ; RMTVOLUME
+         ifconst RMTVOLUME
+             lda #$F0 ; default to full RMT volume
+             sta rmtvolume
+             ifconst TIAVOLUME
+                 sta tiavolume
+             endif ; TIAVOLUME
+         endif ; RMTVOLUME
+     else  ; !RMT
+         ifconst TIAVOLUME
+             lda #$F0 ; default to full TIA volume
+             sta tiavolume
+         endif ; TIAVOLUME
      endif ; RMT
 
      ifconst bankswitchmode

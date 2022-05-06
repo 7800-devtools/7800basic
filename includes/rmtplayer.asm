@@ -1189,13 +1189,13 @@ SetPokey
 
  ifconst RMTVOLUME
         lda rmtvolume
-        sta fourbitfadevalue
+        sta fourbitfadevalueint
  endif
 	ldy v_audctl
 	ldx trackn_audf+0
 	lda trackn_audc+0
  ifconst RMTVOLUME
-        jsr fourbitfade
+        jsr fourbitfadeint
  endif
 	stx POKEY_BASE+$00+0
 	sta POKEY_BASE+$01+0
@@ -1203,7 +1203,7 @@ SetPokey
 	ldx trackn_audf+1
 	lda trackn_audc+1
  ifconst RMTVOLUME
-        jsr fourbitfade
+        jsr fourbitfadeint
  endif
 	stx POKEY_BASE+$00+2
 	sta POKEY_BASE+$01+2
@@ -1211,7 +1211,7 @@ SetPokey
 	ldx trackn_audf+2
 	lda trackn_audc+2
  ifconst RMTVOLUME
-        jsr fourbitfade
+        jsr fourbitfadeint
  endif
 	stx POKEY_BASE+$00+4
 	sta POKEY_BASE+$01+4
@@ -1219,7 +1219,7 @@ SetPokey
 	ldx trackn_audf+3
 	lda trackn_audc+3
  ifconst RMTVOLUME
-        jsr fourbitfade
+        jsr fourbitfadeint
  endif
 	stx POKEY_BASE+$00+6
 	sta POKEY_BASE+$01+6

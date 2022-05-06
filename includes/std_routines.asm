@@ -909,7 +909,14 @@ exitmusictracker
      sta inttemp2
      iny
 sfxvolumeentrypt
+ ifconst TIAVOLUME
+     lda tiavolume
+     sta fourbitfadevalueint
+ endif ; TIAVOLUME
      lda (inttemp5),y
+ ifconst TIAVOLUME
+     jsr fourbitfadeint
+ endif ; TIAVOLUME
      sta AUDV0,x
      cmp #$10
      bcs sfxsoundloop ; AUDV0>$0F means the sound is looped while priority is active
