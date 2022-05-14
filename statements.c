@@ -4681,7 +4681,7 @@ void mul(char **statement, int bits)
     // this will attempt to output optimized code depending on the multiplicand
     int multiplicand = strictatoi(statement[6]);
     int tempstorage = 0;
-    // we will optimize specifically for 2,3,5,7,9
+    // we will optimize specifically for 2,3,5,7,9,11
     if (bits == 16)
     {
 	printf("	ldx #0\n");
@@ -4689,7 +4689,50 @@ void mul(char **statement, int bits)
     }
     while (multiplicand != 1)
     {
-	if (!(multiplicand % 9))
+	if (!(multiplicand % 11))
+	{
+	    if (tempstorage)
+	    {
+		strcpy(statement[4], "temp2");
+		printf("	sta temp2\n");
+	    }
+	    multiplicand /= 11;
+	    printf("	asl\n");
+	    if (bits == 16)
+		printf("  rol temp1\n");
+	    printf("	asl\n");
+	    if (bits == 16)
+		printf("  rol temp1\n");
+	    printf("	clc\n");
+	    printf("	adc ");
+	    printimmed(statement[4]);
+	    printf("%s\n", statement[4]);
+	    if (bits == 16)
+	    {
+		printf("	tax\n");
+		printf("	lda temp1\n");
+		printf("	adc #0\n");
+		printf("	sta temp1\n");
+		printf("	txa\n");
+	    }
+	    printf("	asl\n");
+	    if (bits == 16)
+		printf("  rol temp1\n");
+	    printf("	clc\n");
+	    printf("	adc ");
+	    printimmed(statement[4]);
+	    printf("%s\n", statement[4]);
+	    if (bits == 16)
+	    {
+		printf("	tax\n");
+		printf("	lda temp1\n");
+		printf("	adc #0\n");
+		printf("	sta temp1\n");
+		printf("	txa\n");
+	    }
+	    tempstorage = 1;
+	}
+	else if (!(multiplicand % 9))
 	{
 	    if (tempstorage)
 	    {
