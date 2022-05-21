@@ -648,6 +648,8 @@ SNES_CLOCK_PORT_BIT
    .byte $10,$01 
 SNES_CTLSWA_MASK
    .byte $30,$03
+SNES_CTLSWA_SIGNAL
+   .byte $C0,$0C
 SWCHA_DIRMASK
    .byte $F0,$0F
 SWCHA_INVDIRMASK
@@ -682,6 +684,7 @@ snes2atarihandler
 SNES2ATARI
      jsr SNES_READ 
      jmp buttonreadloopreturn
+
 SNES_READ
      ; x=0 for left port, x=1 for right
 
@@ -696,13 +699,22 @@ SNES_READ
      eor SWCHA_DIRMASK,x
      beq SNES_ABORT
 
+     lda port0control,x
+     cmp #11 ; snes
+     bne snes2atari_signal_go ; if this is a first auto-detection read, go ahead and signal
+     lda snesdetected0,x 
+     bne snes2atari_signal_skip ; if snes was available in previous frames, skip signalling
+snes2atari_signal_go
+         jsr SNES2ATARI_SIGNAL
+snes2atari_signal_skip
+
      lda SNES_CTLSWA_MASK,x
      sta CTLSWA    ; enable pins UP/DOWN to work as outputs
      lda #$0
      sta SWCHA     ; make both latch and clock down
      ldy #16 ; 16 bits 
 SNES2ATARILOOP
-         rol INPT4,x     ; sample data
+         rol INPT4,x     ; sample data into carry
          lda SNES_CLOCK_PORT_BIT,x
          sta SWCHA     ; clock low
          rol snes2atari0lo,x
@@ -711,9 +723,9 @@ SNES2ATARILOOP
          sta SWCHA     ; clock high
          dey           ; next bit
      bne SNES2ATARILOOP
-     rol INPT4,x     ; sample data
-     rol
-     eor snes2atari0lo,x ; last 4 bits out of 16 should always be hi, 17th bit should always be lo
+     rol INPT4,x         ; 17th bit should be lo if controller is there.
+     rol                 ; 17th snes bit into A low bit
+     eor snes2atari0lo,x ; 16th bit should be hi if controller is there.
      and #1
      sta snesdetected0,x
      beq SNES_STOP_CLOCK ; if snes isn't detected, leave port in default state
@@ -725,6 +737,19 @@ SNES_STOP_CLOCK
      rts
 SNES_ABORT
      sta snesdetected0,x
+     rts
+SNES2ATARI_SIGNAL
+     ; signal to SNES2ATARI++ that we want SNES mode...
+     lda SNES_CTLSWA_SIGNAL,x
+     sta CTLSWA  
+     lda #0 
+     sta SWCHA
+     ldy #0
+SNES_SIGNAL_LOOP
+     dey
+     bne SNES_SIGNAL_LOOP
+     lda #$FF
+     sta SWCHA
      rts
  endif
 
