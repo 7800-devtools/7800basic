@@ -29,6 +29,7 @@ int tallspritecount = 0;
 int currentdmahole = 0;
 
 int deprecatedframeheight = 0;
+int deprecated160bindexes = 0;
 
 #define PNG_DEBUG 3
 #include <png.h>
@@ -3081,6 +3082,21 @@ void add_graphic(char **statement, int incbanner)
 	{
 	    graphiccolormode = MODE160B;
 	    palettestatement = 17;
+	    if (deprecated160bindexes == 1)
+    	    {
+                s = 1;
+                for (t = 1; t < 12; t++)
+                {
+                    if (s % 4 == 0)
+                        s = s + 1;
+                    graphiccolorindex[t] = s;
+                    s = s + 1;
+                }
+                graphiccolorindex[12] = 15;
+                graphiccolorindex[13] = 4;
+                graphiccolorindex[14] = 8;
+                graphiccolorindex[15] = 12;
+	    }
 	}
 	else if (strcasecmp(statement[3], "320A") == 0)
 	{
@@ -3125,7 +3141,7 @@ void add_graphic(char **statement, int incbanner)
 	}
     }
 
- if (strcasecmp(statement[3], "160B") == 0)
+ if ((strcasecmp(statement[3], "160B") == 0) && (deprecated160bindexes == 0))
     {
 	// We need to reorder the color indexes some more. For 160B the 7800 makes color
 	// indexes 0, 4, 8, and 12 transparent, but a 16 color PNG will likely have
@@ -9557,6 +9573,8 @@ void set(char **statement)
     {
 	if (!strncmp(statement[3], "frameheight", 11))
 	    deprecatedframeheight = 1;
+	if (!strncmp(statement[3], "160bindexes", 11))
+	    deprecated160bindexes = 1;
     }
     else if (!strncmp(statement[2], "dlmemory\0", 8))
     {
