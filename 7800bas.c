@@ -252,6 +252,11 @@ int main(int argc, char *argv[])
 	    doend();
 
 	keywords(statement);
+        if(numconstants==(MAXCONSTANTS-1))
+        {
+            fprintf(stderr, "(%d) Maximum number of constants exceeded.\n", bbgetline());
+            exit(1);
+        }
     }
 
     printf("DMAHOLEEND%d SET .\n",currentdmahole);

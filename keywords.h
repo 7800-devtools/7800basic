@@ -3,6 +3,8 @@
 #ifndef KEYWORDS_H
 #define KEYWORDS_H
 
+#define MAXCONSTANTS 80000
+
 char includespath[500];
 char incbasepath[500];
 int ongosub;
@@ -43,7 +45,7 @@ int multtableheight[100];
 int multtableindex;
 void keywords(char **);
 char redefined_variables[80000][100];
-char constants[80000][100];
+char constants[MAXCONSTANTS][100];
 char bannerfilenames[1000][100];
 int bannerheights[1000];
 int bannerwidths[1000];
