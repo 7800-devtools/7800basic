@@ -28,6 +28,10 @@ int tallspritecount = 0;
 
 int currentdmahole = 0;
 
+int banksetrom = 0;
+
+#define BANKSETASM "banksetrom.asm"
+
 int deprecatedframeheight = 0;
 int deprecated160bindexes = 0;
 
@@ -856,13 +860,13 @@ void bank(char **statement)
     // 2.issue ORG,RORG
     currentbank = requestedbank;
     if (romat4k == 1)
-	printf(" ORG $%04X,0\n", (currentbank + 1) * 0x4000);
+        orgprintf(" ORG $%04X,0\n", (currentbank + 1) * 0x4000);
     else
-	printf(" ORG $%04X,0\n", (currentbank + 2) * 0x4000);
+        orgprintf(" ORG $%04X,0\n", (currentbank + 2) * 0x4000);
     if (currentbank == (bankcount - 1))	//last bank
-	printf(" RORG $C000\n");
+        orgprintf(" RORG $C000\n");
     else
-	printf(" RORG $8000\n");
+        orgprintf(" RORG $8000\n");
 }
 
 void dmahole(char **statement)
@@ -874,6 +878,12 @@ void dmahole(char **statement)
     int noflow = FALSE;
 
     assertminimumargs(statement, "dmahole", 1);
+
+    if(banksetrom==1)
+    {
+	prwarn("the dmahole command was ignored. dmahole isn't supported with banksets.");
+        return;
+    }
 
     removeCR(statement[2]);
     removeCR(statement[3]);
@@ -2797,7 +2807,7 @@ void fixfilename(char *filename)
 
     if ((filename[0] != '/') && (filename[0] != '\\') && (incbasepath[0] != 0))
     {
-	char temppath[500];
+	char temppath[1024];
 
 	//the path is relative, and basepath is defined. We'll add on the basepath
 
@@ -3258,7 +3268,7 @@ void add_graphic(char **statement, int incbanner)
 	{
 	    for (t = 0; t < (height / zoneheight); t++)
 	    {
-		char indexstr[1024];
+		char indexstr[1124];
 
 		// Now read the png into memory...
 		incgraphic(statement[2], offset);
@@ -4213,7 +4223,7 @@ void barf_graphic_file(void)
 
     if (bankcount == 0)  // non-banked
     {
-	if ((graphicsdatawidth[dmaplain] > 0) || (dmaplain > 0))	//calculate from graphics area...
+	if (((graphicsdatawidth[dmaplain] > 0) || (dmaplain > 0)) && (banksetrom==0)) //calculate from graphics area...
         {
 	    printf(" echo \" \",[($%04X - gameend)]d , \"bytes of ROM space left in the main area.\"\n", ADDRBASE);
 	    printf(" if ($%04X - gameend) < 0\n", ADDRBASE);
@@ -4231,7 +4241,7 @@ void barf_graphic_file(void)
     else if ((currentbank + 1) == bankcount) // 0xC000
     {
 
-	if ((graphicsdatawidth[dmaplain] > 0) || (dmaplain > 0))	//calculate from graphics area...
+	if (((graphicsdatawidth[dmaplain] > 0) || (dmaplain > 0)) && (banksetrom==0))	//calculate from graphics area...
         {
 	    printf(" echo \" \",[($%04X - .)]d , \"bytes of ROM space left in the main area of bank %d.\"\n", ADDRBASE,
 		   currentbank + 1);
@@ -4251,7 +4261,7 @@ void barf_graphic_file(void)
     else if ((romat4k == 1) && (currentbank == 0)) // 0x4000
     {
 
-	if ((graphicsdatawidth[dmaplain] > 0) || (dmaplain > 0))	//calculate from graphics area...
+	if (((graphicsdatawidth[dmaplain] > 0) || (dmaplain > 0)) && (banksetrom==0))	//calculate from graphics area...
         {
 	    printf(" echo \" \",[($%04X - .)]d , \"bytes of ROM space left in the main area of bank %d.\"\n", ADDRBASE,
 		   currentbank + 1);
@@ -4270,7 +4280,7 @@ void barf_graphic_file(void)
     }
     else
     {
-	if ((graphicsdatawidth[dmaplain] > 0) || (dmaplain > 0))	//calculate from graphics area...
+	if (((graphicsdatawidth[dmaplain] > 0) || (dmaplain > 0)) && (banksetrom==0))	//calculate from graphics area...
         {
 	    printf(" echo \" \",[($%04X - .)]d , \"bytes of ROM space left in the main area of bank %d.\"\n", ADDRBASE,
 		   currentbank + 1);
@@ -4287,8 +4297,6 @@ void barf_graphic_file(void)
             printf(" endif\n");
         }
     }
-
-
 
     if ((graphicsdatawidth[dmaplain] > 0) || (dmaplain > 0))	//only process if the incgraphic command was encountered.
     {
@@ -4322,11 +4330,11 @@ void barf_graphic_file(void)
 	    for (s = zoneheight - 1; s >= 0; s--)
 	    {
 		if (bankcount == 0)
-		    printf("\n ORG $%04X,0  ; *************\n", ADDRBASE);
+		    gfxprintf("\n ORG $%04X,0  ; *************\n", ADDRBASE);
 		else
 		{
-		    printf("\n ORG $%04X,0  ; *************\n", ABADDRBASE);
-		    printf("\n RORG $%04X ; *************\n", ADDRBASE);
+		    gfxprintf("\n ORG $%04X,0  ; *************\n", ABADDRBASE);
+		    gfxprintf("\n RORG $%04X ; *************\n", ADDRBASE);
 		}
 
 		for (t = 0; t < graphicsdatawidth[currentplain]; t++)
@@ -4336,7 +4344,8 @@ void barf_graphic_file(void)
 			runi = 0;
 			if (s == (zoneheight - 1))
 			{
-			    printf("\n%s\n       HEX ", graphicslabels[currentplain][t]);
+                            printf("\n%s = $%X\n",graphicslabels[currentplain][t],t+ADDRBASE);
+			    gfxprintf("\n%s\n       HEX ", graphicslabels[currentplain][t]);
 			    if ((linewidth + strlen(graphicslabels[currentplain][t])) > 60)
 			    {
 				linewidth = 0;
@@ -4346,14 +4355,14 @@ void barf_graphic_file(void)
 			    linewidth = linewidth + strlen(graphicslabels[currentplain][t]);
 			}
 			else
-			    printf("\n;%s\n       HEX ", graphicslabels[currentplain][t]);
+			    gfxprintf("\n;%s\n       HEX ", graphicslabels[currentplain][t]);
 		    }
-		    printf("%02x", graphicsdata[currentplain][t][s]);
+		    gfxprintf("%02x", graphicsdata[currentplain][t][s]);
 		    runi++;
 		    if ((runi % 32 == 0) && ((t + 1) < graphicsdatawidth[currentplain]))
-			printf("\n       HEX ");
+			gfxprintf("\n       HEX ");
 		}
-		printf("\n");
+		gfxprintf("\n");
 		ADDRBASE = ADDRBASE + 256;
 		if (bankcount > 0)
 		    ABADDRBASE = ABADDRBASE + 256;
@@ -4394,11 +4403,11 @@ void barf_graphic_file(void)
 		    prinfo("bank #%d, DMA hole #%d starts @ $%04X", currentbank + 1, currentplain, ADDRBASE);
 
 		if (bankcount == 0)
-		    printf("\n ORG $%04X,0  ; *************\n", ADDRBASE);
+		    gfxprintf("\n ORG $%04X,0  ; *************\n", ADDRBASE);
 		else
 		{
-		    printf("\n ORG $%04X,0  ; *************\n", ABADDRBASE);
-		    printf("\n RORG $%04X ; *************\n", ADDRBASE);
+		    gfxprintf("\n ORG $%04X,0  ; *************\n", ABADDRBASE);
+		    gfxprintf("\n RORG $%04X ; *************\n", ADDRBASE);
 		}
 
 		FILE *holefilepointer;
@@ -5570,7 +5579,7 @@ int getpatternloops(char *patternname)
 void songdata(char **statement)
 {
     char data[1001];		// allow for long lines
-    char savepatternname[100];
+    char savepatternname[200];
     char songstatements[200][100];
     char *wordstart;
     int s;
@@ -9530,6 +9539,15 @@ void set(char **statement)
     {
 	set_romsize(statement[3]);
     }
+    else if (!strncmp(statement[2], "bankset\0", 7))
+    {
+	if (!strncmp(statement[3], "on", 2))
+        {
+	    strcpy(redefined_variables[numredefvars++], "BANKSETROM = 1");
+	    banksetrom=1; 
+            append_a78info("set bankset");
+        }
+    }
     else if (!strncmp(statement[2], "softresetpause\0", 15))
     {
 	if (!strncmp(statement[3], "off", 3))
@@ -10441,6 +10459,59 @@ void restorescreen(void)
     invalidate_Areg();
     jsr("restorescreen");
 }
+
+void orgprintf(char *format, ...)
+{
+    //    orgprintf()
+    //    printf to stdout. If the bankset format is selected,
+    //    then *also* printf to the bankset asm file.
+
+    char buffer[4096];
+    va_list args;
+    va_start(args, format);
+    vsnprintf(buffer, 4095, format, args);
+    va_end(args);
+
+    printf("%s",buffer);
+
+    if (banksetrom == 0)
+        return;
+
+    FILE *banksetout;
+    banksetout=fopen(BANKSETASM,"ab");
+    if(banksetout==NULL)
+        prerror("Couldn't open bankset assembly file %s for update\n",BANKSETASM);
+    fprintf(banksetout, "%s", buffer);
+    fclose(banksetout);
+}
+
+void gfxprintf(char *format, ...)
+{
+    // gfxprintf() 
+    //    print the gfx assembly code to *either* stdout or the bankset assembly file,
+    //    (depending if banksets are selected or not)
+
+    char buffer[4096];
+    va_list args;
+    va_start(args, format);
+    vsnprintf(buffer, 4095, format, args);
+    va_end(args);
+
+    if (banksetrom == 0)
+    {
+        printf("%s",buffer);
+        return;
+    }
+
+    FILE *banksetout;
+    banksetout=fopen(BANKSETASM,"ab");
+    if(banksetout==NULL)
+        prerror("Couldn't open bankset assembly file %s for update\n",BANKSETASM);
+    fprintf(banksetout, "%s", buffer);
+    fclose(banksetout);
+}
+
+
 
 void prinfo(char *format, ...)
 {

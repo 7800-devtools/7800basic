@@ -122,6 +122,8 @@ void characterset(char **statement);
 void savescreen(void);
 void restorescreen(void);
 void barf_graphic_file(void);
+void gfxprintf(char *format, ...);
+void orgprintf(char *format, ...);
 void barfmultiplicationtables(void);
 void append_a78info(char *);
 void create_a78info(void);

@@ -124,9 +124,13 @@ int main(int argc, char *argv[])
 
     printf("SPACEOVERFLOW SET 0\n");
 
+    // these asm files are produced dynamically, so as to allow out-of-order
+    // assembly with dasm. Their mere presence will affect the compile process
+    // so we start off by wiping them, if they exist from a previous compile.
     remove("7800hole.0.asm");
     remove("7800hole.1.asm");
     remove("7800hole.2.asm");
+    remove("banksetrom.asm");
 
     create_a78info();		//wipe/create a78 parameter file
 
