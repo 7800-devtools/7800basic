@@ -62,6 +62,7 @@ int main(int argc, char *argv[])
     condpart = 0;
     ongosub = 0;
     decimal = 0;
+    romsize = 0;
     romat4k = 0;
     bankcount = 0;
     currentbank = 0;

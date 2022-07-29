@@ -14,7 +14,7 @@
 
 ROMSTART = .
  .byte 0
- ORG ROMSTART
+ ORG ROMSTART,0
 
 NMI   = 0
 START = 0

@@ -17,6 +17,7 @@ int decimal;
 int romat4k;
 int includesfile_already_done;
 int bankcount;
+int romsize;
 int currentbank;
 int doublebufferused;
 int boxcollisionused;

@@ -5,12 +5,14 @@
  include "7800basic.h"
  include "7800basic_variable_redefs.h"
 
+ ; BEADHEADER... disabled for now
  ; A BEAD header gets automatically incorportated into the ROM header. 
  ; For more BEAD executable info, check out the spec...
  ; http://7800.8bitdev.org/index.php/The_Atari_7800_BEAD_Execuable_Specification
 
 GAMEDESCRIPTIONSET = 1
 GAMEDESCRIPTION = "Test Name"
+
 
 BDHSC   = %01000000
 BDYM    = %00100000
@@ -21,13 +23,6 @@ BD32K   = %00000001
 BD48K   = %00000010
 BD1800  = %00000101
 BD4000  = %00000110
-
- ifconst ROM32K
-BEADHEADER = 1
- endif
- ifconst ROM48K
-;BEADHEADER = 1
- endif
 
  ifconst BEADHEADER
 BEADHARDWARE SET 0

@@ -626,6 +626,7 @@ void set_romsize(char *size)
 {
     if (!strncmp(size, "32k\0", 3))
     {
+        romsize=32;
 	strcpy(redefined_variables[numredefvars++], "ROM32K = 1");
 	if (strncmp(size + 3, "RAM", 3) == 0)
 	{
@@ -636,23 +637,28 @@ void set_romsize(char *size)
 
     else if (!strncmp(size, "16k\0", 3))
     {
+        romsize=16;
 	strcpy(redefined_variables[numredefvars++], "ROM16K = 1");
     }
     else if (!strncmp(size, "8k\0", 2))
     {
+        romsize=8;
 	strcpy(redefined_variables[numredefvars++], "ROM8K = 1");
     }
 
     else if (!strncmp(size, "48k\0", 3))
     {
+        romsize=48;
 	strcpy(redefined_variables[numredefvars++], "ROM48K = 1");
     }
     else if (!strncmp(size, "52k\0", 3))
     {
+        romsize=52;
 	strcpy(redefined_variables[numredefvars++], "ROM52K = 1");
     }
    else if (!strncmp(size, "144k\0", 4))
     {
+        romsize=144;
 	strcpy(redefined_variables[numredefvars++], "ROM144K = 1");
 	strcpy(redefined_variables[numredefvars++], "ROMAT4K = 1");
 	strcpy(redefined_variables[numredefvars++], "bankswitchmode = 9");
@@ -664,6 +670,7 @@ void set_romsize(char *size)
     }
     else if (!strncmp(size, "128k\0", 4))
     {
+        romsize=128;
 	strcpy(redefined_variables[numredefvars++], "ROM128K = 1");
 	strcpy(redefined_variables[numredefvars++], "bankswitchmode = 8");
 	bankcount = 8;
@@ -683,6 +690,7 @@ void set_romsize(char *size)
     }
     else if (!strncmp(size, "256k\0", 4))
     {
+        romsize=256;
 	strcpy(redefined_variables[numredefvars++], "ROM256K = 1");
 	strcpy(redefined_variables[numredefvars++], "bankswitchmode = 16");
 	bankcount = 16;
@@ -703,6 +711,7 @@ void set_romsize(char *size)
     }
     else if (!strncmp(size, "272k\0", 4))
     {
+        romsize=272;
 	strcpy(redefined_variables[numredefvars++], "ROM272K = 1");
 	strcpy(redefined_variables[numredefvars++], "ROMAT4K = 1");
 	strcpy(redefined_variables[numredefvars++], "bankswitchmode = 17");
@@ -714,6 +723,7 @@ void set_romsize(char *size)
     }
     else if (!strncmp(size, "512k\0", 4))
     {
+        romsize=512;
 	strcpy(redefined_variables[numredefvars++], "ROM512K = 1");
 	strcpy(redefined_variables[numredefvars++], "bankswitchmode = 32");
 	bankcount = 32;
@@ -734,6 +744,7 @@ void set_romsize(char *size)
     }
     else if (!strncmp(size, "528k\0", 4))
     {
+        romsize=528;
 	strcpy(redefined_variables[numredefvars++], "ROM528K = 1");
 	strcpy(redefined_variables[numredefvars++], "ROMAT4K = 1");
 	strcpy(redefined_variables[numredefvars++], "bankswitchmode = 33");
@@ -1329,8 +1340,23 @@ int inlinealphadata(char **statement)
 	if (statement[2][t] == '^')
 	    statement[2][t] = ' ';
 
-    printf("	JMP skipalphadata%d\n", templabel);
-    printf("alphadata%d\n", templabel);
+    if (banksetrom == 0)
+    {
+        printf("	JMP skipalphadata%d\n", templabel);
+        printf("alphadata%d\n", templabel);
+    }
+    else
+    {
+        char banklabel[32];
+        int  stringsize;
+        snprintf(banklabel,32,"alphadata%d", templabel);
+        for (t = 1; (statement[2][t] != '\'') && (statement[2][t] != '\0'); t++)
+            ;
+        stringsize=t-1;
+        if ((doublewide==1)||(strncmp(statement[6], "extrawide", 9) == 0))
+            stringsize=stringsize*2;
+        banksetdataopen(banklabel,stringsize);
+    }
 
     for (t = 1; (statement[2][t] != '\'') && (statement[2][t] != '\0'); t++)
     {
@@ -1349,16 +1375,79 @@ int inlinealphadata(char **statement)
 	}
 	if (quotelen > 32)
 	    prerror("greater than 32 characters used in plotchars statement");
-	printf(" .byte (<%s + $%02x)\n", currentcharset, charoffset);
+	gfxprintf(" .byte (<%s + $%02x)\n", currentcharset, charoffset);
 	if (strncmp(statement[6], "extrawide", 9) == 0)
 	{
-	    printf(" .byte (<%s + $%02x)\n", currentcharset, charoffset + 1);
+            gfxprintf(" .byte (<%s + $%02x)\n", currentcharset, charoffset + 1);
 	}
     }
-    printf("skipalphadata%d\n", templabel);
+    if(banksetrom==0)
+    {
+        printf("skipalphadata%d\n", templabel);
+    }
+    else
+    {
+        banksetdataclose();
+    }
     sprintf(statement[2], "alphadata%d", templabel);
     templabel++;
     return (quotelen);
+}
+
+int banksetdataopen(char *datalabel, int sizeofdata)
+{
+    // utility function. updatates the bankset assembly with an ORG between the
+    // graphics banks
+    static long banksetdatastart   = -1;
+    static long banksetdatacurrent = -1;
+    static int banksetbank = 0;
+
+    if(banksetdatastart == -1)
+    {
+        // This is the first time we were called. Setup the start address for where 
+        // we'll stuff string data. We don't start at the very bottom of the rom,
+        // because dmaholes don't exist that far down, and we want to leave rom
+        // between gfx areas as zero, so sprites can go there.
+
+        banksetdatastart = 0x8000 + (zoneheight * 256) ;
+        banksetdatacurrent = banksetdatastart;
+    }
+
+    // check if the user has bankswitched since we were last called. If so, change
+    // change our address to the start of the current bank...
+    if( banksetbank != currentbank )
+    {
+        banksetdatastart = 0x8000 + (zoneheight * 256) + (currentbank * 0x4000) ;
+        banksetdatacurrent = banksetdatastart;
+    }
+
+    // check if storing this data would overflow the dmaplain. If so, advance to
+    // to the next plain.
+    if ( (banksetdatacurrent + sizeofdata) >= (banksetdatastart + (zoneheight * 256) ) )
+    {
+        banksetdatastart = banksetdatastart + (2 * zoneheight * 256);
+        banksetdatacurrent = banksetdatastart;
+    }
+    
+    gfxprintf("BANKSETSAVEORG set .\n");
+    gfxprintf("    ORG $%X \n",banksetdatacurrent);
+
+    // set data label to memory address it's found at
+    if(bankcount==0)
+        snprintf(redefined_variables[numredefvars++],99, "%s = $%lX\n",datalabel,banksetdatacurrent);
+    else if(currentbank<(bankcount-1)) // if we're not in the last bank, $8000 is the base.
+        snprintf(redefined_variables[numredefvars++],99, "%s = $%lX\n",datalabel,banksetdatacurrent-(currentbank*0x4000));
+    else // if we're in the last bank, $c000 is the base
+        snprintf(redefined_variables[numredefvars++],99, "%s = $%lX\n",datalabel,banksetdatacurrent-(currentbank*0x4000)+0x4000);
+        
+    // advance to the next bit of empty rom
+    banksetdatacurrent = banksetdatacurrent + sizeofdata;
+}
+
+
+void banksetdataclose(void)
+{
+    gfxprintf("    ORG (BANKSETSAVEORG)\n");
 }
 
 void plotchars(char **statement)
@@ -4172,12 +4261,23 @@ void barf_graphic_file(void)
 	DMASIZE = 8192;
     if (bankcount == 0)
     {
-	BANKSTART = 0xE000;
+        if((banksetrom==1)&&(zoneheight==8))
+	    BANKSTART = 0xF000;
+        else
+	    BANKSTART = 0xE000;
     }
     else if (currentbank == (bankcount - 1)) // last bank
     {
-	BANKSTART = 0xE000;
-	REALSTART = 0x8000;
+        if((banksetrom==1)&&(zoneheight==8))
+        {
+	    BANKSTART = 0xF000;
+	    REALSTART = 0x9000;
+        }
+        else
+        {
+	    BANKSTART = 0xE000;
+	    REALSTART = 0x8000;
+        }
     }
     else if ((romat4k == 1) && (currentbank == 0))
     {
