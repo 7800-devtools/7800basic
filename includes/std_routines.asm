@@ -582,6 +582,16 @@ skippalframeadjusting
 servicesongwasnotmissed
      endif ; MUSICTRACKER
 
+     ifconst RMT
+           lda palfastframe
+           beq skiprasterupdate2
+           lda rasterpause
+           beq skiprasterupdate2
+           jsr RASTERMUSICTRACKER+3
+skiprasterupdate2
+     endif
+
+
      rts
 
 serviceatarivoxqueue
@@ -3108,6 +3118,8 @@ skipport0val
    iny
    iny ; y=y+2
 skipport1val
+ cpy #0 
+ beq exitkeypadrowselect 
    lda keyrowdirectionmask,y
    sta CTLSWA
    tya
@@ -3120,6 +3132,7 @@ skipport1val
    tax
    lda keyrowselectvalue,x
    sta SWCHA
+exitkeypadrowselect
    rts
 
 keyrowdirectionmask

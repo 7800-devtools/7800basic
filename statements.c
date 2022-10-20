@@ -695,6 +695,7 @@ void set_romsize(char *size)
 	strcpy(redefined_variables[numredefvars++], "bankswitchmode = 16");
 	bankcount = 16;
 	currentbank = 0;
+	append_a78info("set supergame");
 	if (strncmp(size + 4, "BANKRAM", 7) == 0)
 	{
 	    append_a78info("set supergamebankram");
@@ -728,6 +729,7 @@ void set_romsize(char *size)
 	strcpy(redefined_variables[numredefvars++], "bankswitchmode = 32");
 	bankcount = 32;
 	currentbank = 0;
+	append_a78info("set supergame");
 	if (strncmp(size + 4, "BANKRAM", 7) == 0)
 	{
 	    append_a78info("set supergamebankram");
@@ -10153,6 +10155,11 @@ void set(char **statement)
                 strcpy(redefined_variables[numredefvars++], "pokeysupport = 1");
 	        strcpy(redefined_variables[numredefvars++], "pokeyaddress = $4000");
                 append_a78info("set pokey@4000");
+            }
+            else // some other address
+            {
+                strcpy(redefined_variables[numredefvars++], "pokeysupport = 1");
+                snprintf(redefined_variables[numredefvars++],30,"pokeyaddress = %s",statement[3]);
             }
 	}
 
