@@ -10,7 +10,7 @@ CC=cc
 LEX=lex
 LEXFLAGS=-t
 
-all: 7800basic 7800preprocess 7800postprocess 7800filter 7800optimize 7800header 7800sign 7800makecc2 snip
+all: 7800basic 7800preprocess 7800postprocess 7800filter 7800optimize 7800header 7800sign 7800makecc2 snip 7800rmtfix
 
 7800basic: 7800bas.c statements.c keywords.c statements.h keywords.h atarivox.h
 	${CC} ${CFLAGS} -o $@ 7800bas.c statements.c keywords.c -lz -lpng -lm
@@ -39,6 +39,9 @@ all: 7800basic 7800preprocess 7800postprocess 7800filter 7800optimize 7800header
 
 snip: snip.c
 	${CC} ${CFLAGS} -o $@ snip.c
+
+7800rmtfix: 7800rmtfix.c
+	${CC} ${CFLAGS} -o $@ 7800rmtfix.c
 
 7800makecc2: 7800makecc2.c
 	${CC} ${CFLAGS} -o $@ 7800makecc2.c
