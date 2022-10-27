@@ -541,6 +541,8 @@ int switchjoy(char *input_source)
 	if (keynum == 13)
 	    prerror("unsupported keypad key value");
 	// if we're here, the input_source in the form "keypadNkeyT", where N=port #, K=key (0-9,s or n)
+        printf(" lda keypadready\n");
+        printf(" bne [.-2]\n");
 	printf(" lda keypadmatrix%d%c\n", port, rowletter[keynum / 3]);
 	printf(" and #$%02x\n", keymask[keynum % 3]);
 	return 4;

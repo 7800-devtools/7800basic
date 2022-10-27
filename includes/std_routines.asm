@@ -3151,6 +3151,8 @@ keyrowselectvalue
  ifconst KEYPADSUPPORT
    ; TODO - split into compile-time KEYPAD0SUPPORT and KEYPAD1SUPPORT
 keypadcolumnread
+   lda #$ff
+   sta keypadready
    lda port0control
    cmp #7
    bne skipkeypadcolumnread0
@@ -3197,6 +3199,8 @@ skipkeypadcolumnread0
    eor #%00000111
    sta keypadmatrix1a,x
 skipkeypadcolumnread1
+   lda #0
+   sta keypadready
    rts
  endif ; KEYPADSUPPORT
  
