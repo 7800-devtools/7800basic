@@ -130,9 +130,9 @@ buttonreadloopreturn
          dex
          bpl buttonreadloop
 
-	 ifconst KEYPADSUPPORT
-           jsr keypadrowselect
-	 endif ; KEYPADSUPPORT
+	 ;ifconst KEYPADSUPPORT
+         ;  jsr keypadrowselect
+	 ;endif ; KEYPADSUPPORT
 
 
  ifconst DOUBLEBUFFER
@@ -318,6 +318,7 @@ skipuserintroutine
 
      ifconst KEYPADSUPPORT
          jsr keypadcolumnread
+         jsr keypadrowselect
      endif
 
 NMIexit
@@ -3106,6 +3107,7 @@ mousebuttonhandler ; outside of conditional, for button-handler LUT
  ifconst KEYPADSUPPORT
    ; ** select keypad rows 0 to 3 over 4 frames...
 keypadrowselect
+   inc keypadcounter
    ldy #0
    lda port0control
    cmp #7
@@ -3126,7 +3128,7 @@ skipport1val
    asl
    asl
    sta inttemp1
-   lda framecounter
+   lda keypadcounter
    and #3
    ora inttemp1
    tax
@@ -3151,12 +3153,10 @@ keyrowselectvalue
  ifconst KEYPADSUPPORT
    ; TODO - split into compile-time KEYPAD0SUPPORT and KEYPAD1SUPPORT
 keypadcolumnread
-   lda #$ff
-   sta keypadready
    lda port0control
    cmp #7
    bne skipkeypadcolumnread0
-   lda framecounter
+   lda keypadcounter
    and #3
    asl ; x2 because keypad variables are interleaved
    tax
@@ -3179,7 +3179,7 @@ skipkeypadcolumnread0
    lda port1control
    cmp #7
    bne skipkeypadcolumnread1
-   lda framecounter
+   lda keypadcounter
    and #3
    asl ; x2 because keypad variables are interleaved
    tax
@@ -3199,8 +3199,6 @@ skipkeypadcolumnread0
    eor #%00000111
    sta keypadmatrix1a,x
 skipkeypadcolumnread1
-   lda #0
-   sta keypadready
    rts
  endif ; KEYPADSUPPORT
  

@@ -567,9 +567,8 @@ snesport           DS 1
  endif
 
  ifconst KEYPADSUPPORT
-keypadready        DS 1
+keypadcounter      DS 1
  endif
-
 
  ; see if we need an interrupthold byte...
 INTERRUPTNEEDED SET 0
