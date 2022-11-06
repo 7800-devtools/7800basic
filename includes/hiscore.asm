@@ -547,6 +547,7 @@ carryonkeepdisplayinghs
 
              ldx hscursorx
              ldy hsdisplaymode
+ #ifnconst .HSup
              lda SWCHA
              cpy #3
              bne hsskipadjustjoystick1
@@ -556,6 +557,21 @@ carryonkeepdisplayinghs
              asl
 hsskipadjustjoystick1
              sta hsswcha
+ #else ; there are user-defined routines!
+             jsr .HSdown
+             lda hsreturn ; b0
+             asl
+             pha
+             jsr .HSup
+             pla 
+             ora hsreturn 
+             asl 
+             asl 
+             asl 
+             asl 
+             eor #$FF 
+             sta hsswcha
+ #endif
              lda SWCHB
              and #%00000010
              bne hsskipselectswitch
@@ -611,7 +627,6 @@ hsjoystickskipped
              lda hsinpt1
              bpl hsbuttonskipped
              lda hsjoydebounce
-             beq hsfiredontdebounce
              bne hspostjoystick
 hsfiredontdebounce
              lda hsinitialhold
@@ -707,6 +722,7 @@ skipdebounceadjust
                sta hsinpt1
                rts
 hscheckresetover
+ #ifnconst .HSup
              ldx hsdisplaymode
              cpx #3
              bne hsskipadjustjoyfire1
@@ -716,6 +732,13 @@ hsskipadjustjoyfire1
              lda sINPT1
 hsskipadjustjoyfire1done
              sta hsinpt1
+ #else ; there are user-defined routines!
+             jsr .HSselect
+             lda hsreturn
+             ror ; carry
+             ror ; b7
+             sta hsinpt1
+ #endif
 skipstorefirebuttonstatus
              rts
 

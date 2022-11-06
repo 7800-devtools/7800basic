@@ -420,11 +420,50 @@ pauseroutine
  ifnconst SOFTRESETASPAUSEOFF
  ifnconst MOUSESUPPORT
  ifnconst TRAKBALLSUPPORT
+     lda port0control
+     cmp #11
+     bne skipsoftpause
      lda SWCHA ; then check the soft "RESET" joysick code...
      and #%01110000 ; _LDU
      beq pausepressed
+skipsoftpause
  endif
  endif
+ endif
+ ifconst SNES0PAUSE
+     lda port0control
+     cmp #11
+     bne skipsnes0pause
+     lda snesdetected0
+     beq skipsnes0pause
+     lda snes2atari0hi
+     and #%00010000
+     beq pausepressed
+skipsnes0pause
+ endif
+ ifconst SNES1PAUSE
+
+     lda port1control
+     cmp #11
+     bne skipsnes1pause
+     lda snesdetected1
+     beq skipsnes1pause
+     lda snes2atari1hi
+     and #%00010000
+     beq pausepressed
+skipsnes1pause
+ endif
+ ifconst SNESNPAUSE
+     ldx snesport
+     lda port0control,x
+     cmp #11
+     bne skipsnesNpause
+     lda snesdetected0,x
+     beq skipsnesNpause
+     lda snes2atari0hi,x
+     and #%00010000
+     beq pausepressed
+skipsnesNpause
  endif
 
          ;pause isn't pressed

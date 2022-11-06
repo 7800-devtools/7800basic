@@ -73,6 +73,7 @@ hscolorchaseindex = $213B
 visibleDLLstart   = $213C
 overscanDLLstart  = $213D
 frameslost        = $213E
+hsreturn          = $213F
 
 
 rand       = $40

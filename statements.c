@@ -258,13 +258,29 @@ int switchjoy(char *input_source)
     // snes2atari0lo:   A      X     LSH    RSH     -      -      -      -
     // snes2atari0hi:   B      Y    SELECT START    UP    DOWN   LEFT  RIGHT
 
-    if (!strncmp(input_source, "snes0any\0", 8))
+    if (!strncmp(input_source, "snes0any\0", 9))
     {
 	printf(" lda snes2atari0hi\n");
 	printf(" and snes2atari0lo\n");
 	printf(" eor #$FF\n");
 	return 4;
     }
+    if (!strncmp(input_source, "snes0anyABXY\0", 12))
+    {
+	printf(" lda snes2atari0hi\n");
+	printf(" and snes2atari0lo\n");
+	printf(" ora #%%00111111\n");
+	printf(" eor #$FF\n");
+	return 4;
+    }
+    if (!strncmp(input_source, "snes0anymove\0", 12))
+    {
+	printf(" lda snes2atari0hi\n");
+	printf(" ora #%%11110000\n");
+	printf(" eor #$FF\n");
+	return 4;
+    }
+
     if (!strncmp(input_source, "snes0up\0", 7))
     {
 	printf(" lda snes2atari0hi\n");
@@ -343,10 +359,25 @@ int switchjoy(char *input_source)
     // snes2atari0lo:   A      X     LSH    RSH     -      -      -      -
     // snes2atari0hi:   B      Y    SELECT START    UP    DOWN   LEFT  RIGHT
 
-    if (!strncmp(input_source, "snes1any\0", 8))
+    if (!strncmp(input_source, "snes1any\0", 9))
     {
 	printf(" lda snes2atari1hi\n");
 	printf(" and snes2atari1lo\n");
+	printf(" eor #$FF\n");
+	return 4;
+    }
+    if (!strncmp(input_source, "snes1anyABXY\0", 12))
+    {
+	printf(" lda snes2atari1hi\n");
+	printf(" and snes2atari1lo\n");
+	printf(" ora #%%00111111\n");
+	printf(" eor #$FF\n");
+	return 4;
+    }
+    if (!strncmp(input_source, "snes1anymove\0", 12))
+    {
+	printf(" lda snes2atari1hi\n");
+	printf(" ora #%%11110000\n");
 	printf(" eor #$FF\n");
 	return 4;
     }
@@ -429,7 +460,7 @@ int switchjoy(char *input_source)
     // snes2atari0lo:   A      X     LSH    RSH     -      -      -      -
     // snes2atari0hi:   B      Y    SELECT START    UP    DOWN   LEFT  RIGHT
 
-    if (!strncmp(input_source, "snes#any\0", 8))
+    if (!strncmp(input_source, "snes#any\0", 9))
     {
 	printf(" ldx snesport\n");
 	printf(" lda snes2atari0hi,x\n");
@@ -437,6 +468,24 @@ int switchjoy(char *input_source)
 	printf(" eor #$FF\n");
 	return 4;
     }
+    if (!strncmp(input_source, "snes#anyABXY\0", 12))
+    {
+	printf(" ldx snesport\n");
+	printf(" lda snes2atari0hi,x\n");
+	printf(" and snes2atari0lo,x\n");
+	printf(" ora #%%00111111\n");
+	printf(" eor #$FF\n");
+	return 4;
+    }
+    if (!strncmp(input_source, "snes#anymove\0", 12))
+    {
+	printf(" ldx snesport\n");
+	printf(" lda snes2atari0hi,x\n");
+	printf(" ora #%%11110000\n");
+	printf(" eor #$FF\n");
+	return 4;
+    }
+
     if (!strncmp(input_source, "snes#up\0", 7))
     {
 	printf(" ldx snesport\n");
@@ -541,8 +590,6 @@ int switchjoy(char *input_source)
 	if (keynum == 13)
 	    prerror("unsupported keypad key value");
 	// if we're here, the input_source in the form "keypadNkeyT", where N=port #, K=key (0-9,s or n)
-        printf(" lda keypadready\n");
-        printf(" bne [.-2]\n");
 	printf(" lda keypadmatrix%d%c\n", port, rowletter[keynum / 3]);
 	printf(" and #$%02x\n", keymask[keynum % 3]);
 	return 4;
@@ -680,7 +727,7 @@ void set_romsize(char *size)
 	append_a78info("set supergame");
 	if (strncmp(size + 4, "BANKRAM", 7) == 0)
 	{
-	    append_a78info("set supergamebankram");
+	    append_a78info("set bankram");
 	    strcpy(redefined_variables[numredefvars++], "SGRAM = 1");
 	    strcpy(redefined_variables[numredefvars++], "BANKRAM = 1");
 	}
@@ -9656,6 +9703,21 @@ void set(char **statement)
     {
 	if (!strncmp(statement[3], "off", 3))
 	    strcpy(redefined_variables[numredefvars++], "SOFTRESETASPAUSEOFF = 1");
+    }
+    else if (!strncmp(statement[2], "snes0pause\0", 10))
+    {
+	if (!strncmp(statement[3], "on", 2))
+	    strcpy(redefined_variables[numredefvars++], "SNES0PAUSE = 1");
+    }
+    else if (!strncmp(statement[2], "snes1pause\0", 10))
+    {
+	if (!strncmp(statement[3], "on", 2))
+	    strcpy(redefined_variables[numredefvars++], "SNES1PAUSE = 1");
+    }
+    else if (!strncmp(statement[2], "snes#pause\0", 10))
+    {
+	if (!strncmp(statement[3], "on", 2))
+	    strcpy(redefined_variables[numredefvars++], "SNESNPAUSE = 1");
     }
     else if (!strncmp(statement[2], "basepath\0", 7))
     {
