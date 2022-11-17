@@ -417,6 +417,7 @@ pauseroutine
          bit SWCHB
          beq pausepressed
 
+ ifnconst SOFTPAUSEOFF
  ifnconst SOFTRESETASPAUSEOFF
  ifnconst MOUSESUPPORT
  ifnconst TRAKBALLSUPPORT
@@ -427,6 +428,7 @@ pauseroutine
      and #%01110000 ; _LDU
      beq pausepressed
 skipsoftpause
+ endif
  endif
  endif
  endif
@@ -760,8 +762,16 @@ snes2atari_signal_skip
 
      lda SNES_CTLSWA_MASK,x
      sta CTLSWA    ; enable pins UP/DOWN to work as outputs
+     sta SWCHA     ; latch+clock high
+     nop
+     nop
+     nop
+     nop
+     nop
+     nop
+     nop
      lda #$0
-     sta SWCHA     ; make both latch and clock down
+     sta SWCHA     ; latch and clock low
      ldy #16 ; 16 bits 
 SNES2ATARILOOP
          rol INPT4,x     ; sample data into carry
@@ -1963,26 +1973,42 @@ BS_return
 checkselectswitch
      lda SWCHB ; first check the real select switch...
      and #%00000010
+ ifnconst SOFTPAUSEOFF
  ifnconst MOUSESUPPORT
  ifnconst TRAKBALLSUPPORT
      beq checkselectswitchreturn ; switch is pressed
+     lda port0control
+     cmp #11
+     bne checkselectsoftswitch
+     lda #$ff
+     rts
+checkselectsoftswitch
      lda SWCHA ; then check the soft "select" joysick code...
      and #%10110000 ; R_DU
  endif ; TRAKBALLSUPPORT
  endif ; MOUSESUPPORT
+ endif ; SOFTPAUSEOFF
 checkselectswitchreturn
      rts
 
 checkresetswitch
      lda SWCHB ; first check the real reset switch...
      and #%00000001
+ ifnconst SOFTPAUSEOFF
  ifnconst MOUSESUPPORT
  ifnconst TRAKBALLSUPPORT
      beq checkresetswitchreturn ; switch is pressed
+     lda port0control
+     cmp #11
+     bne checkresetsoftswitch
+     lda #$ff
+     rts
+checkresetsoftswitch
      lda SWCHA ; then check the soft "reset" joysick code...
      and #%01110000 ; _LDU
  endif ; TRAKBALLSUPPORT
  endif ; MOUSESUPPORT
+ endif ; SOFTPAUSEOFF
 checkresetswitchreturn
      rts
 
