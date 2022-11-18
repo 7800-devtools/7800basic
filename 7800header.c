@@ -12,7 +12,7 @@
 //      7800header - a simple app to generate/interrogate a a78 header.
 //                      Michael Saarna (aka RevEng@AtariAge)
 
-#define HEADER_VERSION_INFO "7800header 0.15"
+#define HEADER_VERSION_INFO "7800header 0.16"
 
 void usage(char *binaryname);
 uint32_t phtole32(uint32_t value);
@@ -139,9 +139,9 @@ int main(int argc, char **argv)
     //fix bits that shouldn't be set in the header
     if (printinfo == 0)
     {
-	if (myheader.controller1 > 9)
+	if (myheader.controller1 > 11)
 	    myheader.controller1 = 1;
-	if (myheader.controller2 > 9)
+	if (myheader.controller2 > 11)
 	    myheader.controller2 = 1;
         if(myheader.version<3)
 	    myheader.tvformat &= 1;
