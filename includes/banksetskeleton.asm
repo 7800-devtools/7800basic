@@ -12,9 +12,11 @@
 
  #include "7800basicheader.asm"
 
-ROMSTART = .
- .byte 0
- ORG ROMSTART,0
+ ; A work-around for dasm stripping off the first bit of the rom, if it
+ ; isn't used...
+;ROMSTART = .
+ ;.byte 0
+ ;ORG ROMSTART,0
 
 NMI   = 0
 START = 0

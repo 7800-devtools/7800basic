@@ -31,6 +31,7 @@ int currentdmahole = 0;
 int banksetrom = 0;
 
 #define BANKSETASM "banksetrom.asm"
+#define BANKSETSTRINGSASM "banksetstrings.asm"
 
 int deprecatedframeheight = 0;
 int deprecated160bindexes = 0;
@@ -1396,18 +1397,7 @@ int inlinealphadata(char **statement)
         printf("	JMP skipalphadata%d\n", templabel);
         printf("alphadata%d\n", templabel);
     }
-    else
-    {
-        char banklabel[32];
-        int  stringsize;
-        snprintf(banklabel,32,"alphadata%d", templabel);
-        for (t = 1; (statement[2][t] != '\'') && (statement[2][t] != '\0'); t++)
-            ;
-        stringsize=t-1;
-        if ((doublewide==1)||(strncmp(statement[6], "extrawide", 9) == 0))
-            stringsize=stringsize*2;
-        banksetdataopen(banklabel,stringsize);
-    }
+    gfxprintf("alphadata%d\n", templabel);
 
     for (t = 1; (statement[2][t] != '\'') && (statement[2][t] != '\0'); t++)
     {
@@ -1436,69 +1426,9 @@ int inlinealphadata(char **statement)
     {
         printf("skipalphadata%d\n", templabel);
     }
-    else
-    {
-        banksetdataclose();
-    }
     sprintf(statement[2], "alphadata%d", templabel);
     templabel++;
     return (quotelen);
-}
-
-int banksetdataopen(char *datalabel, int sizeofdata)
-{
-    // utility function. updatates the bankset assembly with an ORG between the
-    // graphics banks
-    static long banksetdatastart   = -1;
-    static long banksetdatacurrent = -1;
-    static int banksetbank = 0;
-
-    if(banksetdatastart == -1)
-    {
-        // This is the first time we were called. Setup the start address for where 
-        // we'll stuff string data. We don't start at the very bottom of the rom,
-        // because dmaholes don't exist that far down, and we want to leave rom
-        // between gfx areas as zero, so sprites can go there.
-
-        banksetdatastart = 0x8000 + (zoneheight * 256) ;
-        banksetdatacurrent = banksetdatastart;
-    }
-
-    // check if the user has bankswitched since we were last called. If so, change
-    // change our address to the start of the current bank...
-    if( banksetbank != currentbank )
-    {
-        banksetdatastart = 0x8000 + (zoneheight * 256) + (currentbank * 0x4000) ;
-        banksetdatacurrent = banksetdatastart;
-    }
-
-    // check if storing this data would overflow the dmaplain. If so, advance to
-    // to the next plain.
-    if ( (banksetdatacurrent + sizeofdata) >= (banksetdatastart + (zoneheight * 256) ) )
-    {
-        banksetdatastart = banksetdatastart + (2 * zoneheight * 256);
-        banksetdatacurrent = banksetdatastart;
-    }
-    
-    gfxprintf("BANKSETSAVEORG set .\n");
-    gfxprintf("    ORG $%X \n",banksetdatacurrent);
-
-    // set data label to memory address it's found at
-    if(bankcount==0)
-        snprintf(redefined_variables[numredefvars++],99, "%s = $%lX\n",datalabel,banksetdatacurrent);
-    else if(currentbank<(bankcount-1)) // if we're not in the last bank, $8000 is the base.
-        snprintf(redefined_variables[numredefvars++],99, "%s = $%lX\n",datalabel,banksetdatacurrent-(currentbank*0x4000));
-    else // if we're in the last bank, $c000 is the base
-        snprintf(redefined_variables[numredefvars++],99, "%s = $%lX\n",datalabel,banksetdatacurrent-(currentbank*0x4000)+0x4000);
-        
-    // advance to the next bit of empty rom
-    banksetdatacurrent = banksetdatacurrent + sizeofdata;
-}
-
-
-void banksetdataclose(void)
-{
-    gfxprintf("    ORG (BANKSETSAVEORG)\n");
 }
 
 void plotchars(char **statement)
