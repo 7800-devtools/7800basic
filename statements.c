@@ -930,6 +930,16 @@ void bank(char **statement)
         orgprintf(" RORG $C000\n");
     else
         orgprintf(" RORG $8000\n");
+
+    // a bit kludgey, but we need this module in the first bit of the last bankset bank
+    // instead of the last 4k, where it goes normally.
+    if ( (banksetrom==1) && (currentbank == (bankcount - 1)))
+    {
+        // gfxprint only outputs to the bankset bank, when the bankset scheme is used.
+        gfxprintf("     ifnconst included.hiscore.asm\n");
+        gfxprintf("         include hiscore.asm\n");
+        gfxprintf("     endif ; included.hiscore.asm\n");
+    }
 }
 
 void dmahole(char **statement)
@@ -4210,11 +4220,16 @@ void add_inline(char *myinclude)
 {
     removeCR(myinclude);
     printf(" include %s\n", myinclude);
-    printf("included.%s = 1\n", myinclude);
+    sprintf(redefined_variables[numredefvars++], "included.%s = 1", myinclude);
     if ((bankcount&1)&&(currentbank>0))
         printf("included.%s.bank = %d\n", myinclude,currentbank-1);
     else
         printf("included.%s.bank = %d\n", myinclude,currentbank);
+    if ((banksetrom==1)&&(strncmp(myinclude,"hiscore.asm",11)==0))
+    {
+        // gfxprint only outputs to the bankset bank, when the bankset scheme is used.
+        gfxprintf(" include %s\n", myinclude);
+    }
 }
 
 void init_includes(char *path)
@@ -9945,6 +9960,7 @@ void set(char **statement)
 	sprintf(redefined_variables[numredefvars++], "HSGAMERANKS = 1");
 	removeCR(statement[3]);	//remove CR from the name
 	tmpval[2] = 0;
+	fprintf(outfile, "\n ifconst HSCHARSHERE\n");
 	while ((statement[strindex] != 0) && (statement[strindex][0] != 0))
 	{
 	    //save these for later. we need to output them in individual tables...
@@ -10024,6 +10040,8 @@ void set(char **statement)
 	    removeCR(statement[strindex]);	//remove CR from the name
 	}
 
+	fprintf(outfile, "\n endif ; HSCHARSHERE\n");
+	fprintf(outfile, "\n ifnconst isBANKSETBANK\n");
 	fprintf(outfile, "\nranklabellengths\n .byte ");
 	for (s = 0; s < count; s++)
 	{
@@ -10057,6 +10075,7 @@ void set(char **statement)
 		fprintf(outfile, "$%02x", val[t][s]);
 	    }
 	}
+	fprintf(outfile, "\n endif ;  isBANKSETBANK\n");
 	fprintf(outfile, "\n");
 	fclose(outfile);
 

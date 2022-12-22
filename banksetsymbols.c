@@ -33,7 +33,20 @@ int main(int argc, char **argv)
 
     while (fgets(inbuffer, BUFSIZE, in) != NULL)
     {
-	if( (strncmp(inbuffer,"alphadata",9)==0) && (inbuffer[9]>='0') && (inbuffer[9]<='9') )
+	if(   ( (strncmp(inbuffer,"alphadata",9)==0) && (inbuffer[9]>='0') && (inbuffer[9]<='9') ) || 
+	        (strncmp(inbuffer,"highscoredifficulty",19)==0) ||
+	        (strncmp(inbuffer,"easylevelname",13)==0) ||
+	        (strncmp(inbuffer,"mediumlevelname",15)==0) ||
+	        (strncmp(inbuffer,"hardlevelname",13)==0) ||
+	        (strncmp(inbuffer,"expertlevelname",15)==0) ||
+	        (strncmp(inbuffer,"ranklabel_",10)==0) ||
+	        (strncmp(inbuffer,"HSGAMENAMEtable",15)==0) ||
+	        (strncmp(inbuffer,"HSHIGHSCOREStext",16)==0) ||
+	        (strncmp(inbuffer,"player0label",12)==0) ||
+	        (strncmp(inbuffer,"player1label",12)==0) ||
+	        (strncmp(inbuffer,"player2label",12)==0) ||
+	        (strncmp(inbuffer,"highscorerank",13)==0) )
+                
         {
             sscanf(inbuffer,"%s %s", variable, value);
             fprintf(out,"%s = $%s\n",variable,value);
