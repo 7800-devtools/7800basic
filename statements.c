@@ -1409,7 +1409,6 @@ int inlinealphadata(char **statement)
     if (banksetrom == 0)
     {
         printf("	JMP skipalphadata%d\n", templabel);
-        printf("alphadata%d\n", templabel);
     }
     gfxprintf("alphadata%d\n", templabel);
 
@@ -5325,14 +5324,6 @@ void data(char **statement)
 
     assertminimumargs(statement, "data", 1);
 
-    data_length = (char **) malloc(sizeof(char *) * 200);
-    for (i = 0; i < 200; ++i)
-    {
-	data_length[i] = (char *) malloc(sizeof(char) * 200);
-	for (j = 0; j < 200; ++j)
-	    data_length[i][j] = '\0';
-    }
-    deallocdata_length = data_length;
     removeCR(statement[2]);
 
     if ((banksetrom) && (strncmp(statement[2],"bset_",5)==0))
@@ -5374,24 +5365,24 @@ void data(char **statement)
                 gfxprintf("    .byte %s\n", data);
         }
     }
-    if(!thisdatabankset)
-        printf(".skip%s\n", statement[0]);
 
-    strcpy(data_length[0], " ");
-    strcpy(data_length[1], "const");
-    sprintf(data_length[2], "%s_length", statement[2]);
-    strcpy(data_length[3], "=");
-    sprintf(data_length[4], ".skip%s-%s", statement[0], statement[2]);
-    strcpy(data_length[5], "\n");
-    data_length[6][0] = '\0';
-    keywords(data_length);
-    freemem(deallocdata_length);
+    if(!thisdatabankset)
+    {
+        printf(".skip%s\n", statement[0]);
+        printf("%s_length = [. - %s]\n", statement[2],statement[2]);
+    }
+    else
+    {
+        gfxprintf("%s_length = [. - %s]\n", statement[2],statement[2]);
+    }
+    sprintf(constants[numconstants++], "%s_length",statement[2]);
 
     char consthilo[200];
     snprintf(consthilo,200,"%s_lo",statement[2]);
     strcpy(constants[numconstants++], consthilo); // record to queue
     snprintf(consthilo,200,"%s_hi",statement[2]);
     strcpy(constants[numconstants++], consthilo); // record to queue
+
     if(!thisdatabankset)
     {
         printf("%s_lo SET #<%s\n",statement[2],statement[2]);
@@ -6761,15 +6752,6 @@ void alphadata(char **statement)
 
     thisdatabankset = 0;
 
-    data_length = (char **) malloc(sizeof(char *) * 200);
-    for (i = 0; i < 200; ++i)
-    {
-	data_length[i] = (char *) malloc(sizeof(char) * 200);
-	for (j = 0; j < 200; ++j)
-	    data_length[i][j] = '\0';
-    }
-    deallocdata_length = data_length;
-
     removeCR(statement[3]);
     removeCR(statement[4]);
 
@@ -6842,17 +6824,16 @@ void alphadata(char **statement)
 	    gfxprintf("\n");
     }
     if(!thisdatabankset)
+    {
         printf(".skip%s\n", statement[0]);
+        printf("%s_length = [. - %s]\n", statement[2],statement[2]);
+    }
+    else
+    {
+        gfxprintf("%s_length = [. - %s]\n", statement[2],statement[2]);
+    }
+    sprintf(constants[numconstants++], "%s_length",statement[2]);
 
-    strcpy(data_length[0], " ");
-    strcpy(data_length[1], "const");
-    sprintf(data_length[2], "%s_length", statement[2]);
-    strcpy(data_length[3], "=");
-    sprintf(data_length[4], ".skip%s-%s", statement[0], statement[2]);
-    strcpy(data_length[5], "\n");
-    data_length[6][0] = '\0';
-    keywords(data_length);
-    freemem(deallocdata_length);
 }
 
 int lookupcharacter(char mychar)
