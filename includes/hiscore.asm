@@ -840,9 +840,7 @@ expertlevelname
                          .byte $04,$17,$0f,$04,$11,$13,$1d,$0b,$04,$15,$04,$0b,$1d,$07,$08,$06,$07,$1d,$12,$02,$0e,$11,$04,$12
                      endif ; HSCHARSHERE
                  else ; HSCUSTOMLEVELNAMES
-                     ifconst HSCHARSHERE
-                         include "7800hsgamediffnames.asm"
-                     endif ; HSCHARSHERE
+                     include "7800hsgamediffnames.asm"
                  endif ; HSCUSTOMLEVELNAMES
              else ; HSNOLEVELNAMES
                  ifconst HSCHARSHERE

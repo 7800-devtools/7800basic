@@ -45,6 +45,7 @@ int main(int argc, char **argv)
 	        (strncmp(inbuffer,"player0label",12)==0) ||
 	        (strncmp(inbuffer,"player1label",12)==0) ||
 	        (strncmp(inbuffer,"player2label",12)==0) ||
+	        (strncmp(inbuffer,"bset_",5)==0) ||
 	        (strncmp(inbuffer,"highscorerank",13)==0) )
                 
         {

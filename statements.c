@@ -920,6 +920,10 @@ void bank(char **statement)
     // 1. dump and clear any incgraphics from the current bank before changing
     barf_graphic_file();
 
+    orgprintf(" if START_OF_ROM = . ; avoid dasm empty start-rom truncation.\n");
+    orgprintf("     .byte 0\n");
+    orgprintf(" endif\n");
+
     // 2.issue ORG,RORG
     currentbank = requestedbank;
     if (romat4k == 1)
@@ -2944,6 +2948,9 @@ void incmapfile(char **statement)
     char datalabelname[256];
     char datavalues[256][256];
     int s, t;
+    int thisdatabankset;
+
+    thisdatabankset = 0;
 
     assertminimumargs(statement, "incmapfile", 1);
 
@@ -2959,10 +2966,17 @@ void incmapfile(char **statement)
 	if (strcasecmp(datalabelname + t, ".tmx") == 0)
 	    datalabelname[t] = 0;
 
-    if (!(optimization & 4))
-        printf("	JMP skipmapdata%d\n", templabel);
+    if ((banksetrom) && (strncmp(datalabelname,"bset_",5)==0))
+        thisdatabankset = 1;
 
-    printf("%s\n", datalabelname);
+    if (!thisdatabankset)
+        if (!(optimization & 4))
+            printf("    JMP skipmapdata%d\n", templabel);
+
+    if (!thisdatabankset)
+        printf("%s\n", datalabelname);
+    else
+        gfxprintf("%s\n", datalabelname);
 
     //default data value is the "0" character...
     for (t = 0; t < 256; t++)
@@ -3014,7 +3028,10 @@ void incmapfile(char **statement)
 	if (keyword != NULL)
 	{
 	    gid = atoi(keyword + 10);
-	    printf("%s", datavalues[gid]);
+            if (!thisdatabankset)
+	         printf("%s", datavalues[gid]);
+            else
+	         gfxprintf("%s", datavalues[gid]);
 	}
 
 	keyword = strstr(line, "<data encoding=\"");
@@ -3040,7 +3057,9 @@ void incmapfile(char **statement)
     }
     fclose(fp);
 
-    printf("skipmapdata%d\n", templabel);
+    if (!thisdatabankset)
+        printf("skipmapdata%d\n", templabel);
+
     templabel = templabel + 1;
 }
 
@@ -4401,6 +4420,9 @@ void barf_graphic_file(void)
 	{
 	    prerror("graphics overrun in bank %d", currentbank);
 	}
+        orgprintf(" if START_OF_ROM = . ; avoid dasm empty start-rom truncation.\n");
+        orgprintf("     .byte 0\n");
+        orgprintf(" endif\n");
 	for (currentplain = 0; currentplain <= dmaplain; currentplain++)
 	{
 	    if (bankcount == 0)
@@ -5297,6 +5319,10 @@ void data(char **statement)
     char **deallocdata_length;
     int i, j;
 
+    int thisdatabankset;
+
+    thisdatabankset = 0;
+
     assertminimumargs(statement, "data", 1);
 
     data_length = (char **) malloc(sizeof(char *) * 200);
@@ -5309,10 +5335,18 @@ void data(char **statement)
     deallocdata_length = data_length;
     removeCR(statement[2]);
 
-    if (!(optimization & 4))
-	printf("	JMP .skip%s\n", statement[0]);
+    if ((banksetrom) && (strncmp(statement[2],"bset_",5)==0))
+        thisdatabankset = 1;
 
-    printf("%s\n", statement[2]);
+    if (!thisdatabankset)
+        if (!(optimization & 4))
+            printf("    JMP .skip%s\n", statement[0]);
+
+    if(!thisdatabankset)
+        printf("%s\n", statement[2]);
+    else
+        gfxprintf("%s\n", statement[2]);
+
     while (1)
     {
 	if (((!fgets(data, 200, stdin))
@@ -5332,10 +5366,17 @@ void data(char **statement)
 	    if (((int) data[i] < 14) && ((int) data[i] != 9))
 		i = 200;
 	}
-	if (i < 200)
-	    printf("	.byte %s\n", data);
+        if (i < 200)
+        {
+            if(!thisdatabankset)
+                printf("    .byte %s\n", data);
+            else
+                gfxprintf("    .byte %s\n", data);
+        }
     }
-    printf(".skip%s\n", statement[0]);
+    if(!thisdatabankset)
+        printf(".skip%s\n", statement[0]);
+
     strcpy(data_length[0], " ");
     strcpy(data_length[1], "const");
     sprintf(data_length[2], "%s_length", statement[2]);
@@ -5351,8 +5392,16 @@ void data(char **statement)
     strcpy(constants[numconstants++], consthilo); // record to queue
     snprintf(consthilo,200,"%s_hi",statement[2]);
     strcpy(constants[numconstants++], consthilo); // record to queue
-    printf("%s_lo SET #<%s\n",statement[2],statement[2]);
-    printf("%s_hi SET #>%s\n",statement[2],statement[2]);
+    if(!thisdatabankset)
+    {
+        printf("%s_lo SET #<%s\n",statement[2],statement[2]);
+        printf("%s_hi SET #>%s\n",statement[2],statement[2]);
+    }
+    else
+    {
+        gfxprintf("%s_lo SET #<%s\n",statement[2],statement[2]);
+        gfxprintf("%s_hi SET #>%s\n",statement[2],statement[2]);
+    }
 }
 
 void speak(char **statement)
@@ -6708,6 +6757,9 @@ void alphadata(char **statement)
     char *alphachr, *alphaend;
     int charoffset;
     int i, j;
+    int thisdatabankset;
+
+    thisdatabankset = 0;
 
     data_length = (char **) malloc(sizeof(char *) * 200);
     for (i = 0; i < 200; ++i)
@@ -6721,11 +6773,19 @@ void alphadata(char **statement)
     removeCR(statement[3]);
     removeCR(statement[4]);
 
-    if (!(optimization & 4))
-	printf("	JMP .skip%s\n", statement[0]);
+    if ((banksetrom) && (strncmp(statement[2],"bset_",5)==0))
+        thisdatabankset = 1;
+
+    if (!thisdatabankset)
+        if (!(optimization & 4))
+            printf("    JMP .skip%s\n", statement[0]);
     // if optimization level >=4 then data cannot be placed inline with code!
 
-    printf("%s\n", statement[2]);
+    if(!thisdatabankset)
+        printf("%s\n", statement[2]);
+    else
+        gfxprintf("%s\n", statement[2]);
+
     while (1)
     {
 	if (((!fgets(data, 200, stdin))
@@ -6759,15 +6819,31 @@ void alphadata(char **statement)
 	    if (strncmp(statement[4], "extrawide", 9) == 0)
 		charoffset = charoffset * 2;
 
-	    printf(" .byte (<%s + $%02x)", statement[3], charoffset);
-	    if (strncmp(statement[4], "extrawide", 9) == 0)
-		printf(", (<%s + $%02x)", statement[3], charoffset + 1);
-	    if (alphachr[1] != '\0')
-		printf("\n");
+            if(!thisdatabankset)
+            {
+	        printf(" .byte (<%s + $%02x)", statement[3], charoffset);
+	        if (strncmp(statement[4], "extrawide", 9) == 0)
+                    printf(", (<%s + $%02x)", statement[3], charoffset + 1);
+                if (alphachr[1] != '\0')
+                    printf("\n");
+            }
+            else
+            {
+	        gfxprintf(" .byte (<%s + $%02x)", statement[3], charoffset);
+	        if (strncmp(statement[4], "extrawide", 9) == 0)
+                    gfxprintf(", (<%s + $%02x)", statement[3], charoffset + 1);
+                if (alphachr[1] != '\0')
+                    gfxprintf("\n");
+            }
 	}
-	printf("\n");
+        if(!thisdatabankset)
+	    printf("\n");
+        else
+	    gfxprintf("\n");
     }
-    printf(".skip%s\n", statement[0]);
+    if(!thisdatabankset)
+        printf(".skip%s\n", statement[0]);
+
     strcpy(data_length[0], " ");
     strcpy(data_length[1], "const");
     sprintf(data_length[2], "%s_length", statement[2]);
@@ -9752,6 +9828,7 @@ void set(char **statement)
 	if (outfile == NULL)
 	    prerror("couldn't create 7800hsgamediffnames.asm file.");
 	sprintf(redefined_variables[numredefvars++], "HSCUSTOMLEVELNAMES = 1");
+	fprintf(outfile, "\n    ifnconst isBANKSETBANK\n");
 	fprintf(outfile, "highscoredifficultytextlen\n");
 	fprintf(outfile, "  .byte ");
 	for (strindex = 3; strindex < 7; strindex++)
@@ -9768,6 +9845,8 @@ void set(char **statement)
 		fprintf(outfile, "%d", (int) strlen(statement[strindex]));
 	    }
 	}
+	fprintf(outfile, "\n    endif ; isBANKSETBANK\n");
+	fprintf(outfile, "\n    ifconst HSCHARSHERE\n");
 
 	for (strindex = 3; strindex < 7; strindex++)
 	{
@@ -9836,6 +9915,7 @@ void set(char **statement)
 	    }
 	}
 	fprintf(outfile, "\n");
+	fprintf(outfile, "\n    endif ; HSCHARSHERE\n");
 	fclose(outfile);
 
     }
