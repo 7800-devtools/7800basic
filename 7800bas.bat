@@ -11,7 +11,7 @@ goto nooptimize
 :nooptimize
 
 if not exist banksetrom.asm goto nobankset1
-  dasm "%bas7800dir%"/includes/banksetskeleton.asm  -I"%bas7800dir%"/includes -f3 -l"%~f1.list.txt" -o"banksetrom.bin" | 7800filter
+  dasm "%bas7800dir%"/includes/banksetskeleton.asm  -I"%bas7800dir%"/includes -f3 -l"banksetrom.list.txt" -s"banksetrom.symbol.txt" -o"banksetrom.bin" | 7800filter
   banksetsymbols
 :nobankset1
 
