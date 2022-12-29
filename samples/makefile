@@ -1,13 +1,16 @@
 # The bB generic-Unix makefile. Should work with most unixy OSes.
 
 
-all: adventurer/adventurer.bas.a78 atarivoxspeech/atarivoxspeech.bas.a78 banner/banner.bas.a78 boxcollision/boxcollision.bas.a78  doublebuffer/doublebuffer.bas.a78 helloworld/helloworld.bas.a78 pokey/pokey.bas.a78
+all: adventurer/adventurer.bas.a78 banksets/banksets.bas.a78 atarivoxspeech/atarivoxspeech.bas.a78 banner/banner.bas.a78 boxcollision/boxcollision.bas.a78  doublebuffer/doublebuffer.bas.a78 helloworld/helloworld.bas.a78 pokey/pokey.bas.a78 snescontrollers/snescontrollers.bas.a78
 
 test:
 	./make_test.sh
 
 adventurer/adventurer.bas.a78:
 	cd adventurer ; 7800basic.sh adventurer.bas
+
+banksets/banksets.bas.a78:
+	cd banksets ; 7800basic.sh banksets.bas
 
 atarivoxspeech/atarivoxspeech.bas.a78:
 	cd atarivoxspeech ; 7800basic.sh atarivoxspeech.bas
@@ -31,5 +34,9 @@ pokey/pokey.bas.a78:
 	cd pokey ; 7800basic.sh pokey.bas
 	cd ..
 
+snescontrollers/snescontrollers.bas.a78: 
+	cd snescontrollers; 7800basic.sh snescontrollers.bas
+	cd ..
+
 clean:
-	rm -fr */*.bas.* */7800.asm */7800basic_variable_redefs.h */a78info.cfg */includes.7800 */cfg
+	rm -fr */*.bas.* */*.list.txt */*.symbol.txt */banksetrom.asm */7800.asm */7800basic_variable_redefs.h */a78info.cfg */includes.7800 */cfg
