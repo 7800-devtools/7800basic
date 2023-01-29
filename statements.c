@@ -674,6 +674,11 @@ int isfixpoint(char *item)
 
 void set_romsize(char *size)
 {
+    static int romsize_already_set = 0;
+    if (romsize_already_set)
+	prerror("rom size was specified more than once.");
+    romsize_already_set = 1;
+    
     if (!strncmp(size, "32k\0", 3))
     {
         romsize=32;
@@ -734,7 +739,10 @@ void set_romsize(char *size)
 	}
 	else if (strncmp(size + 4, "RAM", 3) == 0)
 	{
-	    append_a78info("set supergameram");
+            if(banksetrom)
+	        append_a78info("set hram@4000");
+            else
+	        append_a78info("set supergameram");
 	    strcpy(redefined_variables[numredefvars++], "SGRAM = 1");
 	}
     }
@@ -754,7 +762,10 @@ void set_romsize(char *size)
 	}
 	else if (strncmp(size + 4, "RAM", 3) == 0)
 	{
-	    append_a78info("set supergameram");
+            if(banksetrom)
+	        append_a78info("set hram@4000");
+            else
+	        append_a78info("set supergameram");
 	    strcpy(redefined_variables[numredefvars++], "SGRAM = 1");
 	}
 	else
