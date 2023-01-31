@@ -2276,6 +2276,7 @@ skipminimumframecode
      lda NewPageflipoffset,x
      sta doublebufferdloffset
 
+ ifnconst BANKSET_DL_IN_CARTRAM
      lda doublebufferbufferdirty
      beq flipdisplaybufferreturn
 
@@ -2317,6 +2318,7 @@ copybuffercharsloop
      bpl copybufferzoneloop
      lda #0
      sta doublebufferbufferdirty
+ endif ; ! BANKSET_DL_IN_CARTRAM
      rts
 
 doublebufferoff
