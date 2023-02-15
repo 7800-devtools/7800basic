@@ -12,7 +12,7 @@
 //      7800header - a simple app to generate/interrogate a a78 header.
 //                      Michael Saarna (aka RevEng@AtariAge)
 
-#define HEADER_VERSION_INFO "7800header 0.16"
+#define HEADER_VERSION_INFO "7800header 0.17"
 
 void usage(char *binaryname);
 uint32_t phtole32(uint32_t value);
@@ -20,6 +20,9 @@ void loadfile(char *filename);
 void report(void);
 void setupheaderdefaults(void);
 void setunset(char *command);
+int  checkset(char *option);
+void clearbasemappers(void);
+void syncheader(void);
 void writea78(char *filename);
 void writebin(char *filename);
 void prerror(char *format, ...);
@@ -28,39 +31,50 @@ void trimnewline(char *string);
 
 struct header7800 {
 
-    unsigned char version;	//0
+    unsigned char version;		//0
 
-    char console[16];		//1-16
+    char console[16];			//1-16
 
-    char gamename[32];		//17-48
+    char gamename[32];			//17-48
 
-    unsigned char romsize1;	//49
-    unsigned char romsize2;	//50
-    unsigned char romsize3;	//51
-    unsigned char romsize4;	//52
+    unsigned char romsize1;		//49
+    unsigned char romsize2;		//50
+    unsigned char romsize3;		//51
+    unsigned char romsize4;		//52
 
-    unsigned char carttype1;	//53
-    unsigned char carttype2;	//54
+    // v3 cart hardware bytes...
+    unsigned char carttype1;		//53
+    unsigned char carttype2;		//54
 
-    unsigned char controller1;	//55
-    unsigned char controller2;	//56
+    unsigned char controller1;		//55
+    unsigned char controller2;		//56
 
-    unsigned char tvformat;	//57
+    unsigned char tvformat;		//57
     unsigned char saveperipheral;	//58
 
-    unsigned char unused1[4];	//59-62
+    unsigned char unused1[4];		//59-62
 
-    unsigned char xm;		//63
+    unsigned char xm;			//63
 
-    unsigned char unused2[36];	//64-99
+    // v4 cart hardware bytes
+    unsigned char mapper;		//64
+    unsigned char mapper_options;	//65
+    unsigned char audio1;		//66
+    unsigned char audio2;		//67
+    unsigned char interrupt1;		//68
+    unsigned char interrupt2;		//69
 
-    char headertext[28];	//100-127
+    unsigned char unused2[30];		//70-99
+
+    char headertext[28];		//100-127
 } myheader;
 
 long gamesize;
 uint32_t headergamesize;
 char *rombuffer;
 
+int v3only = 0;
+int v4only = 0;
 int overwrite = 0;
 int printinfo = 0;
 char filename[1024];
@@ -114,7 +128,7 @@ int main(int argc, char **argv)
     fread(rombuffer, 128, (gamesize / 128), in);
 
     // get options - mainly used for reading in header configuration setup from a file
-    while ((c = getopt(argc, argv, "f:opb")) != -1)
+    while ((c = getopt(argc, argv, "f:34opb")) != -1)
     {
 	switch (c)
 	{
@@ -122,6 +136,16 @@ int main(int argc, char **argv)
 	    loadfile(optarg);
 	    writea78(filename);
 	    exit(0);
+	    break;
+	case '3':		// v3 header only
+	    if(v4only)
+	        prerror("both v3-only and v4-only headers selected.");
+	    v3only = 1;
+	    break;
+	case '4':		// v4 header only
+	    if(v3only)
+	        prerror("both v3-only and v4-only headers selected.");
+	    v4only   = 1;
 	    break;
 	case 'o':		// overwrite existing A78 file
 	    overwrite = 1;
@@ -147,7 +171,21 @@ int main(int argc, char **argv)
 	    myheader.tvformat &= 1;
 	myheader.saveperipheral &= 3;
 	myheader.xm &= 1;
-	myheader.version = 3;
+        if(v3only)
+	    myheader.version = 3;
+        else
+        {
+	    myheader.version = 4;
+            if(myheader.mapper = 0xff)
+            {
+                myheader.mapper = 0;
+                myheader.mapper_options = 0;
+                myheader.audio1 = 0;
+                myheader.audio2 = 0;
+                myheader.interrupt1 = 0;
+                myheader.interrupt2 = 0;
+            }
+        }
     }
 
 
@@ -164,15 +202,15 @@ int main(int argc, char **argv)
 	report();
 	if (printinfo != 0)
 	    exit(0);
-	printf("Commands: \"save\"  [name]   Save the A78 file and exit.\n");
-	printf("          \"strip\" [name]   Save a headerless .BIN and exit.\n");
-	printf("          \"set [option]\"   Set one of the options.\n");
-	printf("          \"unset [option]\" Unset one of the options.\n");
-	printf("          \"name game name\" Set the game name in the header.\n");
-	printf("          \"exit\"           Exit the utility. Unsaved changes will be lost.\n");
+	printf("Commands: \"save\" [name]          -     Save a78 and exit. \n");
+	printf("          \"(un)set [option]\"     -     Add/Remove options.\n");
+	printf("          \"strip\" [name]         -     Save headerless bin file and exit, \n");
+	printf("          \"name [game name]\"     -     Set the game name in the header.\n");
+	printf("          \"fix\"                  -     Fix size and sync v3+v4 headers.\n");
+	printf("          \"exit\"                 -     Exit the utility without saving.\n");
 	printf("\n");
 	printf("Options:  rom@4000 bank6@4000 pokey@440 pokey@450 pokey@800 pokey@4000\n");
-	printf("   ram@4000 mram@4000 hram@4000 ym2151@460 supergame bankram\n");
+	printf("   ym2151@460 covox@430 ram@4000 mram@4000 hram@4000 bankram supergame\n");
 	printf("   absolute activision souper bankset tvpal tvntsc composite\n");
 	printf("   7800joy1 7800joy2 lightgun1 lightgun2 paddle1 paddle2 tball1 tball2\n");
 	printf("   2600joy1 2600joy2 driving1 driving2 keypad1 keypad2 stmouse1 stmouse2\n");
@@ -198,13 +236,17 @@ int main(int argc, char **argv)
 		    writebin(filename);
 		exit(0);
 	    }
-	    if (strncmp(usercommand, "fixsize", 7) == 0)
+	    if (strncmp(usercommand, "fix", 7) == 0)
             {
+                // recalculate the size...
                 myheader.romsize4 = (gamesize>>0) & 0xff;
                 myheader.romsize3 = (gamesize>>8) & 0xff;
                 myheader.romsize2 = (gamesize>>16) & 0xff;
                 myheader.romsize1 = (gamesize>>24) & 0xff;
                 headergamesize=gamesize;
+
+		// sync the headers...
+                syncheader();
             }
 	    else if (strncmp(usercommand, "name ", 5) == 0)
 	    {
@@ -324,7 +366,10 @@ void setupheaderdefaults()
     headergamesize = phtole32(gamesize);
 
     // a78 header format version...
-    myheader.version = 3;
+    if(v3only)
+        myheader.version = 3;
+    else
+        myheader.version = 4;
 
     strncpy(myheader.console, "ATARI7800        ", 16);
     strncpy(myheader.gamename, "My Game                          ", 32);
@@ -348,8 +393,17 @@ void setupheaderdefaults()
     // bit 11    = ym2151 at $440/$441
     // bit 12    = souper
     // bit 12-15 = special
-    myheader.carttype1 = 0;
-    myheader.carttype2 = 0;
+
+    if(!v4only)
+    {
+        myheader.carttype1 = 0;
+        myheader.carttype2 = 0;
+    }
+    else // it's v4 only, so we need to scuttle the v3 fields
+    {
+        myheader.carttype1 = 0xff;
+        myheader.carttype2 = 0xff;
+    }
 
     // controller 0=none, 1=7800joy, 2=lightgun, ...
     myheader.controller1 = 1;
@@ -369,7 +423,6 @@ void setupheaderdefaults()
 
     // some expected static text...
     strncpy(myheader.headertext, "ACTUAL CART DATA STARTS HERE", 28);
-
 
 }
 
@@ -423,182 +476,328 @@ void setunset(char *command)
     if ((set == 0) && (unset == 0))
 	return;			//we only handle setting and unsetting flags here
 
+    // ***** BASE MAPPER...
     if (strcmp(noun, "supergame") == 0)
     {
 	if (set)
 	{
-	    myheader.carttype2 = myheader.carttype2 | 2;
-	    setunset("unset activision");
-	    setunset("unset absolute");
-	    setunset("unset souper");
+            clearbasemappers();
+
+            if(!v4only)
+	        myheader.carttype2 = myheader.carttype2 | 2;
+            if(!v3only)
+	        myheader.mapper =  1;
 	}
 	else
 	{
-	    myheader.carttype2 = myheader.carttype2 & (2 ^ 0xff);
-	    setunset("unset supergameram");
+            if(!v4only)
+	        myheader.carttype2 = myheader.carttype2 & (2 ^ 0xff);
+            if(!v3only)
+	        myheader.mapper =  0;
 	}
     }
+    else if (strcmp(noun, "activision") == 0)
+    {
+	if (set)
+	{
+            clearbasemappers();
+	    setunset("unset bankset");
+
+            if(!v4only)
+	        myheader.carttype1 = myheader.carttype1 | 1;
+            if(!v3only)
+            {
+	        myheader.mapper = 2;
+	        myheader.mapper_options = 0;
+            }
+	}
+	else
+        {
+            if(!v4only)
+	        myheader.carttype1 = myheader.carttype1 & (1 ^ 0xff);
+            if(!v3only)
+	        myheader.mapper = 0;
+        }
+    }
+    else if (strcmp(noun, "absolute") == 0)
+    {
+	if (set)
+	{
+            clearbasemappers();
+	    setunset("unset bankset");
+
+            if(!v4only)
+	        myheader.carttype1 = myheader.carttype1 | 2;
+            if(!v3only)
+            {
+	        myheader.mapper = 3;
+	        myheader.mapper_options = 0;
+            }
+	}
+	else
+        {
+            if(!v4only)
+	        myheader.carttype1 = myheader.carttype1 & (2 ^ 0xff);
+            if(!v3only)
+	        myheader.mapper = 0;
+        }
+    }
+    else if (strcmp(noun, "souper") == 0)
+    {
+	if (set)
+	{
+            clearbasemappers();
+	    setunset("unset bankset");
+
+            if(!v4only)
+	        myheader.carttype1 = myheader.carttype1 | 16;
+            if(!v3only)
+            {
+	        myheader.mapper = 4;
+	        myheader.mapper_options = 0;
+            }
+	}
+	else
+        {
+            if(!v4only)
+	        myheader.carttype1 = myheader.carttype1 & (16 ^ 0xff);
+            if(!v3only)
+	        myheader.mapper = 0;
+        }
+    }
+    else if (strcmp(noun, "bankset") == 0)
+    {
+	if (set)
+	{
+	    setunset("unset activision");
+	    setunset("unset absolute");
+	    setunset("unset souper");
+
+            if(!v4only)
+	        myheader.carttype1 = myheader.carttype1 | 32;
+            if(!v3only)
+	        myheader.mapper = myheader.mapper | 0x80;
+	}
+	else
+        {
+            if(!v4only)
+	        myheader.carttype1 = myheader.carttype1 & (32 ^ 0xff);
+            if(!v3only)
+	        myheader.mapper = myheader.mapper & 0x7F;
+
+            if(gamesize>131071)
+                setunset("set supergame");
+        }
+    }
+
+    // ***** CART RAM...
     else if ( (strcmp(noun, "supergameram") == 0) || (strcmp(noun, "ram@4000") == 0))
     {
 	if (set)
 	{
-	    myheader.carttype2 = myheader.carttype2 | 4;
-	    //setunset("set supergame");
+            if(!v4only)
+	        myheader.carttype2 = myheader.carttype2 | 4;
+            if(!v3only)
+	        myheader.mapper_options = (myheader.mapper_options & 0xF8) | 1;
 	}
 	else
-	    myheader.carttype2 = myheader.carttype2 & (4 ^ 0xff);
+        {
+            if(!v4only)
+	        myheader.carttype2 = myheader.carttype2 & (4 ^ 0xff);
+            if(!v3only)
+	        myheader.mapper_options = (myheader.mapper_options & 0xF8);
+        }
     }
     else if (strcmp(noun, "bankram") == 0)
     {
 	if (set)
 	{
-	    myheader.carttype2 = myheader.carttype2 | 32;
+            if(!v4only)
+	        myheader.carttype2 = myheader.carttype2 | 32;
+            if(!v3only)
+	        myheader.mapper_options = (myheader.mapper_options & 0xF8) | 6;
 	}
 	else
-	    myheader.carttype2 = myheader.carttype2 & (32 ^ 0xff);
+        {
+            if(!v4only)
+	        myheader.carttype2 = myheader.carttype2 & (32 ^ 0xff);
+            if(!v3only)
+	        myheader.mapper_options = (myheader.mapper_options & 0xF8);
+        }
     }
+    else if (strcmp(noun, "mram@4000") == 0)
+    {
+	if (set)
+	{
+            if(!v4only)
+	        myheader.carttype2 = myheader.carttype2 | 128;
+            if(!v3only)
+	        myheader.mapper_options = (myheader.mapper_options & 0xF8) | 2;
+	}
+	else
+        {
+            if(!v4only)
+	        myheader.carttype2 = myheader.carttype2 & (128 ^ 0xff);
+            if(!v3only)
+	        myheader.mapper_options = (myheader.mapper_options & 0xF8);
+        }
+    }
+    else if (strcmp(noun, "hram@4000") == 0)
+    {
+	if (set)
+	{
+            if(!v4only)
+	        myheader.carttype1 = myheader.carttype1 | 64;
+            if(!v3only)
+	        myheader.mapper_options = (myheader.mapper_options & 0xF8) | 3;
+	}
+	else
+        {
+            if(!v4only)
+	        myheader.carttype1 = myheader.carttype1 & (64 ^ 0xff);
+            if(!v3only)
+	        myheader.mapper_options = (myheader.mapper_options & 0xF8);
+        }
+    }
+
+    // ***** EXTRA ROM...
     else if (strcmp(noun, "rom@4000") == 0)
     {
 	if (set)
 	{
-	    myheader.carttype2 = myheader.carttype2 | 8;
-	    setunset("unset pokey@4000");
-	    setunset("unset bank6@4000");
+            if(!v4only)
+	        myheader.carttype2 = myheader.carttype2 | 8;
+            if(!v3only)
+	        myheader.mapper_options = (myheader.mapper_options & 0xF8) | 4;
 	}
 	else
 	{
-	    myheader.carttype2 = myheader.carttype2 & (8 ^ 0xff);
+            if(!v4only)
+	        myheader.carttype2 = myheader.carttype2 & (8 ^ 0xff);
+            if(!v3only)
+	        myheader.mapper_options = (myheader.mapper_options & 0xF8);
 	}
     }
     else if (strcmp(noun, "bank6@4000") == 0)
     {
 	if (set)
 	{
-	    myheader.carttype2 = myheader.carttype2 | 16;
-	    setunset("unset rom@4000");
-	    setunset("unset pokey@4000");
+            if(!v4only)
+	        myheader.carttype2 = myheader.carttype2 | 16;
+            if(!v3only)
+	        myheader.mapper_options = (myheader.mapper_options & 0xF8) | 5;
 	}
 	else
-	    myheader.carttype2 = myheader.carttype2 & (16 ^ 0xff);
+        {
+            if(!v4only)
+	        myheader.carttype2 = myheader.carttype2 & (16 ^ 0xff);
+            if(!v3only)
+	        myheader.mapper_options = (myheader.mapper_options & 0xF8);
+        }
     }
+
+    // ***** AUDIO...
     else if (strcmp(noun, "pokey@4000") == 0)
     {
 	if (set)
 	{
-	    myheader.carttype2 = myheader.carttype2 | 1;
-	    //setunset("unset rom@4000");
-	    //setunset("unset bank6@4000");
-	    setunset("unset ram@4000");
-	    setunset("unset hram@4000");
+            if(!v4only)
+	        myheader.carttype2 = myheader.carttype2 | 1;
+            if(!v3only)
+	        myheader.audio2 = (myheader.audio2 & 0xF8) | 5;
 	}
 	else
-	    myheader.carttype2 = myheader.carttype2 & (1 ^ 0xff);
-    }
-    else if (strcmp(noun, "mram@4000") == 0)
-    {
-	if (set)
-	{
-	    myheader.carttype2 = myheader.carttype2 | 128;
-	    setunset("unset pokey@4000");
-	}
-	else
-	    myheader.carttype2 = myheader.carttype2 & (128 ^ 0xff);
-    }
-    else if (strcmp(noun, "hram@4000") == 0)
-    {
-	if (set)
-	{
-	    myheader.carttype1 = myheader.carttype1 | 64;
-	    setunset("unset pokey@4000");
-	}
-	else
-	    myheader.carttype1 = myheader.carttype1 & (64 ^ 0xff);
+        {
+            if(!v4only)
+	        myheader.carttype2 = myheader.carttype2 & (1 ^ 0xff);
+            if(!v3only)
+	        myheader.audio2 = (myheader.audio2 & 0xF8);
+        }
     }
     else if (strcmp(noun, "pokey@450") == 0)
     {
 	if (set)
-	    myheader.carttype2 = myheader.carttype2 | 64;
+        {
+            if(!v4only)
+	        myheader.carttype2 = myheader.carttype2 | 64;
+            if(!v3only)
+	        myheader.audio2 = (myheader.audio2 & 0xF9) | 2;
+        }
 	else
-	    myheader.carttype2 = myheader.carttype2 & (64 ^ 0xff);
+        {
+            if(!v4only)
+	        myheader.carttype2 = myheader.carttype2 & (64 ^ 0xff);
+            if(!v3only)
+	        myheader.audio2 = (myheader.audio2 & 0xF9);
+        }
+    }
+    else if (strcmp(noun, "pokey@440") == 0)
+    {
+	if (set)
+        {
+            if(!v4only)
+	        myheader.carttype1 = myheader.carttype1 | 4;
+            if(!v3only)
+	        myheader.audio2 = (myheader.audio2 & 0xFA) | 1;
+        }
+	else
+        {
+            if(!v4only)
+	        myheader.carttype1 = myheader.carttype1 & (4 ^ 0xff);
+            if(!v3only)
+	        myheader.audio2 = (myheader.audio2 & 0xFA);
+        }
     }
     else if (strcmp(noun, "pokey@800") == 0)
     {
 	if (set)
-	    myheader.carttype1 = myheader.carttype1 | 128;
-	else
-	    myheader.carttype1 = myheader.carttype1 & (128 ^ 0xff);
-    }
-    else if (strcmp(noun, "activision") == 0)
-    {
-	if (set)
-	{
-	    myheader.carttype1 = myheader.carttype1 | 1;
-	    setunset("unset absolute");
-	    setunset("unset supergame");
-	    setunset("unset souper");
-	    setunset("unset bankset");
-	}
-	else
-	    myheader.carttype1 = myheader.carttype1 & (1 ^ 0xff);
-    }
-    else if (strcmp(noun, "absolute") == 0)
-    {
-	if (set)
-	{
-	    myheader.carttype1 = myheader.carttype1 | 2;
-	    setunset("unset activision");
-	    setunset("unset supergame");
-	    setunset("unset souper");
-	    setunset("unset bankset");
-	}
-	else
-	    myheader.carttype1 = myheader.carttype1 & (2 ^ 0xff);
-    }
-    else if (strcmp(noun, "souper") == 0)
-    {
-	if (set)
-	{
-	    myheader.carttype1 = myheader.carttype1 | 16;
-	    setunset("unset activision");
-	    setunset("unset absolute");
-	    setunset("unset supergame");
-	    setunset("unset bankset");
-	}
-	else
-	    myheader.carttype1 = myheader.carttype1 & (16 ^ 0xff);
-    }
-    else if (strcmp(noun, "bankset") == 0)
-    {
-	if (set)
-	{
-	    myheader.carttype1 = myheader.carttype1 | 32;
-	    setunset("unset activision");
-	    setunset("unset absolute");
-	    setunset("unset souper");
-	}
+        {
+            if(!v4only)
+	        myheader.carttype1 = myheader.carttype1 | 128;
+            if(!v3only)
+	        myheader.audio2 = (myheader.audio2 & 0xF8) | 4;
+        }
 	else
         {
-	    myheader.carttype1 = myheader.carttype1 & (32 ^ 0xff);
-            if(gamesize>131071)
-                setunset("set supergame");
+            if(!v4only)
+	        myheader.carttype1 = myheader.carttype1 & (128 ^ 0xff);
+            if(!v3only)
+	            myheader.audio2 = (myheader.audio2 & 0xF8);
         }
-    }
-
-
-    else if (strcmp(noun, "pokey@440") == 0)
-    {
-	if (set)
-	    myheader.carttype1 = myheader.carttype1 | 4;
-	else
-	    myheader.carttype1 = myheader.carttype1 & (4 ^ 0xff);
     }
     else if (strcmp(noun, "ym2151@460") == 0)
     {
 	if (set)
-	    myheader.carttype1 = myheader.carttype1 | 8;
+        {
+            if(!v4only)
+	        myheader.carttype1 = myheader.carttype1 | 8;
+            if(!v3only)
+	        myheader.audio2 = myheader.audio2 | 8;
+        }
 	else
-	    myheader.carttype1 = myheader.carttype1 & (8 ^ 0xff);
+        {
+            if(!v4only)
+	        myheader.carttype1 = myheader.carttype1 & (8 ^ 0xff);
+            if(!v3only)
+	        myheader.audio2 = myheader.audio2 & (8 ^ 0xff);
+        }
     }
+    else if (strcmp(noun, "covox@430") == 0)
+    {
+	if (set)
+        {
+            if(!v4only)
+		prwarn("covox skipped in v3 header fields. (unsupported)\n");
+            if(!v3only)
+	        myheader.audio2 = myheader.audio2 | 16;
+        }
+	else
+        {
+            if(!v4only)
+	        myheader.audio2 = myheader.audio2 & (16 ^ 0xff);
+        }
+    }
+
     else if (strcmp(noun, "tvpal") == 0)
     {
 	if (set)
@@ -790,6 +989,214 @@ void setunset(char *command)
 
 }
 
+void syncheader(void)
+{
+    // don't sync if we don't have v3 and v4 headers enabled.
+    if((v3only)||(v4only))
+        return;
+    if(checkset("supergame"))
+    	setunset("set supergame");
+    if(checkset("activision"))
+    	setunset("set activision");
+    if(checkset("absolute"))
+    	setunset("set absolute");
+    if(checkset("souper"))
+    	setunset("set souper");
+    if(checkset("bankset"))
+    	setunset("set bankset");
+    if(checkset("ram@4000"))
+    	setunset("set ram@4000");
+    if(checkset("bankram"))
+    	setunset("set bankram");
+    if(checkset("mram@4000"))
+    	setunset("set mram@4000");
+    if(checkset("hram@4000"))
+    	setunset("set hram@4000");
+    if(checkset("rom@4000"))
+    	setunset("set rom@4000");
+    if(checkset("bank6@4000"))
+    	setunset("set bank6@4000");
+    if(checkset("pokey@4000"))
+    	setunset("set pokey@4000");
+    if(checkset("pokey@440"))
+    	setunset("set pokey@440");
+    if(checkset("pokey@450"))
+    	setunset("set pokey@450");
+    if(checkset("pokey@800"))
+    	setunset("set pokey@800");
+    if(checkset("ym2151@460"))
+    	setunset("set ym2151@460");
+    if(checkset("covox@430"))
+    	setunset("set covox@430");
+}
+
+int  checkset(char *option)
+{
+    // return !0 if option is set
+    // return 0  if option is not set
+
+    if (!strcmp(option,"supergame"))
+    {
+        if(!v4only)
+            if(myheader.carttype2&2)
+                return(1);
+        if(!v3only)
+            if(myheader.mapper==1)
+                return(1);
+    }
+    if (!strcmp(option,"activision"))
+    {
+        if(!v4only)
+            if(myheader.carttype1&1)
+                return(1);
+        if(!v3only)
+            if(myheader.mapper==2)
+                return(1);
+    }
+    if (!strcmp(option,"absolute"))
+    {
+        if(!v4only)
+            if(myheader.carttype1&2)
+                return(1);
+        if(!v3only)
+            if(myheader.mapper==3)
+                return(1);
+    }
+    if (!strcmp(option,"souper"))
+    {
+        if(!v4only)
+            if(myheader.carttype1&16)
+                return(1);
+        if(!v3only)
+            if(myheader.mapper==4)
+                return(1);
+    }
+    if (!strcmp(option,"bankset"))
+    {
+        if(!v4only)
+            if(myheader.carttype1&32)
+                return(1);
+        if(!v3only)
+            if(myheader.mapper_options&0x80)
+                return(1);
+    }
+    if ((!strcmp(option,"supergameram"))||(!strcmp(option,"ram@4000")))
+    {
+        if(!v4only)
+            if(myheader.carttype2&4)
+                return(1);
+        if(!v3only)
+            if((myheader.mapper_options&7)==1)
+                return(1);
+    }
+    if (!strcmp(option,"bankram"))
+    {
+        if(!v4only)
+            if(myheader.carttype2&32)
+                return(1);
+        if(!v3only)
+            if((myheader.mapper_options&7)==6)
+                return(1);
+    }
+    if (!strcmp(option,"mram"))
+    {
+        if(!v4only)
+            if(myheader.carttype2&128)
+                return(1);
+        if(!v3only)
+            if((myheader.mapper_options&7)==2)
+                return(1);
+    }
+    if (!strcmp(option,"hram"))
+    {
+        if(!v4only)
+            if(myheader.carttype2&64)
+                return(1);
+        if(!v3only)
+            if((myheader.mapper_options&7)==3)
+                return(1);
+    }
+    if (!strcmp(option,"rom@4000"))
+    {
+        if(!v4only)
+            if(myheader.carttype2&8)
+                return(1);
+        if(!v3only)
+            if((myheader.mapper_options&7)==4)
+                return(1);
+    }
+    if (!strcmp(option,"bank6@4000"))
+    {
+        if(!v4only)
+            if(myheader.carttype2&16)
+                return(1);
+        if(!v3only)
+            if((myheader.mapper_options&7)==5)
+                return(1);
+    }
+    if (!strcmp(option,"pokey@4000"))
+    {
+        if(!v4only)
+            if(myheader.carttype2&1)
+                return(1);
+        if(!v3only)
+            if((myheader.audio2&7)==5)
+                return(1);
+    }
+    if (!strcmp(option,"pokey@450"))
+    {
+        if(!v4only)
+            if(myheader.carttype2&64)
+                return(1);
+        if(!v3only)
+            if((myheader.audio2&6)==2)
+                return(1);
+    }
+    if (!strcmp(option,"pokey@440"))
+    {
+        if(!v4only)
+            if(myheader.carttype1&4)
+                return(1);
+        if(!v3only)
+            if((myheader.audio2&5)==1)
+                return(1);
+    }
+    if (!strcmp(option,"pokey@800"))
+    {
+        if(!v4only)
+            if(myheader.carttype1&128)
+                return(1);
+        if(!v3only)
+            if((myheader.audio2&7)==4)
+                return(1);
+    }
+    if (!strcmp(option,"ym2151@460"))
+    {
+        if(!v4only)
+            if(myheader.carttype1&8)
+                return(1);
+        if(!v3only)
+            if(myheader.audio2&8)
+                return(1);
+    }
+    if (!strcmp(option,"covox@430"))
+    {
+        if(!v3only)
+            if(myheader.audio2&16)
+                return(1);
+    }
+
+    return(0);
+}
+
+void clearbasemappers(void)
+{
+    setunset("unset supergame");
+    setunset("unset activision");
+    setunset("unset absolute");
+    setunset("unset souper");
+}
+
 void loadfile(char *filename)
 {
     char buffer[200];
@@ -846,49 +1253,98 @@ uint32_t phtole32(uint32_t value)
 void report(void)
 {
 
-    printf("7800 A78 Header Info   : %s\n\n", filename);
+    printf("    file name          : %s\n", filename);
     printf("    embedded game name : %s\n", myheader.gamename);
     headergamesize = (myheader.romsize4) | (myheader.romsize3 << 8) | (myheader.romsize2 << 16) | (myheader.romsize1 << 24);
     printf("    rom size           : %d", headergamesize);
     if (gamesize!=headergamesize) 
         printf(" !!! actual %ld !!! (\"fixsize\" to correct)", gamesize);
     printf("\n");
-    printf("    cart format        : ");
-    if ((myheader.carttype1 == 0) && (myheader.carttype2 == 0))
-	printf("Non-Banked ");
-    if ((myheader.carttype2 & 1) > 0)
-	printf("Pokey@4000 ");
-    if ((myheader.carttype2 & 2) > 0)
-	printf("SuperGame ");
-    if ((myheader.carttype2 & 4) > 0)
-	printf("ram@4000 ");
-    if ((myheader.carttype2 & 32) > 0)
-	printf("BankRam ");
-    if ((myheader.carttype2 & 64) > 0)
-	printf("pokey@450 ");
-    if ((myheader.carttype2 & 128) > 0)
-	printf("mram@4000 ");
-    if ((myheader.carttype2 & 8) > 0)
-	printf("rom@4000 ");
-    if ((myheader.carttype2 & 16) > 0)
-	printf("bank6@4000 ");
-    if ((myheader.carttype1 & 1) > 0)
-	printf("Activision ");
-    if ((myheader.carttype1 & 2) > 0)
-	printf("Absolute ");
-    if ((myheader.carttype1 & 4) > 0)
-	printf("pokey@440 ");
-    if ((myheader.carttype1 & 8) > 0)
-	printf("ym2151@460 ");
-    if ((myheader.carttype1 & 16) > 0)
-	printf("Souper ");
-    if ((myheader.carttype1 & 32) > 0)
-	printf("Bankset ");
-    if ((myheader.carttype1 & 64) > 0)
-	printf("hram@4000 ");
-    if ((myheader.carttype1 & 128) > 0)
-	printf("pokey@800 ");
-    printf("\n");
+
+    if(!v4only)
+    {
+        printf("    cart format (v3)   : ");
+        if ( !(myheader.carttype2 & 2) && !(myheader.carttype1 & 51))
+            printf("Linear ");
+        if (myheader.carttype2 & 2)
+            printf("SuperGame ");
+        if (myheader.carttype1 & 1)
+            printf("Activision ");
+        if (myheader.carttype1 & 2)
+            printf("Absolute ");
+        if (myheader.carttype1 & 16)
+            printf("Souper ");
+        if (myheader.carttype1 & 32)
+            printf("Bankset ");
+        if (myheader.carttype2 & 4)
+            printf("ram@4000 ");
+        if (myheader.carttype2 & 32)
+            printf("BankRam ");
+        if (myheader.carttype2 & 128)
+            printf("mram@4000 ");
+        if (myheader.carttype1 & 64)
+            printf("hram@4000 ");
+        if (myheader.carttype2 & 8)
+            printf("rom@4000 ");
+        if (myheader.carttype2 & 16)
+            printf("bank6@4000 ");
+        if (myheader.carttype2 & 1)
+            printf("Pokey@4000 ");
+        if (myheader.carttype1 & 4)
+            printf("pokey@440 ");
+        if (myheader.carttype2 & 64)
+            printf("pokey@450 ");
+        if (myheader.carttype1 & 8)
+            printf("ym2151@460 ");
+        if (myheader.carttype1 & 128)
+            printf("pokey@800 ");
+        printf("\n");
+    }
+
+    if(!v3only)
+    {
+        printf("    cart format (v4)   : ");
+        if (myheader.mapper == 0)
+            printf("Linear ");
+        if (myheader.mapper == 1)
+            printf("SuperGame ");
+        if (myheader.mapper == 2)
+            printf("Activision ");
+        if (myheader.mapper == 3)
+            printf("Absolute ");
+        if (myheader.mapper == 4)
+            printf("Souper ");
+        if (myheader.mapper_options & 0x80)
+            printf("Bankset ");
+        if ((myheader.mapper_options & 7) == 1)
+            printf("ram@4000 ");
+        if ((myheader.mapper_options & 7) == 6)
+            printf("BankRam ");
+        if ((myheader.mapper_options & 7) == 2)
+            printf("mram@4000 ");
+        if ((myheader.mapper_options & 7) == 3)
+            printf("hram@4000 ");
+        if ((myheader.mapper_options & 7) == 4)
+            printf("rom@4000 ");
+        if ((myheader.mapper_options & 7) == 5)
+            printf("bank6@4000 ");
+        if ((myheader.audio2 & 7) == 5)
+            printf("Pokey@4000 ");
+        if ((myheader.audio2 & 7) == 1)
+            printf("pokey@440 ");
+        if ((myheader.audio2 & 7) == 2)
+            printf("pokey@450 ");
+        if ((myheader.audio2 & 7) == 3)
+            printf("pokey@440 pokey@450 ");
+        if (myheader.audio2 & 8)
+            printf("ym2151@460 ");
+        if ((myheader.audio2 & 7) == 4)
+            printf("pokey@800 ");
+        if (myheader.audio2 & 16)
+            printf("covox@430 ");
+        printf("\n");
+    }
+
 
     printf("    controllers        : ");
     if (myheader.controller1 == 0)
@@ -938,20 +1394,25 @@ void report(void)
 
     printf("\n");
 
-    printf("    save peripheral    : ");
-    if (myheader.saveperipheral == 0)
-	printf("none ");
+    int peripherals = 0;
+    printf("    peripherals        : ");
     if (myheader.saveperipheral & 1)
+    {
 	printf("HSC ");
+        peripherals++;
+    }
     if (myheader.saveperipheral & 2)
+    {
 	printf("SaveKey/AtariVOX ");
-    printf("\n");
-
-    printf("    xm/xboard          : ");
-    if (myheader.xm > 0)
-	printf("enabled ");
-    else
-	printf("not enabled ");
+        peripherals++;
+    }
+    if (myheader.xm)
+    {
+	printf("XM ");
+        peripherals++;
+    }
+    if (!peripherals)
+	printf("none ");
     printf("\n");
 
     printf("    tv format          : ");
