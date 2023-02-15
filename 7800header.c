@@ -20,7 +20,7 @@ void loadfile(char *filename);
 void report(void);
 void setupheaderdefaults(void);
 void setunset(char *command);
-int  checkset(char *option);
+int  checkset(char *option, int typemask);
 void clearbasemappers(void);
 void syncheader(void);
 void writea78(char *filename);
@@ -42,7 +42,7 @@ struct header7800 {
     unsigned char romsize3;		//51
     unsigned char romsize4;		//52
 
-    // v3 cart hardware bytes...
+    // deprecated bytes in v4...
     unsigned char carttype1;		//53
     unsigned char carttype2;		//54
 
@@ -52,7 +52,10 @@ struct header7800 {
     unsigned char tvformat;		//57
     unsigned char saveperipheral;	//58
 
-    unsigned char unused1[4];		//59-62
+    unsigned char unused1[3];		//59-61
+
+    // deprecated bytes in v4...
+    unsigned char irq;                  //62
 
     unsigned char xm;			//63
 
@@ -161,7 +164,7 @@ int main(int argc, char **argv)
     }
 
     //fix bits that shouldn't be set in the header
-    if (printinfo == 0)
+    if (!printinfo)
     {
 	if (myheader.controller1 > 11)
 	    myheader.controller1 = 1;
@@ -176,7 +179,7 @@ int main(int argc, char **argv)
         else
         {
 	    myheader.version = 4;
-            if(myheader.mapper = 0xff)
+            if(myheader.mapper == 0xff)
             {
                 myheader.mapper = 0;
                 myheader.mapper_options = 0;
@@ -200,21 +203,24 @@ int main(int argc, char **argv)
 #endif
 
 	report();
-	if (printinfo != 0)
+	if (printinfo)
 	    exit(0);
-	printf("Commands: \"save\" [name]          -     Save a78 and exit. \n");
-	printf("          \"(un)set [option]\"     -     Add/Remove options.\n");
-	printf("          \"strip\" [name]         -     Save headerless bin file and exit, \n");
-	printf("          \"name [game name]\"     -     Set the game name in the header.\n");
-	printf("          \"fix\"                  -     Fix size and sync v3+v4 headers.\n");
-	printf("          \"exit\"                 -     Exit the utility without saving.\n");
+	printf("Commands: \"(un)set [option]\"       -   Add/Remove options.\n");
+	printf("          \"name [embedded name]\"   -   Set the game name in the header.\n");
+        if((v3only)||(v4only))
+	    printf("          \"fix\"                    -   Fix embedded size.\n");
+        else
+	    printf("          \"fix\"                    -   Fix embedded size and sync v3+v4.\n");
+	printf("          \"save [name]\"            -   Save a78 and exit.\n");
+	printf("          \"strip [name]\"           -   Save headerless bin file and exit.\n");
+	printf("          \"exit\"                   -   Exit the utility without saving.\n");
 	printf("\n");
-	printf("Options:  rom@4000 bank6@4000 pokey@440 pokey@450 pokey@800 pokey@4000\n");
-	printf("   ym2151@460 covox@430 ram@4000 mram@4000 hram@4000 bankram supergame\n");
-	printf("   absolute activision souper bankset tvpal tvntsc composite\n");
-	printf("   7800joy1 7800joy2 lightgun1 lightgun2 paddle1 paddle2 tball1 tball2\n");
-	printf("   2600joy1 2600joy2 driving1 driving2 keypad1 keypad2 stmouse1 stmouse2\n");
-	printf("   amouse1 amouse2 snes1 snes2 hsc savekey xm\n");
+	printf("Options:  linear supergame souper bankset absolute activision\n");
+	printf("  rom@4000 bank6@4000 ram@4000 mram@4000 hram@4000 bankram pokey@440 pokey@450\n");
+	printf("  pokey@800 pokey@4000 ym2151@460 covox@430 irqpokey1 irqpokey2 irqym2152\n");
+	printf("  7800joy1 7800joy2 lightgun1 lightgun2 paddle1 paddle2 tball1 tball2\n");
+	printf("  2600joy1 2600joy2 driving1 driving2 keypad1 keypad2 stmouse1 stmouse2\n");
+	printf("  amouse1 amouse2 snes1 snes2 hsc savekey xm tvpal tvntsc composite\n");
 	printf("> ");
 
 	if (fgets(usercommand, 1024, stdin))
@@ -398,6 +404,7 @@ void setupheaderdefaults()
     {
         myheader.carttype1 = 0;
         myheader.carttype2 = 0;
+        myheader.irq       = 0;
     }
     else // it's v4 only, so we need to scuttle the v3 fields
     {
@@ -419,7 +426,14 @@ void setupheaderdefaults()
 
     myheader.xm = 0;
 
-    memset(myheader.unused2, 0, 36);
+    myheader.mapper = 0;
+    myheader.mapper_options = 0;
+    myheader.audio1 = 0;
+    myheader.audio2 = 0;
+    myheader.interrupt1 = 0;
+    myheader.interrupt2 = 0;
+
+    memset(myheader.unused2, 0, 30);
 
     // some expected static text...
     strncpy(myheader.headertext, "ACTUAL CART DATA STARTS HERE", 28);
@@ -458,7 +472,7 @@ void setunset(char *command)
     s = 0;
     for (; command[t] != 0; t++)
     {
-	if (command[t] == ' ')
+	if ((command[t] == ' ')||(command[t] == '#'))
 	{
 	    noun[s] = 0;
 	    t = t + 1;
@@ -477,6 +491,9 @@ void setunset(char *command)
 	return;			//we only handle setting and unsetting flags here
 
     // ***** BASE MAPPER...
+    if (strcmp(noun, "linear") == 0)
+        clearbasemappers();
+   
     if (strcmp(noun, "supergame") == 0)
     {
 	if (set)
@@ -490,9 +507,9 @@ void setunset(char *command)
 	}
 	else
 	{
-            if(!v4only)
+            if((!v4only)&&(checkset("supergame",3)))
 	        myheader.carttype2 = myheader.carttype2 & (2 ^ 0xff);
-            if(!v3only)
+            if((!v3only)&&(checkset("supergame",4)))
 	        myheader.mapper =  0;
 	}
     }
@@ -513,9 +530,9 @@ void setunset(char *command)
 	}
 	else
         {
-            if(!v4only)
+            if((!v4only)&&(checkset("activision",3)))
 	        myheader.carttype1 = myheader.carttype1 & (1 ^ 0xff);
-            if(!v3only)
+            if((!v3only)&&(checkset("activision",4)))
 	        myheader.mapper = 0;
         }
     }
@@ -536,9 +553,9 @@ void setunset(char *command)
 	}
 	else
         {
-            if(!v4only)
+            if((!v4only)&&(checkset("absolute",3)))
 	        myheader.carttype1 = myheader.carttype1 & (2 ^ 0xff);
-            if(!v3only)
+            if((!v3only)&&(checkset("absolute",4)))
 	        myheader.mapper = 0;
         }
     }
@@ -559,9 +576,9 @@ void setunset(char *command)
 	}
 	else
         {
-            if(!v4only)
+            if((!v4only)&&(checkset("souper",3)))
 	        myheader.carttype1 = myheader.carttype1 & (16 ^ 0xff);
-            if(!v3only)
+            if((!v3only)&&(checkset("souper",4)))
 	        myheader.mapper = 0;
         }
     }
@@ -576,14 +593,14 @@ void setunset(char *command)
             if(!v4only)
 	        myheader.carttype1 = myheader.carttype1 | 32;
             if(!v3only)
-	        myheader.mapper = myheader.mapper | 0x80;
+	        myheader.mapper_options = myheader.mapper_options | 0x80;
 	}
 	else
         {
-            if(!v4only)
+            if((!v4only)&&(checkset("bankset",3)))
 	        myheader.carttype1 = myheader.carttype1 & (32 ^ 0xff);
-            if(!v3only)
-	        myheader.mapper = myheader.mapper & 0x7F;
+            if((!v3only)&&(checkset("bankset",4)))
+	        myheader.mapper_options = myheader.mapper_options & 0x7F;
 
             if(gamesize>131071)
                 setunset("set supergame");
@@ -602,9 +619,9 @@ void setunset(char *command)
 	}
 	else
         {
-            if(!v4only)
+            if((!v4only)&&(checkset("ram@4000",3)))
 	        myheader.carttype2 = myheader.carttype2 & (4 ^ 0xff);
-            if(!v3only)
+            if((!v3only)&&(checkset("ram@4000",4)))
 	        myheader.mapper_options = (myheader.mapper_options & 0xF8);
         }
     }
@@ -619,9 +636,9 @@ void setunset(char *command)
 	}
 	else
         {
-            if(!v4only)
+            if((!v4only)&&(checkset("bankram",3)))
 	        myheader.carttype2 = myheader.carttype2 & (32 ^ 0xff);
-            if(!v3only)
+            if((!v3only)&&(checkset("bankram",4)))
 	        myheader.mapper_options = (myheader.mapper_options & 0xF8);
         }
     }
@@ -636,9 +653,9 @@ void setunset(char *command)
 	}
 	else
         {
-            if(!v4only)
+            if((!v4only)&&(checkset("mram@4000",3)))
 	        myheader.carttype2 = myheader.carttype2 & (128 ^ 0xff);
-            if(!v3only)
+            if((!v3only)&&(checkset("mram@4000",4)))
 	        myheader.mapper_options = (myheader.mapper_options & 0xF8);
         }
     }
@@ -653,9 +670,9 @@ void setunset(char *command)
 	}
 	else
         {
-            if(!v4only)
+            if((!v4only)&&(checkset("hram@4000",3)))
 	        myheader.carttype1 = myheader.carttype1 & (64 ^ 0xff);
-            if(!v3only)
+            if((!v3only)&&(checkset("hram@4000",4)))
 	        myheader.mapper_options = (myheader.mapper_options & 0xF8);
         }
     }
@@ -672,9 +689,9 @@ void setunset(char *command)
 	}
 	else
 	{
-            if(!v4only)
+            if((!v4only)&&(checkset("rom@4000",3)))
 	        myheader.carttype2 = myheader.carttype2 & (8 ^ 0xff);
-            if(!v3only)
+            if((!v3only)&&(checkset("rom@4000",4)))
 	        myheader.mapper_options = (myheader.mapper_options & 0xF8);
 	}
     }
@@ -689,9 +706,9 @@ void setunset(char *command)
 	}
 	else
         {
-            if(!v4only)
+            if((!v4only)&&(checkset("bank6@4000",3)))
 	        myheader.carttype2 = myheader.carttype2 & (16 ^ 0xff);
-            if(!v3only)
+            if((!v3only)&&(checkset("bank6@4000",4)))
 	        myheader.mapper_options = (myheader.mapper_options & 0xF8);
         }
     }
@@ -708,9 +725,9 @@ void setunset(char *command)
 	}
 	else
         {
-            if(!v4only)
+            if((!v4only)&&(checkset("pokey@4000",3)))
 	        myheader.carttype2 = myheader.carttype2 & (1 ^ 0xff);
-            if(!v3only)
+            if((!v3only)&&(checkset("pokey@4000",4)))
 	        myheader.audio2 = (myheader.audio2 & 0xF8);
         }
     }
@@ -721,14 +738,24 @@ void setunset(char *command)
             if(!v4only)
 	        myheader.carttype2 = myheader.carttype2 | 64;
             if(!v3only)
-	        myheader.audio2 = (myheader.audio2 & 0xF9) | 2;
+            {
+                if(checkset("pokey@440",4))
+	            myheader.audio2 = (myheader.audio2 & 0xF8) | 3;
+                else
+	            myheader.audio2 = (myheader.audio2 & 0xF8) | 2;
+            }
         }
 	else
         {
-            if(!v4only)
+            if((!v4only)&&(checkset("pokey@450",3)))
 	        myheader.carttype2 = myheader.carttype2 & (64 ^ 0xff);
-            if(!v3only)
-	        myheader.audio2 = (myheader.audio2 & 0xF9);
+            if((!v3only)&&(checkset("pokey@450",4)))
+            {
+                if(checkset("pokey@440",4))
+	            myheader.audio2 = (myheader.audio2 & 0xF8) | 1;
+                else
+	            myheader.audio2 = (myheader.audio2 & 0xF8);
+            }
         }
     }
     else if (strcmp(noun, "pokey@440") == 0)
@@ -738,14 +765,24 @@ void setunset(char *command)
             if(!v4only)
 	        myheader.carttype1 = myheader.carttype1 | 4;
             if(!v3only)
-	        myheader.audio2 = (myheader.audio2 & 0xFA) | 1;
+            {
+                if(checkset("pokey@450",4))
+	            myheader.audio2 = (myheader.audio2 & 0xF8) | 3;
+                else
+	            myheader.audio2 = (myheader.audio2 & 0xF8) | 1;
+            }
         }
 	else
         {
-            if(!v4only)
+            if((!v4only)&&(checkset("pokey@440",3)))
 	        myheader.carttype1 = myheader.carttype1 & (4 ^ 0xff);
-            if(!v3only)
-	        myheader.audio2 = (myheader.audio2 & 0xFA);
+            if((!v3only)&&(checkset("pokey@440",4)))
+            {
+                if(checkset("pokey@450",4))
+	            myheader.audio2 = (myheader.audio2 & 0xF8) | 2;
+                else
+	            myheader.audio2 = (myheader.audio2 & 0xF8);
+            }
         }
     }
     else if (strcmp(noun, "pokey@800") == 0)
@@ -759,9 +796,9 @@ void setunset(char *command)
         }
 	else
         {
-            if(!v4only)
+            if((!v4only)&&(checkset("pokey@800",3)))
 	        myheader.carttype1 = myheader.carttype1 & (128 ^ 0xff);
-            if(!v3only)
+            if((!v3only)&&(checkset("pokey@800",4)))
 	            myheader.audio2 = (myheader.audio2 & 0xF8);
         }
     }
@@ -776,9 +813,9 @@ void setunset(char *command)
         }
 	else
         {
-            if(!v4only)
+            if((!v4only)&&(checkset("ym2151@460",3)))
 	        myheader.carttype1 = myheader.carttype1 & (8 ^ 0xff);
-            if(!v3only)
+            if((!v3only)&&(checkset("ym2151@460",4)))
 	        myheader.audio2 = myheader.audio2 & (8 ^ 0xff);
         }
     }
@@ -793,10 +830,81 @@ void setunset(char *command)
         }
 	else
         {
-            if(!v4only)
+            if((!v4only)&&(checkset("covox@430",3)))
 	        myheader.audio2 = myheader.audio2 & (16 ^ 0xff);
         }
     }
+    else if (strcmp(noun, "irqpokey1") == 0)
+    {
+	// this one is kind of a pain. v3 irq refers to specific devices,
+	// but v4 irq refers to pokey1,pokey2, and then specific devices,
+	// so we need to do some checking and mapping.
+	if (set)
+        {
+            if(!v4only)
+            {
+                if(checkset("pokey@4000",3))
+	            myheader.irq = myheader.irq | 1;
+                else if(checkset("pokey@450",3))
+	            myheader.irq = myheader.irq | 2;
+                else if(checkset("pokey@800",3))
+	            myheader.irq = myheader.irq | 16;
+            }
+            if(!v3only)
+                if( checkset("pokey@4000",4) || checkset("pokey@450",4) || checkset("pokey@800",4) )
+	            myheader.interrupt2 = myheader.interrupt2 | 1;
+        }
+	else
+        {
+            if((!v4only)&&(checkset("irqpokey1",3)))
+                myheader.irq = myheader.irq & ((1|2|16) ^ 0xff); // strip pokey@4000,@450,@800
+            if((!v3only)&&(checkset("irqpokey1",4)))
+	            myheader.interrupt2 = myheader.interrupt2 & (1 ^ 0xff);
+        }
+    }
+    else if (strcmp(noun, "irqpokey2") == 0)
+    {
+	if (set)
+        {
+            if(!v4only)
+            {
+                if(checkset("pokey@440",3))
+	            myheader.irq = myheader.irq | 4;
+            }
+            if(!v3only)
+                if(checkset("pokey@440",4))
+	            myheader.interrupt2 = myheader.interrupt2 | 2;
+        }
+	else
+        {
+            if((!v4only)&&(checkset("irqpokey2",3)))
+                myheader.irq = myheader.irq & (4 ^ 0xff); // strip @440
+            if((!v3only)&&(checkset("irqpokey2",4)))
+	        myheader.interrupt2 = myheader.interrupt2 & (2 ^ 0xff);
+        }
+    }
+    else if (strcmp(noun, "irqym2152") == 0)
+    {
+	if (set)
+        {
+            if(!v4only)
+            {
+                if(checkset("ym2151@460",3))
+	            myheader.irq = myheader.irq | 8;
+            }
+            if(!v3only)
+                if(checkset("ym2151@460",4))
+	            myheader.interrupt2 = myheader.interrupt2 | 4;
+        }
+	else
+        {
+            if((!v4only)&&(checkset("irqym2152",3)))
+                myheader.irq = myheader.irq & (8 ^ 0xff); // strip @440
+            if((!v3only)&&(checkset("irqym2152",4)))
+	        myheader.interrupt2 = myheader.interrupt2 & (4 ^ 0xff);
+        }
+    }
+
 
     else if (strcmp(noun, "tvpal") == 0)
     {
@@ -994,198 +1102,241 @@ void syncheader(void)
     // don't sync if we don't have v3 and v4 headers enabled.
     if((v3only)||(v4only))
         return;
-    if(checkset("supergame"))
+    if(checkset("linear",3))
+    	setunset("set linear");
+    if(checkset("supergame",7))
     	setunset("set supergame");
-    if(checkset("activision"))
+    if(checkset("activision",7))
     	setunset("set activision");
-    if(checkset("absolute"))
+    if(checkset("absolute",7))
     	setunset("set absolute");
-    if(checkset("souper"))
+    if(checkset("souper",7))
     	setunset("set souper");
-    if(checkset("bankset"))
+    if(checkset("bankset",7))
     	setunset("set bankset");
-    if(checkset("ram@4000"))
+    if(checkset("ram@4000",7))
     	setunset("set ram@4000");
-    if(checkset("bankram"))
+    if(checkset("bankram",7))
     	setunset("set bankram");
-    if(checkset("mram@4000"))
+    if(checkset("mram@4000",7))
     	setunset("set mram@4000");
-    if(checkset("hram@4000"))
+    if(checkset("hram@4000",7))
     	setunset("set hram@4000");
-    if(checkset("rom@4000"))
+    if(checkset("rom@4000",7))
     	setunset("set rom@4000");
-    if(checkset("bank6@4000"))
+    if(checkset("bank6@4000",7))
     	setunset("set bank6@4000");
-    if(checkset("pokey@4000"))
+    if(checkset("pokey@4000",7))
     	setunset("set pokey@4000");
-    if(checkset("pokey@440"))
+    if(checkset("pokey@440",7))
     	setunset("set pokey@440");
-    if(checkset("pokey@450"))
+    if(checkset("pokey@450",7))
     	setunset("set pokey@450");
-    if(checkset("pokey@800"))
+    if(checkset("pokey@800",7))
     	setunset("set pokey@800");
-    if(checkset("ym2151@460"))
+    if(checkset("ym2151@460",7))
     	setunset("set ym2151@460");
-    if(checkset("covox@430"))
+    if(checkset("covox@430",7))
     	setunset("set covox@430");
+    if(checkset("irqpokey1",7))
+    	setunset("set irqpokey1");
+    if(checkset("irqpokey2",7))
+    	setunset("set irqpokey2");
+    if(checkset("irqym2152",7))
+    	setunset("set irqym2152");
 }
 
-int  checkset(char *option)
+int checkset(char *option, int typemask)
 {
-    // return !0 if option is set
-    // return 0  if option is not set
+    // call with typemask=3 to check only v3 header types
+    // call with typemask=4 to check only v4 header types
+    // call with typemask=7 to check both v3+v4 header types
 
+    // return !0 if option is set
+    // return  0 if option is not set
+
+    if (!strcmp(option,"linear"))
+    {
+        return(!(checkset("supergame",typemask) | checkset("activision",typemask) | 
+            checkset("absolute",typemask) | checkset("souper",typemask)));
+    }
     if (!strcmp(option,"supergame"))
     {
-        if(!v4only)
+        if((!v4only)&&(typemask&3))
             if(myheader.carttype2&2)
                 return(1);
-        if(!v3only)
+        if((!v3only)&&(typemask&4))
             if(myheader.mapper==1)
                 return(1);
     }
     if (!strcmp(option,"activision"))
     {
-        if(!v4only)
+        if((!v4only)&&(typemask&3))
             if(myheader.carttype1&1)
                 return(1);
-        if(!v3only)
+        if((!v3only)&&(typemask&4))
             if(myheader.mapper==2)
                 return(1);
     }
     if (!strcmp(option,"absolute"))
     {
-        if(!v4only)
+        if((!v4only)&&(typemask&3))
             if(myheader.carttype1&2)
                 return(1);
-        if(!v3only)
+        if((!v3only)&&(typemask&4))
             if(myheader.mapper==3)
                 return(1);
     }
     if (!strcmp(option,"souper"))
     {
-        if(!v4only)
+        if((!v4only)&&(typemask&3))
             if(myheader.carttype1&16)
                 return(1);
-        if(!v3only)
+        if((!v3only)&&(typemask&4))
             if(myheader.mapper==4)
                 return(1);
     }
     if (!strcmp(option,"bankset"))
     {
-        if(!v4only)
+        if((!v4only)&&(typemask&3))
             if(myheader.carttype1&32)
                 return(1);
-        if(!v3only)
+        if((!v3only)&&(typemask&4))
             if(myheader.mapper_options&0x80)
                 return(1);
     }
     if ((!strcmp(option,"supergameram"))||(!strcmp(option,"ram@4000")))
     {
-        if(!v4only)
+        if((!v4only)&&(typemask&3))
             if(myheader.carttype2&4)
                 return(1);
-        if(!v3only)
+        if((!v3only)&&(typemask&4))
             if((myheader.mapper_options&7)==1)
                 return(1);
     }
     if (!strcmp(option,"bankram"))
     {
-        if(!v4only)
+        if((!v4only)&&(typemask&3))
             if(myheader.carttype2&32)
                 return(1);
-        if(!v3only)
+        if((!v3only)&&(typemask&4))
             if((myheader.mapper_options&7)==6)
                 return(1);
     }
     if (!strcmp(option,"mram"))
     {
-        if(!v4only)
+        if((!v4only)&&(typemask&3))
             if(myheader.carttype2&128)
                 return(1);
-        if(!v3only)
+        if((!v3only)&&(typemask&4))
             if((myheader.mapper_options&7)==2)
                 return(1);
     }
     if (!strcmp(option,"hram"))
     {
-        if(!v4only)
+        if((!v4only)&&(typemask&3))
             if(myheader.carttype2&64)
                 return(1);
-        if(!v3only)
+        if((!v3only)&&(typemask&4))
             if((myheader.mapper_options&7)==3)
                 return(1);
     }
     if (!strcmp(option,"rom@4000"))
     {
-        if(!v4only)
+        if((!v4only)&&(typemask&3))
             if(myheader.carttype2&8)
                 return(1);
-        if(!v3only)
+        if((!v3only)&&(typemask&4))
             if((myheader.mapper_options&7)==4)
                 return(1);
     }
     if (!strcmp(option,"bank6@4000"))
     {
-        if(!v4only)
+        if((!v4only)&&(typemask&3))
             if(myheader.carttype2&16)
                 return(1);
-        if(!v3only)
+        if((!v3only)&&(typemask&4))
             if((myheader.mapper_options&7)==5)
                 return(1);
     }
     if (!strcmp(option,"pokey@4000"))
     {
-        if(!v4only)
+        if((!v4only)&&(typemask&3))
             if(myheader.carttype2&1)
                 return(1);
-        if(!v3only)
+        if((!v3only)&&(typemask&4))
             if((myheader.audio2&7)==5)
                 return(1);
     }
     if (!strcmp(option,"pokey@450"))
     {
-        if(!v4only)
+        if((!v4only)&&(typemask&3))
             if(myheader.carttype2&64)
                 return(1);
-        if(!v3only)
+        if((!v3only)&&(typemask&4))
             if((myheader.audio2&6)==2)
                 return(1);
     }
     if (!strcmp(option,"pokey@440"))
     {
-        if(!v4only)
+        if((!v4only)&&(typemask&3))
             if(myheader.carttype1&4)
                 return(1);
-        if(!v3only)
+        if((!v3only)&&(typemask&4))
             if((myheader.audio2&5)==1)
                 return(1);
     }
     if (!strcmp(option,"pokey@800"))
     {
-        if(!v4only)
+        if((!v4only)&&(typemask&3))
             if(myheader.carttype1&128)
                 return(1);
-        if(!v3only)
+        if((!v3only)&&(typemask&4))
             if((myheader.audio2&7)==4)
                 return(1);
     }
     if (!strcmp(option,"ym2151@460"))
     {
-        if(!v4only)
+        if((!v4only)&&(typemask&3))
             if(myheader.carttype1&8)
                 return(1);
-        if(!v3only)
+        if((!v3only)&&(typemask&4))
             if(myheader.audio2&8)
                 return(1);
     }
     if (!strcmp(option,"covox@430"))
     {
-        if(!v3only)
+        if((!v3only)&&(typemask&4))
             if(myheader.audio2&16)
                 return(1);
     }
-
+    if (!strcmp(option,"irqpokey1"))
+    {
+        if((!v4only)&&(typemask&3))
+            if(myheader.irq&19)
+                return(1);
+        if((!v3only)&&(typemask&4))
+            if(myheader.interrupt2&1)
+                return(1);
+    }
+    if (!strcmp(option,"irqpokey2"))
+    {
+        if((!v4only)&&(typemask&3))
+            if(myheader.irq&4)
+                return(1);
+        if((!v3only)&&(typemask&4))
+            if(myheader.interrupt2&2)
+                return(1);
+    }
+    if (!strcmp(option,"irqym2152"))
+    {
+        if((!v4only)&&(typemask&3))
+            if(myheader.irq&8)
+                return(1);
+        if((!v3only)&&(typemask&4))
+            if(myheader.interrupt2&4)
+                return(1);
+    }
     return(0);
 }
 
@@ -1258,90 +1409,102 @@ void report(void)
     headergamesize = (myheader.romsize4) | (myheader.romsize3 << 8) | (myheader.romsize2 << 16) | (myheader.romsize1 << 24);
     printf("    rom size           : %d", headergamesize);
     if (gamesize!=headergamesize) 
-        printf(" !!! actual %ld !!! (\"fixsize\" to correct)", gamesize);
+        printf(" !!! actual %ld !!! (\"fix\" to correct)", gamesize);
     printf("\n");
 
     if(!v4only)
     {
         printf("    cart format (v3)   : ");
-        if ( !(myheader.carttype2 & 2) && !(myheader.carttype1 & 51))
-            printf("Linear ");
-        if (myheader.carttype2 & 2)
-            printf("SuperGame ");
-        if (myheader.carttype1 & 1)
-            printf("Activision ");
-        if (myheader.carttype1 & 2)
-            printf("Absolute ");
-        if (myheader.carttype1 & 16)
-            printf("Souper ");
-        if (myheader.carttype1 & 32)
-            printf("Bankset ");
-        if (myheader.carttype2 & 4)
+        if (checkset("linear",3))
+            printf("linear ");
+        if (checkset("supergame",3))
+            printf("supergame ");
+        if (checkset("activision",3))
+            printf("activision ");
+        if (checkset("absolute",3))
+            printf("absolute ");
+        if (checkset("souper",3))
+            printf("souper ");
+        if (checkset("bankset",3))
+            printf("bankset ");
+        if (checkset("ram@4000",3))
             printf("ram@4000 ");
-        if (myheader.carttype2 & 32)
-            printf("BankRam ");
-        if (myheader.carttype2 & 128)
+        if (checkset("bankram",3))
+            printf("bankram ");
+        if (checkset("mram@4000",3))
             printf("mram@4000 ");
-        if (myheader.carttype1 & 64)
+        if (checkset("hram@4000",3))
             printf("hram@4000 ");
-        if (myheader.carttype2 & 8)
+        if (checkset("rom@4000",3))
             printf("rom@4000 ");
-        if (myheader.carttype2 & 16)
+        if (checkset("bank6@4000",3))
             printf("bank6@4000 ");
-        if (myheader.carttype2 & 1)
-            printf("Pokey@4000 ");
-        if (myheader.carttype1 & 4)
+        if (checkset("pokey@4000",3))
+            printf("pokey@4000 ");
+        if (checkset("pokey@440",3))
             printf("pokey@440 ");
-        if (myheader.carttype2 & 64)
+        if (checkset("pokey@450",3))
             printf("pokey@450 ");
-        if (myheader.carttype1 & 8)
+        if (checkset("ym2151@460",3))
             printf("ym2151@460 ");
-        if (myheader.carttype1 & 128)
+        if (checkset("pokey@800",3))
             printf("pokey@800 ");
+        if (checkset("covox@430",3))
+            printf("covox@430 ");
+        if (checkset("irqpokey1",3))
+            printf("irqpokey1 ");
+        if (checkset("irqpokey2",3))
+            printf("irqpokey2 ");
+        if (checkset("irqym2152",3))
+            printf("irqym2152 ");
         printf("\n");
     }
 
     if(!v3only)
     {
         printf("    cart format (v4)   : ");
-        if (myheader.mapper == 0)
-            printf("Linear ");
-        if (myheader.mapper == 1)
-            printf("SuperGame ");
-        if (myheader.mapper == 2)
-            printf("Activision ");
-        if (myheader.mapper == 3)
-            printf("Absolute ");
-        if (myheader.mapper == 4)
-            printf("Souper ");
-        if (myheader.mapper_options & 0x80)
-            printf("Bankset ");
-        if ((myheader.mapper_options & 7) == 1)
+        if (checkset("linear",4))
+            printf("linear ");
+        if (checkset("supergame",4))
+            printf("supergame ");
+        if (checkset("activision",4))
+            printf("activision ");
+        if (checkset("absolute",4))
+            printf("absolute ");
+        if (checkset("souper",4))
+            printf("souper ");
+        if (checkset("bankset",4))
+            printf("bankset ");
+        if (checkset("ram@4000",4))
             printf("ram@4000 ");
-        if ((myheader.mapper_options & 7) == 6)
-            printf("BankRam ");
-        if ((myheader.mapper_options & 7) == 2)
+        if (checkset("bankram",4))
+            printf("bankram ");
+        if (checkset("mram@4000",4))
             printf("mram@4000 ");
-        if ((myheader.mapper_options & 7) == 3)
+        if (checkset("hram@4000",4))
             printf("hram@4000 ");
-        if ((myheader.mapper_options & 7) == 4)
+        if (checkset("rom@4000",4))
             printf("rom@4000 ");
-        if ((myheader.mapper_options & 7) == 5)
+        if (checkset("bank6@4000",4))
             printf("bank6@4000 ");
-        if ((myheader.audio2 & 7) == 5)
-            printf("Pokey@4000 ");
-        if ((myheader.audio2 & 7) == 1)
+        if (checkset("pokey@4000",4))
+            printf("pokey@4000 ");
+        if (checkset("pokey@440",4))
             printf("pokey@440 ");
-        if ((myheader.audio2 & 7) == 2)
+        if (checkset("pokey@450",4))
             printf("pokey@450 ");
-        if ((myheader.audio2 & 7) == 3)
-            printf("pokey@440 pokey@450 ");
-        if (myheader.audio2 & 8)
+        if (checkset("ym2151@460",4))
             printf("ym2151@460 ");
-        if ((myheader.audio2 & 7) == 4)
+        if (checkset("pokey@800",4))
             printf("pokey@800 ");
-        if (myheader.audio2 & 16)
+        if (checkset("covox@430",4))
             printf("covox@430 ");
+        if (checkset("irqpokey1",4))
+            printf("irqpokey1 ");
+        if (checkset("irqpokey2",4))
+            printf("irqpokey2 ");
+        if (checkset("irqym2152",4))
+            printf("irqym2152 ");
         printf("\n");
     }
 
