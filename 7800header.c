@@ -181,6 +181,7 @@ int main(int argc, char **argv)
 	    myheader.version = 4;
             if(myheader.mapper == 0xff)
             {
+                // If the v4 header bytes are 0xff, clear them out. The dasm default fill is 0xff.
                 myheader.mapper = 0;
                 myheader.mapper_options = 0;
                 myheader.audio1 = 0;
@@ -188,6 +189,12 @@ int main(int argc, char **argv)
                 myheader.interrupt1 = 0;
                 myheader.interrupt2 = 0;
             }
+        }
+        if((!v4only)&&(myheader.carttype1==0xff)&&(myheader.carttype2==0xff))
+        {
+            // if we're not running v4 only, clear out a detected v3 scuttle
+            myheader.carttype1=0;
+            myheader.carttype2=0;
         }
     }
 
@@ -1102,8 +1109,6 @@ void syncheader(void)
     // don't sync if we don't have v3 and v4 headers enabled.
     if((v3only)||(v4only))
         return;
-    if(checkset("linear",3))
-    	setunset("set linear");
     if(checkset("supergame",7))
     	setunset("set supergame");
     if(checkset("activision",7))
@@ -1378,6 +1383,8 @@ void usage(char *binaryname)
     fprintf(stderr, "\t[-f file]\n\t\t...file for command input, write a78. same syntax as interactive mode.\n\n");
     fprintf(stderr, "\t[-b]\n\t\t...strip off the a78 header and write out a bin.\n\n");
     fprintf(stderr, "\t[-o]\n\t\t...override backup of the a78 file before updating it.\n\n");
+    fprintf(stderr, "\t[-3]\n\t\t...only create v3 compatible header, v4 is empty.\n\n");
+    fprintf(stderr, "\t[-4]\n\t\t...only create v4 compatible header, v3 is disabled.\n\n");
     fprintf(stderr, "\t[-p]\n\t\t...print info about the file's a78 header and exit.\n\n");
     exit(0);
 }
@@ -1415,96 +1422,107 @@ void report(void)
     if(!v4only)
     {
         printf("    cart format (v3)   : ");
-        if (checkset("linear",3))
-            printf("linear ");
-        if (checkset("supergame",3))
-            printf("supergame ");
-        if (checkset("activision",3))
-            printf("activision ");
-        if (checkset("absolute",3))
-            printf("absolute ");
-        if (checkset("souper",3))
-            printf("souper ");
-        if (checkset("bankset",3))
-            printf("bankset ");
-        if (checkset("ram@4000",3))
-            printf("ram@4000 ");
-        if (checkset("bankram",3))
-            printf("bankram ");
-        if (checkset("mram@4000",3))
-            printf("mram@4000 ");
-        if (checkset("hram@4000",3))
-            printf("hram@4000 ");
-        if (checkset("rom@4000",3))
-            printf("rom@4000 ");
-        if (checkset("bank6@4000",3))
-            printf("bank6@4000 ");
-        if (checkset("pokey@4000",3))
-            printf("pokey@4000 ");
-        if (checkset("pokey@440",3))
-            printf("pokey@440 ");
-        if (checkset("pokey@450",3))
-            printf("pokey@450 ");
-        if (checkset("ym2151@460",3))
-            printf("ym2151@460 ");
-        if (checkset("pokey@800",3))
-            printf("pokey@800 ");
-        if (checkset("covox@430",3))
-            printf("covox@430 ");
-        if (checkset("irqpokey1",3))
-            printf("irqpokey1 ");
-        if (checkset("irqpokey2",3))
-            printf("irqpokey2 ");
-        if (checkset("irqym2152",3))
-            printf("irqym2152 ");
+
+        if ((myheader.carttype1==0xff)&&(myheader.carttype2==0xff))
+            printf("[disabled] ");
+        else
+        {
+            if (checkset("linear",3))
+                printf("linear ");
+            if (checkset("supergame",3))
+                printf("supergame ");
+            if (checkset("activision",3))
+                printf("activision ");
+            if (checkset("absolute",3))
+                printf("absolute ");
+            if (checkset("souper",3))
+                printf("souper ");
+            if (checkset("bankset",3))
+                printf("bankset ");
+            if (checkset("ram@4000",3))
+                printf("ram@4000 ");
+            if (checkset("bankram",3))
+                printf("bankram ");
+            if (checkset("mram@4000",3))
+                printf("mram@4000 ");
+            if (checkset("hram@4000",3))
+                printf("hram@4000 ");
+            if (checkset("rom@4000",3))
+                printf("rom@4000 ");
+            if (checkset("bank6@4000",3))
+                printf("bank6@4000 ");
+            if (checkset("pokey@4000",3))
+                printf("pokey@4000 ");
+            if (checkset("pokey@440",3))
+                printf("pokey@440 ");
+            if (checkset("pokey@450",3))
+                printf("pokey@450 ");
+            if (checkset("ym2151@460",3))
+                printf("ym2151@460 ");
+            if (checkset("pokey@800",3))
+                printf("pokey@800 ");
+            if (checkset("covox@430",3))
+                printf("covox@430 ");
+            if (checkset("irqpokey1",3))
+                printf("irqpokey1 ");
+            if (checkset("irqpokey2",3))
+                printf("irqpokey2 ");
+            if (checkset("irqym2152",3))
+                printf("irqym2152 ");
+        }
         printf("\n");
     }
 
     if(!v3only)
     {
         printf("    cart format (v4)   : ");
-        if (checkset("linear",4))
-            printf("linear ");
-        if (checkset("supergame",4))
-            printf("supergame ");
-        if (checkset("activision",4))
-            printf("activision ");
-        if (checkset("absolute",4))
-            printf("absolute ");
-        if (checkset("souper",4))
-            printf("souper ");
-        if (checkset("bankset",4))
-            printf("bankset ");
-        if (checkset("ram@4000",4))
-            printf("ram@4000 ");
-        if (checkset("bankram",4))
-            printf("bankram ");
-        if (checkset("mram@4000",4))
-            printf("mram@4000 ");
-        if (checkset("hram@4000",4))
-            printf("hram@4000 ");
-        if (checkset("rom@4000",4))
-            printf("rom@4000 ");
-        if (checkset("bank6@4000",4))
-            printf("bank6@4000 ");
-        if (checkset("pokey@4000",4))
-            printf("pokey@4000 ");
-        if (checkset("pokey@440",4))
-            printf("pokey@440 ");
-        if (checkset("pokey@450",4))
-            printf("pokey@450 ");
-        if (checkset("ym2151@460",4))
-            printf("ym2151@460 ");
-        if (checkset("pokey@800",4))
-            printf("pokey@800 ");
-        if (checkset("covox@430",4))
-            printf("covox@430 ");
-        if (checkset("irqpokey1",4))
-            printf("irqpokey1 ");
-        if (checkset("irqpokey2",4))
-            printf("irqpokey2 ");
-        if (checkset("irqym2152",4))
-            printf("irqym2152 ");
+        if (myheader.version < 4)
+            printf("[header version < 4] ");
+        else    
+        {
+            if (checkset("linear",4))
+                printf("linear ");
+            if (checkset("supergame",4))
+                printf("supergame ");
+            if (checkset("activision",4))
+                printf("activision ");
+            if (checkset("absolute",4))
+                printf("absolute ");
+            if (checkset("souper",4))
+                printf("souper ");
+            if (checkset("bankset",4))
+                printf("bankset ");
+            if (checkset("ram@4000",4))
+                printf("ram@4000 ");
+            if (checkset("bankram",4))
+                printf("bankram ");
+            if (checkset("mram@4000",4))
+                printf("mram@4000 ");
+            if (checkset("hram@4000",4))
+                printf("hram@4000 ");
+            if (checkset("rom@4000",4))
+                printf("rom@4000 ");
+            if (checkset("bank6@4000",4))
+                printf("bank6@4000 ");
+            if (checkset("pokey@4000",4))
+                printf("pokey@4000 ");
+            if (checkset("pokey@440",4))
+                printf("pokey@440 ");
+            if (checkset("pokey@450",4))
+                printf("pokey@450 ");
+            if (checkset("ym2151@460",4))
+                printf("ym2151@460 ");
+            if (checkset("pokey@800",4))
+                printf("pokey@800 ");
+            if (checkset("covox@430",4))
+                printf("covox@430 ");
+            if (checkset("irqpokey1",4))
+                printf("irqpokey1 ");
+            if (checkset("irqpokey2",4))
+                printf("irqpokey2 ");
+            if (checkset("irqym2152",4))
+                printf("irqym2152 ");
+        }
         printf("\n");
     }
 
