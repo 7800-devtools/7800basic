@@ -726,7 +726,14 @@ void setunset(char *command)
 	if (set)
 	{
             if(!v4only)
+            {
 	        myheader.carttype2 = myheader.carttype2 | 1;
+
+                //unset other pokeys...
+	        myheader.carttype2 = myheader.carttype2 & (64 ^ 0xff);  // 450
+	        myheader.carttype1 = myheader.carttype1 & (4 ^ 0xff);   // 440
+	        myheader.carttype1 = myheader.carttype1 & (128 ^ 0xff); // 800
+            }
             if(!v3only)
 	        myheader.audio2 = (myheader.audio2 & 0xF8) | 5;
 	}
@@ -743,7 +750,13 @@ void setunset(char *command)
 	if (set)
         {
             if(!v4only)
+            {
 	        myheader.carttype2 = myheader.carttype2 | 64;
+
+                //unset other pokeys...
+	        myheader.carttype2 = myheader.carttype2 & (1 ^ 0xff);   // 4000
+	        myheader.carttype1 = myheader.carttype1 & (128 ^ 0xff); // 800
+            }
             if(!v3only)
             {
                 if(checkset("pokey@440",4))
@@ -770,7 +783,13 @@ void setunset(char *command)
 	if (set)
         {
             if(!v4only)
+            {
 	        myheader.carttype1 = myheader.carttype1 | 4;
+
+                //unset other pokeys...
+	        myheader.carttype2 = myheader.carttype2 & (1 ^ 0xff);   // 4000
+	        myheader.carttype1 = myheader.carttype1 & (128 ^ 0xff); // 800
+            }
             if(!v3only)
             {
                 if(checkset("pokey@450",4))
@@ -797,7 +816,14 @@ void setunset(char *command)
 	if (set)
         {
             if(!v4only)
+            {
 	        myheader.carttype1 = myheader.carttype1 | 128;
+
+                //unset other pokeys...
+	        myheader.carttype2 = myheader.carttype2 & (1 ^ 0xff);   // 4000
+	        myheader.carttype2 = myheader.carttype2 & (64 ^ 0xff);  // 450
+	        myheader.carttype1 = myheader.carttype1 & (4 ^ 0xff);   // 440
+            }
             if(!v3only)
 	        myheader.audio2 = (myheader.audio2 & 0xF8) | 4;
         }
