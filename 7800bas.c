@@ -134,6 +134,18 @@ int main(int argc, char *argv[])
     remove("banksetrom.asm");
     remove("banksetstrings.asm");
 
+    char removefile[256];
+    int t;
+    for(t=0;t<100;t++)
+    {
+        sprintf(removefile,"dump_gfx_%02d.bin",t);
+        if(remove(removefile))
+            break;
+        sprintf(removefile,"dump_gfx_%02d.asm",t);
+            remove(removefile);
+    }
+    
+
     create_a78info();		//wipe/create a78 parameter file
 
     printf("game\n");		// label for start of game
