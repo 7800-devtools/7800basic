@@ -7374,6 +7374,16 @@ void endif(void)
     printf(" endif\n");
 }
 
+void incbin(char **statement)
+{
+    //         1           2
+    //     incbin    somelabel
+    removeCR(statement[2]);
+    if ((statement[2] == 0) || (statement[2][0] == 0))
+	prerror("missing argument in incbin statement");
+    printf(" incbin %s\n", statement[2]);
+}
+
 
 void doif(char **statement)
 {
@@ -9845,11 +9855,7 @@ void set(char **statement)
 	assertminimumargs(statement + 1, "set dlmemory", 2);	//+1 to skip "dlmemory"
 	removeCR(statement[4]);	//remove CR if present
         if(banksetrom)
-        {
-	    printf("DLMEMSTART = (%s + $8000)\n", statement[3]);
-	    printf("DLMEMEND   = (%s + $8000)\n", statement[4]);
-	    strcpy(redefined_variables[numredefvars++], "BANKSET_DL_IN_CARTRAM = 1");
-        }
+	    prerror("\"set dlmemory\" isn't compatibl with banksets.");
         else
         {
 	    printf("DLMEMSTART = %s\n", statement[3]);

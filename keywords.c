@@ -308,6 +308,8 @@ void keywords(char **cstatement)
 	    doelse();
 	else if (!strncmp(statement[1], "#endif\0", 6))
 	    endif();
+	else if (!strncmp(statement[1], "incbin\0", 6))
+	    incbin(statement);
 	else if (!strncmp(statement[1], "sizeof\0", 6))
 	    dosizeof(statement);
 	else if (!strncmp(statement[1], "includesfile\0", 13))

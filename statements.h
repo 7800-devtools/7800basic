@@ -106,6 +106,7 @@ void plotmapfile(char **statement);
 void plotvalue(char **statement);
 void displaymode(char **statement);
 void ifconst(char **statement);
+void incbin(char **statement);
 void doelse(void);
 void endif(void);
 void dosizeof(char **statement);
