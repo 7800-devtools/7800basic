@@ -363,6 +363,8 @@ void keywords(char **cstatement)
 	    sinedata(statement);
 	else if (!strncmp(statement[1], "pokechar\0", 8))
 	    pokechar(statement);
+	else if (!strncmp(statement[1], "setfade\0", 7))
+	    setfade(statement);
 	else if ((!strncmp(statement[1], "on\0", 3)) && (!strncmp(statement[3], "go\0", 2)))
 	    ongoto(statement);	// on ... goto or on ... gosub
 	else if (!strncmp(statement[1], "const\0", 6))

@@ -30,6 +30,8 @@ int currentdmahole = 0;
 
 int banksetrom = 0;
 
+int fourbitfade_alreadyused = 0;
+
 #define BANKSETASM "banksetrom.asm"
 #define BANKSETSTRINGSASM "banksetstrings.asm"
 
@@ -2294,6 +2296,61 @@ void barfmultiplicationtables(void)
 	}
     }
 
+}
+
+void getfade(char **statement)
+{
+
+    //   4       5     6   7   8     9
+    // getfade   (   value , "black" )
+
+    if ( (statement[7][0] != ')') && (statement[9][0] != ')'))
+	prerror("bad argument count for getfade");
+
+    if (!fourbitfade_alreadyused)
+    {
+        fourbitfade_alreadyused=1;
+        strcpy(redefined_variables[numredefvars++], "FOURBITFADE = 1");
+    }
+
+    templabel++;
+    if ( (statement[7][0] != ')') && (statement[9][0] == ')') && (statement[8][0] == 'b') )
+    {
+        printf("    lda fourbitfadevalue\n");
+        printf("    beq .fadezeroskip%d\n",templabel);
+    }
+    printf("    lda ");
+    printimmed(statement[6]);
+    printf("%s\n", statement[6]);
+    printf("    jsr fourbitfade\n");
+    printf(".fadezeroskip%d\n",templabel);
+    strcpy(Areg, "invalid");
+
+}
+
+void setfade(char **statement)
+{
+
+    //   1      2
+    // setfade  value
+
+    assertminimumargs(statement, "setfade", 1);
+
+    if (!fourbitfade_alreadyused)
+    {
+        fourbitfade_alreadyused=1;
+        strcpy(redefined_variables[numredefvars++], "FOURBITFADE = 1");
+    }
+
+    printf("    lda ");
+    printimmed(statement[2]);
+    printf("%s\n", statement[2]);
+    printf("    asl\n");
+    printf("    asl\n");
+    printf("    asl\n");
+    printf("    asl\n");
+    printf("    sta fourbitfadevalue\n");
+    strcpy(Areg, "invalid");
 }
 
 void peekchar(char **statement)
@@ -9349,6 +9406,8 @@ void let(char **cstatement)
 		sread(statement);
 	    else if (!strncmp(statement[4], "peekchar\0", 8))
 		peekchar(statement);
+	    else if (!strncmp(statement[4], "getfade\0", 10))
+		getfade(statement);
 	    else
 		callfunction(statement);
 	}

@@ -1039,6 +1039,10 @@ exitmusictracker
 sfxvolumeentrypt
  ifconst TIAVOLUME
      lda tiavolume
+     asl
+     asl
+     asl
+     asl
      sta fourbitfadevalueint
  endif ; TIAVOLUME
      lda (inttemp5),y

@@ -79,6 +79,7 @@ void gosub(char **);
 void doif(char **);
 void domemcpy(char **);
 void pokechar(char **);
+void setfade(char **statement);
 void let(char **);
 void dec(char **);
 void bank(char **);
