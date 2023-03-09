@@ -8409,6 +8409,13 @@ void boxcollision(char **statement)
 	    prerror("malformed boxcollision statement");
     }
 
+    // check if widths and heights are all constants. if so, use quick box collision
+    if(isimmed(statement[8]) && isimmed(statement[10]) &&isimmed(statement[16]) &&isimmed(statement[18]))
+    {
+        printf("  QBOXCOLLISIONCHECK %s,%s,%s,%s,%s,%s,%s,%s\n", statement[4],statement[6],statement[8],statement[10],statement[12],statement[14],statement[16],statement[18]);
+        return;
+    }
+
     if (collisionwrap == 0)
     {
 	//no collision wrapping is selected. we'll work directly with the variables, no prep required.
@@ -10377,6 +10384,7 @@ void set(char **statement)
             {
                 strcpy(redefined_variables[numredefvars++], "pokeysupport = 1");
                 append_a78info("set pokey@450");
+	        prwarn("pokey autodetection is deprecated.");
             }
             else if (!strncmp(statement[3], "$450", 4))
             {
