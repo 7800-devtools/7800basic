@@ -8394,12 +8394,6 @@ void boxcollision(char **statement)
 
     invalidate_Areg();
 
-    // enable the compile-time optional code
-    if (boxcollisionused == 0)
-    {
-	strcpy(redefined_variables[numredefvars++], "BOXCOLLISION = 1");
-	boxcollisionused = 1;
-    }
 
 
     for (t = 4; t < 19; t = t + 2)
@@ -8414,6 +8408,13 @@ void boxcollision(char **statement)
     {
         printf("  QBOXCOLLISIONCHECK %s,%s,%s,%s,%s,%s,%s,%s\n", statement[4],statement[6],statement[8],statement[10],statement[12],statement[14],statement[16],statement[18]);
         return;
+    }
+
+    // we're going to use the boxcollision subroutine, so enable it
+    if (boxcollisionused == 0)
+    {
+	strcpy(redefined_variables[numredefvars++], "BOXCOLLISION = 1");
+	boxcollisionused = 1;
     }
 
     if (collisionwrap == 0)
