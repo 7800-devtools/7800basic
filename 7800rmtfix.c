@@ -17,24 +17,26 @@
 #define DESTADDR 0x4000
 
 #pragma pack(push, 1)
-struct rmtheader {
-	uint16_t vect1;
-	uint16_t vect2_start;
-	uint16_t vect3;
+struct rmtheader
+{
+    uint16_t vect1;
+    uint16_t vect2_start;
+    uint16_t vect3;
 
-	unsigned char magic[4]; //RMT4 
-	uint8_t  track_len;
-	uint8_t  song_speed;
-	uint8_t  player_freq;
-	uint8_t  format_version_number;
-	uint16_t pointer_to_instrument_pointers;
-	uint16_t pointer_to_track_pointers_lo;
-	uint16_t pointer_to_track_pointers_hi;
-	uint16_t pointer_to_song;
+    unsigned char magic[4];	//RMT4 
+    uint8_t track_len;
+    uint8_t song_speed;
+    uint8_t player_freq;
+    uint8_t format_version_number;
+    uint16_t pointer_to_instrument_pointers;
+    uint16_t pointer_to_track_pointers_lo;
+    uint16_t pointer_to_track_pointers_hi;
+    uint16_t pointer_to_song;
 };
 
-struct upoint {
-	uint16_t pointer;
+struct upoint
+{
+    uint16_t pointer;
 };
 
 #pragma pack(pop)
@@ -42,72 +44,75 @@ struct upoint {
 
 int main (int argc, char **argv)
 {
-	long t,rmtstart,size;
-	FILE *in,*out;
-	char outname[1024];
-	unsigned char *buffer;
+    long t, rmtstart, size;
+    FILE *in, *out;
+    char outname[1024];
+    unsigned char *buffer;
 
-	struct rmtheader *rmthead;
-	struct upoint *myupoint;
+    struct rmtheader *rmthead;
+    struct upoint *myupoint;
 
-	fprintf(stderr, "\n%s %s %s\n", HEADER_VERSION_INFO, __DATE__, __TIME__);
+    fprintf (stderr, "\n%s %s %s\n", HEADER_VERSION_INFO, __DATE__, __TIME__);
 
-	if(argc==1)
-	{
-		fprintf(stderr,"Usage:\n%s [RMT or SAP filename]\n",argv[0]);
-		return(1);
-	}
-	strncpy(outname,argv[1],1024);
-	int len=strlen(outname);
-	if((len>4) && (outname[len-4]=='.'))
-		outname[len-4]=0; 
-	strcat(outname,"_rmtfix.rmt");
+    if (argc == 1)
+    {
+	fprintf (stderr, "Usage:\n%s [RMT or SAP filename]\n", argv[0]);
+	return (1);
+    }
+    strncpy (outname, argv[1], 1024);
+    int len = strlen (outname);
+    if ((len > 4) && (outname[len - 4] == '.'))
+	outname[len - 4] = 0;
+    strcat (outname, "_rmtfix.rmt");
 
-	in=fopen(argv[1],"rb");
-	if(in==NULL)
-	{
-		fprintf(stderr,"ERR: couldn't open file '%s' for reading.\n",argv[1]);
-		return(2);
-	}
-	fseek(in,0,SEEK_END);
-	size=ftell(in);
-	fseek(in,0,SEEK_SET);
-	if(size<16)
-	{
-		fprintf(stderr,"ERR: file size of '%s' is %ld bytes.\n",argv[1],size);
-		return(3);
-	}
-	buffer=malloc(size);
-	if(fread(buffer,1,size,in) == 0)
-	{
-		fprintf(stderr,"ERR: couldn't read from '%s'.\n",argv[1]);
-		return(4);
-	}
-	fclose(in);
+    in = fopen (argv[1], "rb");
+    if (in == NULL)
+    {
+	fprintf (stderr, "ERR: couldn't open file '%s' for reading.\n",
+		 argv[1]);
+	return (2);
+    }
+    fseek (in, 0, SEEK_END);
+    size = ftell (in);
+    fseek (in, 0, SEEK_SET);
+    if (size < 16)
+    {
+	fprintf (stderr, "ERR: file size of '%s' is %ld bytes.\n", argv[1],
+		 size);
+	return (3);
+    }
+    buffer = malloc (size);
+    if (fread (buffer, 1, size, in) == 0)
+    {
+	fprintf (stderr, "ERR: couldn't read from '%s'.\n", argv[1]);
+	return (4);
+    }
+    fclose (in);
 
-	// Search for our RMT4 header...
-	for(t=0;t<size-10;t++)
-	{
-		if ( (buffer[t]=='R') && (buffer[t+1]=='M') && (buffer[t+2]=='T') && (buffer[t+3]=='4'))
-			break;
-	}
-	if(t==size-10)
-	{
-		fprintf(stderr,"ERR: no RMT4 header was found in '%s'.\n",argv[1]);
-		return(5);
-	}
+    // Search for our RMT4 header...
+    for (t = 0; t < size - 10; t++)
+    {
+	if ((buffer[t] == 'R') && (buffer[t + 1] == 'M')
+	    && (buffer[t + 2] == 'T') && (buffer[t + 3] == '4'))
+	    break;
+    }
+    if (t == size - 10)
+    {
+	fprintf (stderr, "ERR: no RMT4 header was found in '%s'.\n", argv[1]);
+	return (5);
+    }
 
-	// Try to create our output file...
-	out=fopen(outname,"wb");
-	if(out==NULL)
-	{
-		fprintf(stderr,"ERR: couldn't open '%s' for writing.\n",outname);
-		return(4);
-	}
+    // Try to create our output file...
+    out = fopen (outname, "wb");
+    if (out == NULL)
+    {
+	fprintf (stderr, "ERR: couldn't open '%s' for writing.\n", outname);
+	return (4);
+    }
 
-	rmtstart=t;
+    rmtstart = t;
 
-	rmthead=(void *)buffer+rmtstart-6;
+    rmthead = (void *) buffer + rmtstart - 6;
 
 /*
 	printf("vect1 .......................... 0x%04x\n",rmthead->vect1);
@@ -125,60 +130,65 @@ int main (int argc, char **argv)
 	printf("pointer_to_song ................ 0x%04x\n",rmthead->pointer_to_song);
 */
 
-	// if we're here, the RMT was found. Now we can start relocating it's internal pointers...
+    // if we're here, the RMT was found. Now we can start relocating it's internal pointers...
 
-	uint16_t memstart;
-	uint16_t startfix,endfix;
+    uint16_t memstart;
+    uint16_t startfix, endfix;
 
-	memstart = rmthead->vect2_start;
+    memstart = rmthead->vect2_start;
 
-	// Relocate the instrument pointers, which are consecutive words...
-	startfix=(rmthead->pointer_to_instrument_pointers)-memstart;
-	endfix=(rmthead->pointer_to_track_pointers_lo)-memstart;
-	for(t=startfix;t<endfix;t=t+2)
-	{
-		myupoint=(void *)(rmthead->magic)+t;
-		myupoint->pointer = (myupoint->pointer) - memstart + DESTADDR;
-	}
+    // Relocate the instrument pointers, which are consecutive words...
+    startfix = (rmthead->pointer_to_instrument_pointers) - memstart;
+    endfix = (rmthead->pointer_to_track_pointers_lo) - memstart;
+    for (t = startfix; t < endfix; t = t + 2)
+    {
+	myupoint = (void *) (rmthead->magic) + t;
+	myupoint->pointer = (myupoint->pointer) - memstart + DESTADDR;
+    }
 
 
-	// Relocate the track pointers, which are split into 2 separate LO and HI byte tables
-	startfix=(rmthead->pointer_to_track_pointers_lo)-memstart;
-	endfix=(rmthead->pointer_to_track_pointers_hi)-memstart;
-	for(t=startfix;t<endfix;t++)
-	{
-		uint8_t *lo,*hi;
-		uint16_t val;
-		lo = buffer+rmtstart+t;
-		hi = buffer+rmtstart+t+endfix-startfix;
+    // Relocate the track pointers, which are split into 2 separate LO and HI byte tables
+    startfix = (rmthead->pointer_to_track_pointers_lo) - memstart;
+    endfix = (rmthead->pointer_to_track_pointers_hi) - memstart;
+    for (t = startfix; t < endfix; t++)
+    {
+	uint8_t *lo, *hi;
+	uint16_t val;
+	lo = buffer + rmtstart + t;
+	hi = buffer + rmtstart + t + endfix - startfix;
 
-		if ((*lo == 0) && (*hi == 0)) // don't relocate 0x0000 flag
-			continue;
+	if ((*lo == 0) && (*hi == 0))	// don't relocate 0x0000 flag
+	    continue;
 
-//		fprintf(stderr,"%04x - VALHI:%02x VALLO:%02x  ",t,*hi,*lo);
+//              fprintf(stderr,"%04x - VALHI:%02x VALLO:%02x  ",t,*hi,*lo);
 
-		val = *lo + (*hi << 8);
-//		fprintf(stderr,"VAL:%04x ",val);
-		val = val - memstart + DESTADDR;
-//		fprintf(stderr,"NEWVAL:%04x\n",val);
-		*lo = val & 255;
-		*hi = (val >> 8) & 255;
-	}
+	val = *lo + (*hi << 8);
+//              fprintf(stderr,"VAL:%04x ",val);
+	val = val - memstart + DESTADDR;
+//              fprintf(stderr,"NEWVAL:%04x\n",val);
+	*lo = val & 255;
+	*hi = (val >> 8) & 255;
+    }
 
-	// Relocate the pointers to the tables who's contents we just relocated earlier...
-	rmthead->pointer_to_instrument_pointers=(rmthead->pointer_to_instrument_pointers)-memstart + DESTADDR;
-	rmthead->pointer_to_track_pointers_lo=(rmthead->pointer_to_track_pointers_lo)-memstart + DESTADDR;
-	rmthead->pointer_to_track_pointers_hi=(rmthead->pointer_to_track_pointers_hi)-memstart + DESTADDR;
-	rmthead->pointer_to_song=(rmthead->pointer_to_song)-memstart + DESTADDR;
+    // Relocate the pointers to the tables who's contents we just relocated earlier...
+    rmthead->pointer_to_instrument_pointers =
+	(rmthead->pointer_to_instrument_pointers) - memstart + DESTADDR;
+    rmthead->pointer_to_track_pointers_lo =
+	(rmthead->pointer_to_track_pointers_lo) - memstart + DESTADDR;
+    rmthead->pointer_to_track_pointers_hi =
+	(rmthead->pointer_to_track_pointers_hi) - memstart + DESTADDR;
+    rmthead->pointer_to_song =
+	(rmthead->pointer_to_song) - memstart + DESTADDR;
 
-	// An RMT file ends with pointer back to song data. Relocate this one too...
-	uint16_t *song_restart_address = (void *)buffer+size-2;
-	*song_restart_address = *song_restart_address + DESTADDR - rmthead->vect2_start;
+    // An RMT file ends with pointer back to song data. Relocate this one too...
+    uint16_t *song_restart_address = (void *) buffer + size - 2;
+    *song_restart_address =
+	*song_restart_address + DESTADDR - rmthead->vect2_start;
 
-	// Lastly, relocate the pointers at the start of the RMT...
-	rmthead->vect3 = rmthead->vect3 - rmthead->vect2_start + DESTADDR;
-	rmthead->vect2_start = DESTADDR;
-	rmthead->vect1 = 0xffff;
+    // Lastly, relocate the pointers at the start of the RMT...
+    rmthead->vect3 = rmthead->vect3 - rmthead->vect2_start + DESTADDR;
+    rmthead->vect2_start = DESTADDR;
+    rmthead->vect1 = 0xffff;
 
 /*
 	printf("vect1 .......................... 0x%04x\n",rmthead->vect1);
@@ -196,6 +206,6 @@ int main (int argc, char **argv)
 	printf("pointer_to_song ................ 0x%04x\n",rmthead->pointer_to_song);
 */
 
-	fwrite(buffer+rmtstart-6,1,size-rmtstart+6,out);
-	fclose(out);
+    fwrite (buffer + rmtstart - 6, 1, size - rmtstart + 6, out);
+    fclose (out);
 }
