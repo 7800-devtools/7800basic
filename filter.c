@@ -163,9 +163,7 @@ int main (int argc, char **argv)
 	{
 	    if (filterterm[t][0] == '^')
 	    {
-		if (strncmp
-		    (linebuffer, filterterm[t] + 1,
-		     strlen (filterterm[t] + 1)) == 0)
+		if (strncmp (linebuffer, filterterm[t] + 1, strlen (filterterm[t] + 1)) == 0)
 		{
 		    match = 1;
 		    break;

@@ -105,9 +105,7 @@ void prwarn (char *format, ...)
 void usage (char *binaryname)
 {
     fprintf (stderr, "Usage:\n");
-    fprintf (stderr,
-	     "    %s FILENAME\n    where FILENAME is a binary input file containing SNIP marks\n",
-	     binaryname);
+    fprintf (stderr, "    %s FILENAME\n    where FILENAME is a binary input file containing SNIP marks\n", binaryname);
     fprintf (stderr, "\n");
     fprintf (stderr, "Sample SNIP marks in dasm format:\n");
     fprintf (stderr, "    .byte \"SNIPStart\",0,\"snipfilename\",0\n");

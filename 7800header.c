@@ -191,8 +191,7 @@ int main (int argc, char **argv)
 		myheader.interrupt2 = 0;
 	    }
 	}
-	if ((!v4only) && (myheader.carttype1 == 0xff)
-	    && (myheader.carttype2 == 0xff))
+	if ((!v4only) && (myheader.carttype1 == 0xff) && (myheader.carttype2 == 0xff))
 	{
 	    // if we're not running v4 only, clear out a detected v3 scuttle
 	    myheader.carttype1 = 0;
@@ -214,35 +213,22 @@ int main (int argc, char **argv)
 	report ();
 	if (printinfo)
 	    exit (0);
-	printf
-	    ("Commands: \"(un)set [option]\"       -   Add/Remove options.\n");
-	printf
-	    ("          \"name [embedded name]\"   -   Set the game name in the header.\n");
+	printf ("Commands: \"(un)set [option]\"       -   Add/Remove options.\n");
+	printf ("          \"name [embedded name]\"   -   Set the game name in the header.\n");
 	if ((v3only) || (v4only))
-	    printf
-		("          \"fix\"                    -   Fix embedded size.\n");
+	    printf ("          \"fix\"                    -   Fix embedded size.\n");
 	else
-	    printf
-		("          \"fix\"                    -   Fix embedded size and sync v3+v4.\n");
-	printf
-	    ("          \"save [name]\"            -   Save a78 and exit.\n");
-	printf
-	    ("          \"strip [name]\"           -   Save headerless bin file and exit.\n");
-	printf
-	    ("          \"exit\"                   -   Exit the utility without saving.\n");
+	    printf ("          \"fix\"                    -   Fix embedded size and sync v3+v4.\n");
+	printf ("          \"save [name]\"            -   Save a78 and exit.\n");
+	printf ("          \"strip [name]\"           -   Save headerless bin file and exit.\n");
+	printf ("          \"exit\"                   -   Exit the utility without saving.\n");
 	printf ("\n");
-	printf
-	    ("Options:  linear supergame souper bankset absolute activision\n");
-	printf
-	    ("  rom@4000 bank6@4000 ram@4000 mram@4000 hram@4000 bankram pokey@440 pokey@450\n");
-	printf
-	    ("  pokey@800 pokey@4000 ym2151@460 covox@430 irqpokey1 irqpokey2 irqym2152\n");
-	printf
-	    ("  7800joy1 7800joy2 lightgun1 lightgun2 paddle1 paddle2 tball1 tball2\n");
-	printf
-	    ("  2600joy1 2600joy2 driving1 driving2 keypad1 keypad2 stmouse1 stmouse2\n");
-	printf
-	    ("  amouse1 amouse2 snes1 snes2 hsc savekey xm tvpal tvntsc composite\n");
+	printf ("Options:  linear supergame souper bankset absolute activision\n");
+	printf ("  rom@4000 bank6@4000 ram@4000 mram@4000 hram@4000 bankram pokey@440 pokey@450\n");
+	printf ("  pokey@800 pokey@4000 ym2151@460 covox@430 irqpokey1 irqpokey2 irqym2152\n");
+	printf ("  7800joy1 7800joy2 lightgun1 lightgun2 paddle1 paddle2 tball1 tball2\n");
+	printf ("  2600joy1 2600joy2 driving1 driving2 keypad1 keypad2 stmouse1 stmouse2\n");
+	printf ("  amouse1 amouse2 snes1 snes2 hsc savekey xm tvpal tvntsc composite\n");
 	printf ("> ");
 
 	if (fgets (usercommand, 1024, stdin))
@@ -281,8 +267,7 @@ int main (int argc, char **argv)
 		memset (myheader.gamename, 0, 32);
 		strncpy (myheader.gamename, usercommand + 5, 32);
 	    }
-	    else if ((strncmp (usercommand, "ex", 2) == 0)
-		     || (usercommand[0] == 'x') || (usercommand[0] == 'q'))
+	    else if ((strncmp (usercommand, "ex", 2) == 0) || (usercommand[0] == 'x') || (usercommand[0] == 'q'))
 	    {
 		exit (0);
 	    }
@@ -631,16 +616,14 @@ void setunset (char *command)
     }
 
     // ***** CART RAM...
-    else if ((strcmp (noun, "supergameram") == 0)
-	     || (strcmp (noun, "ram@4000") == 0))
+    else if ((strcmp (noun, "supergameram") == 0) || (strcmp (noun, "ram@4000") == 0))
     {
 	if (set)
 	{
 	    if (!v4only)
 		myheader.carttype2 = myheader.carttype2 | 4;
 	    if (!v3only)
-		myheader.mapper_options =
-		    (myheader.mapper_options & 0xF8) | 1;
+		myheader.mapper_options = (myheader.mapper_options & 0xF8) | 1;
 	}
 	else
 	{
@@ -657,8 +640,7 @@ void setunset (char *command)
 	    if (!v4only)
 		myheader.carttype2 = myheader.carttype2 | 32;
 	    if (!v3only)
-		myheader.mapper_options =
-		    (myheader.mapper_options & 0xF8) | 6;
+		myheader.mapper_options = (myheader.mapper_options & 0xF8) | 6;
 	}
 	else
 	{
@@ -675,8 +657,7 @@ void setunset (char *command)
 	    if (!v4only)
 		myheader.carttype2 = myheader.carttype2 | 128;
 	    if (!v3only)
-		myheader.mapper_options =
-		    (myheader.mapper_options & 0xF8) | 2;
+		myheader.mapper_options = (myheader.mapper_options & 0xF8) | 2;
 	}
 	else
 	{
@@ -693,8 +674,7 @@ void setunset (char *command)
 	    if (!v4only)
 		myheader.carttype1 = myheader.carttype1 | 64;
 	    if (!v3only)
-		myheader.mapper_options =
-		    (myheader.mapper_options & 0xF8) | 3;
+		myheader.mapper_options = (myheader.mapper_options & 0xF8) | 3;
 	}
 	else
 	{
@@ -713,8 +693,7 @@ void setunset (char *command)
 	    if (!v4only)
 		myheader.carttype2 = myheader.carttype2 | 8;
 	    if (!v3only)
-		myheader.mapper_options =
-		    (myheader.mapper_options & 0xF8) | 4;
+		myheader.mapper_options = (myheader.mapper_options & 0xF8) | 4;
 	}
 	else
 	{
@@ -731,8 +710,7 @@ void setunset (char *command)
 	    if (!v4only)
 		myheader.carttype2 = myheader.carttype2 | 16;
 	    if (!v3only)
-		myheader.mapper_options =
-		    (myheader.mapper_options & 0xF8) | 5;
+		myheader.mapper_options = (myheader.mapper_options & 0xF8) | 5;
 	}
 	else
 	{
@@ -907,8 +885,7 @@ void setunset (char *command)
 		    myheader.irq = myheader.irq | 16;
 	    }
 	    if (!v3only)
-		if (checkset ("pokey@4000", 4) || checkset ("pokey@450", 4)
-		    || checkset ("pokey@800", 4))
+		if (checkset ("pokey@4000", 4) || checkset ("pokey@450", 4) || checkset ("pokey@800", 4))
 		    myheader.interrupt2 = myheader.interrupt2 | 1;
 	}
 	else
@@ -1214,9 +1191,7 @@ int checkset (char *option, int typemask)
     {
 	return (!
 		(checkset ("supergame", typemask) |
-		 checkset ("activision", typemask) | checkset ("absolute",
-							       typemask) |
-		 checkset ("souper", typemask)));
+		 checkset ("activision", typemask) | checkset ("absolute", typemask) | checkset ("souper", typemask)));
     }
     if (!strcmp (option, "supergame"))
     {
@@ -1432,21 +1407,13 @@ void loadfile (char *filename)
 void usage (char *binaryname)
 {
     fprintf (stderr, "Usage:\n\n");
-    fprintf (stderr,
-	     "\"%s [options] FILENAME\", where options are zero or more of the following... \n\n",
-	     binaryname);
-    fprintf (stderr,
-	     "\t[-f file]\n\t\t...file for command input, write a78. same syntax as interactive mode.\n\n");
-    fprintf (stderr,
-	     "\t[-b]\n\t\t...strip off the a78 header and write out a bin.\n\n");
-    fprintf (stderr,
-	     "\t[-o]\n\t\t...override backup of the a78 file before updating it.\n\n");
-    fprintf (stderr,
-	     "\t[-3]\n\t\t...only create v3 compatible header, v4 is empty.\n\n");
-    fprintf (stderr,
-	     "\t[-4]\n\t\t...only create v4 compatible header, v3 is disabled.\n\n");
-    fprintf (stderr,
-	     "\t[-p]\n\t\t...print info about the file's a78 header and exit.\n\n");
+    fprintf (stderr, "\"%s [options] FILENAME\", where options are zero or more of the following... \n\n", binaryname);
+    fprintf (stderr, "\t[-f file]\n\t\t...file for command input, write a78. same syntax as interactive mode.\n\n");
+    fprintf (stderr, "\t[-b]\n\t\t...strip off the a78 header and write out a bin.\n\n");
+    fprintf (stderr, "\t[-o]\n\t\t...override backup of the a78 file before updating it.\n\n");
+    fprintf (stderr, "\t[-3]\n\t\t...only create v3 compatible header, v4 is empty.\n\n");
+    fprintf (stderr, "\t[-4]\n\t\t...only create v4 compatible header, v3 is disabled.\n\n");
+    fprintf (stderr, "\t[-p]\n\t\t...print info about the file's a78 header and exit.\n\n");
     exit (0);
 }
 
@@ -1466,8 +1433,7 @@ uint32_t phtole32 (uint32_t value)
 
     //we're big endian. we need to swap all 4 bytes
     value = ((value & 0xff000000) >> 24) |
-	((value & 0x00ff0000) >> 8) | ((value & 0x0000ff00) << 8) |
-	((value & 0x000000ff) << 24);
+	((value & 0x00ff0000) >> 8) | ((value & 0x0000ff00) << 8) | ((value & 0x000000ff) << 24);
     return (value);
 }
 
@@ -1477,9 +1443,7 @@ void report (void)
     printf ("    file name          : %s\n", filename);
     printf ("    embedded game name : %s\n", myheader.gamename);
     headergamesize =
-	(myheader.romsize4) | (myheader.romsize3 << 8) | (myheader.
-							  romsize2 << 16) |
-	(myheader.romsize1 << 24);
+	(myheader.romsize4) | (myheader.romsize3 << 8) | (myheader.romsize2 << 16) | (myheader.romsize1 << 24);
     printf ("    rom size           : %d", headergamesize);
     if (gamesize != headergamesize)
 	printf (" !!! actual %ld !!! (\"fix\" to correct)", gamesize);

@@ -62,9 +62,7 @@ int main (int argc, char *argv[])
 	    printf ("%s (%s, %s)\n", BASIC_VERSION_INFO, __TIME__, __DATE__);
 	    exit (0);
 	case '?':
-	    fprintf (stderr,
-		     "usage: %s -r <variable redefs file> -i <includes path>\n",
-		     argv[0]);
+	    fprintf (stderr, "usage: %s -r <variable redefs file> -i <includes path>\n", argv[0]);
 	    exit (1);
 	}
     }
@@ -118,7 +116,6 @@ int main (int argc, char *argv[])
     create_a78info ();		//wipe/create a78 parameter file
 
     printf ("game\n");		// label for start of game
-    header_open (header);
     init_includes (path);
 
     statement = (char **) malloc (sizeof (char *) * 200);
@@ -146,8 +143,7 @@ int main (int argc, char *argv[])
 	for (i = 0; i < 495; ++i)
 	    if (code[i] == ' ')
 		break;
-	if (code[i + 1] == 'd' && code[i + 2] == 'e' && code[i + 3] == 'f'
-	    && code[i + 4] == ' ')
+	if (code[i + 1] == 'd' && code[i + 2] == 'e' && code[i + 3] == 'f' && code[i + 4] == ' ')
 	{			// found a define
 	    i += 5;
 	    for (j = 0; code[i] != ' '; i++)
@@ -188,8 +184,7 @@ int main (int argc, char *argv[])
 			break;
 		    for (j = 0; j < 500; ++j)
 			finalcode[j] = '\0';
-		    strncpy (finalcode, mycode,
-			     strlen (mycode) - strlen (codeadd));
+		    strncpy (finalcode, mycode, strlen (mycode) - strlen (codeadd));
 		    strcat (finalcode, defr[i]);
 		    strcat (finalcode, codeadd + strlen (def[i]));
 		    strcpy (mycode, finalcode);
@@ -223,7 +218,7 @@ int main (int argc, char *argv[])
 	    else
 	    {
 		multiplespace = 0;
-		if (k < 199)	//REVENG - avoid overrun when users use REM with long horizontal separators
+		if (k < 199)	// avoid overrun when users use REM with long horizontal separators
 		    statement[j][k++] = single;
 	    }
 
@@ -244,8 +239,7 @@ int main (int argc, char *argv[])
 	keywords (statement);
 	if (numconstants == (MAXCONSTANTS - 1))
 	{
-	    fprintf (stderr, "(%d) Maximum number of constants exceeded.\n",
-		     bbgetline ());
+	    fprintf (stderr, "(%d) Maximum number of constants exceeded.\n", bbgetline ());
 	    exit (1);
 	}
     }
@@ -256,8 +250,7 @@ int main (int argc, char *argv[])
     if (strcmp (stdoutfilename, "7800.asm") != 0)
     {
 	strcpy (stdoutfilename, "7800.asm");
-	if ((stdoutfilepointer =
-	     freopen (stdoutfilename, "a", stdout)) == NULL)
+	if ((stdoutfilepointer = freopen (stdoutfilename, "a", stdout)) == NULL)
 	{
 	    prerror ("couldn't reopen the 7800.asm file.");
 	}
@@ -270,13 +263,11 @@ int main (int argc, char *argv[])
     barfmultiplicationtables ();
 
     printf (" if SPACEOVERFLOW > 0\n");
-    printf (" echo \"\"\n");
-    printf
-	(" echo \"######## ERROR: space overflow detected in\",[SPACEOVERFLOW]d,\"areas.\"\n");
-    printf
-	(" echo \"######## look above for areas with negative ROM space left.\"\n");
-    printf (" echo \"######## Aborting assembly.\"\n");
-    printf (" ERR\n");
+    printf ("  echo \"\"\n");
+    printf ("  echo \"######## ERROR: space overflow detected in\",[SPACEOVERFLOW]d,\"areas.\"\n");
+    printf ("  echo \"######## look above for areas with negative ROM space left.\"\n");
+    printf ("  echo \"######## Aborting assembly.\"\n");
+    printf ("  ERR\n");
     printf (" endif\n");
 
     printf (" \n\n");

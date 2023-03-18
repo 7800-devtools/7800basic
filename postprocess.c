@@ -23,8 +23,7 @@ int main (int argc, char *argv[])
     char line[5000];
     char asmline[5000];
     int bB = 2;			// part of bB file
-    int writebBfile[17] =
-	{ 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 };
+    int writebBfile[17] = { 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 };
     int i;
     int j;
     while ((i = getopt (argc, argv, "i:")) != -1)
@@ -75,9 +74,7 @@ int main (int argc, char *argv[])
 	    }
 	    else if (strncmp (line, "bB\0", 2))
 	    {
-		fprintf (stderr,
-			 "User-defined %s found in current directory\n",
-			 line);
+		fprintf (stderr, "User-defined %s found in current directory\n", line);
 	    }
 	}
 	while (fgets (asmline, 5000, asmfile))
@@ -86,16 +83,14 @@ int main (int argc, char *argv[])
 	    {
 		writebBfile[bB]++;
 		readbBfile[bB] = (char **) malloc (sizeof (char *) * 50000);
-		readbBfile[bB][writebBfile[bB]] =
-		    (char *) malloc (strlen (line) + 3);
+		readbBfile[bB][writebBfile[bB]] = (char *) malloc (strlen (line) + 3);
 		sprintf (readbBfile[bB][writebBfile[bB]], ";%s\n", line);
 	    }
 	    if (!writebBfile[bB])
 		printf ("%s", asmline);
 	    else
 	    {
-		readbBfile[bB][++writebBfile[bB]] =
-		    (char *) malloc (strlen (asmline) + 3);
+		readbBfile[bB][++writebBfile[bB]] = (char *) malloc (strlen (asmline) + 3);
 		sprintf (readbBfile[bB][writebBfile[bB]], "%s", asmline);
 	    }
 	}

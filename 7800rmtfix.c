@@ -68,8 +68,7 @@ int main (int argc, char **argv)
     in = fopen (argv[1], "rb");
     if (in == NULL)
     {
-	fprintf (stderr, "ERR: couldn't open file '%s' for reading.\n",
-		 argv[1]);
+	fprintf (stderr, "ERR: couldn't open file '%s' for reading.\n", argv[1]);
 	return (2);
     }
     fseek (in, 0, SEEK_END);
@@ -77,8 +76,7 @@ int main (int argc, char **argv)
     fseek (in, 0, SEEK_SET);
     if (size < 16)
     {
-	fprintf (stderr, "ERR: file size of '%s' is %ld bytes.\n", argv[1],
-		 size);
+	fprintf (stderr, "ERR: file size of '%s' is %ld bytes.\n", argv[1], size);
 	return (3);
     }
     buffer = malloc (size);
@@ -92,8 +90,7 @@ int main (int argc, char **argv)
     // Search for our RMT4 header...
     for (t = 0; t < size - 10; t++)
     {
-	if ((buffer[t] == 'R') && (buffer[t + 1] == 'M')
-	    && (buffer[t + 2] == 'T') && (buffer[t + 3] == '4'))
+	if ((buffer[t] == 'R') && (buffer[t + 1] == 'M') && (buffer[t + 2] == 'T') && (buffer[t + 3] == '4'))
 	    break;
     }
     if (t == size - 10)
@@ -171,19 +168,14 @@ int main (int argc, char **argv)
     }
 
     // Relocate the pointers to the tables who's contents we just relocated earlier...
-    rmthead->pointer_to_instrument_pointers =
-	(rmthead->pointer_to_instrument_pointers) - memstart + DESTADDR;
-    rmthead->pointer_to_track_pointers_lo =
-	(rmthead->pointer_to_track_pointers_lo) - memstart + DESTADDR;
-    rmthead->pointer_to_track_pointers_hi =
-	(rmthead->pointer_to_track_pointers_hi) - memstart + DESTADDR;
-    rmthead->pointer_to_song =
-	(rmthead->pointer_to_song) - memstart + DESTADDR;
+    rmthead->pointer_to_instrument_pointers = (rmthead->pointer_to_instrument_pointers) - memstart + DESTADDR;
+    rmthead->pointer_to_track_pointers_lo = (rmthead->pointer_to_track_pointers_lo) - memstart + DESTADDR;
+    rmthead->pointer_to_track_pointers_hi = (rmthead->pointer_to_track_pointers_hi) - memstart + DESTADDR;
+    rmthead->pointer_to_song = (rmthead->pointer_to_song) - memstart + DESTADDR;
 
     // An RMT file ends with pointer back to song data. Relocate this one too...
     uint16_t *song_restart_address = (void *) buffer + size - 2;
-    *song_restart_address =
-	*song_restart_address + DESTADDR - rmthead->vect2_start;
+    *song_restart_address = *song_restart_address + DESTADDR - rmthead->vect2_start;
 
     // Lastly, relocate the pointers at the start of the RMT...
     rmthead->vect3 = rmthead->vect3 - rmthead->vect2_start + DESTADDR;

@@ -13,8 +13,7 @@ int numthens = 0;
 
 int swaptest (char *value)	// check for then, && or ||
 {
-    if (!strncmp (value, "then\0", 4) || !strncmp (value, "&&\0", 2)
-	|| !strncmp (value, "||\0", 2))
+    if (!strncmp (value, "then\0", 4) || !strncmp (value, "&&\0", 2) || !strncmp (value, "||\0", 2))
 	return 1;
     return 0;
 }
@@ -75,8 +74,7 @@ void keywords (char **cstatement)
 		    foundelse = i;
 	    }
 	    if (!strncmp (cstatement[k + 3], ">\0", 2)
-		&& (!strncmp (cstatement[k + 1], "if\0", 2))
-		&& (swaptest (cstatement[k + 5])))
+		&& (!strncmp (cstatement[k + 1], "if\0", 2)) && (swaptest (cstatement[k + 5])))
 	    {
 		// swap operands and switch compare
 		strcpy (cstatement[k + 3], cstatement[k + 2]);	// stick 1st operand here temporarily
@@ -85,8 +83,7 @@ void keywords (char **cstatement)
 		strcpy (cstatement[k + 3], "<");	// replace compare
 	    }
 	    else if (!strncmp (cstatement[k + 3], "<=\0", 2)
-		     && (!strncmp (cstatement[k + 1], "if\0", 2))
-		     && (swaptest (cstatement[k + 5])))
+		     && (!strncmp (cstatement[k + 1], "if\0", 2)) && (swaptest (cstatement[k + 5])))
 	    {
 		// swap operands and switch compare
 		strcpy (cstatement[k + 3], cstatement[k + 2]);
@@ -110,8 +107,7 @@ void keywords (char **cstatement)
 	    else if (!strncmp (cstatement[k + 3], "||\0", 2))
 	    {
 		if (!strncmp (cstatement[k + 5], ">\0", 2)
-		    && (!strncmp (cstatement[k + 1], "if\0", 2))
-		    && (swaptest (cstatement[k + 7])))
+		    && (!strncmp (cstatement[k + 1], "if\0", 2)) && (swaptest (cstatement[k + 7])))
 		{
 		    // swap operands and switch compare
 		    strcpy (cstatement[k + 5], cstatement[k + 4]);	// stick 1st operand here temporarily
@@ -120,8 +116,7 @@ void keywords (char **cstatement)
 		    strcpy (cstatement[k + 5], "<");	// replace compare
 		}
 		else if (!strncmp (cstatement[k + 5], "<=\0", 2)
-			 && (!strncmp (cstatement[k + 1], "if\0", 2))
-			 && (swaptest (cstatement[k + 7])))
+			 && (!strncmp (cstatement[k + 1], "if\0", 2)) && (swaptest (cstatement[k + 7])))
 		{
 		    // swap operands and switch compare
 		    strcpy (cstatement[k + 5], cstatement[k + 4]);
@@ -146,8 +141,7 @@ void keywords (char **cstatement)
 	    else if (!strncmp (cstatement[k + 5], "||\0", 2))
 	    {
 		if (!strncmp (cstatement[k + 7], ">\0", 2)
-		    && (!strncmp (cstatement[k + 1], "if\0", 2))
-		    && (swaptest (cstatement[k + 9])))
+		    && (!strncmp (cstatement[k + 1], "if\0", 2)) && (swaptest (cstatement[k + 9])))
 		{
 		    // swap operands and switch compare
 		    strcpy (cstatement[k + 7], cstatement[k + 6]);	// stick 1st operand here temporarily
@@ -156,8 +150,7 @@ void keywords (char **cstatement)
 		    strcpy (cstatement[k + 7], "<");	// replace compare
 		}
 		else if (!strncmp (cstatement[k + 7], "<=\0", 2)
-			 && (!strncmp (cstatement[k + 1], "if\0", 2))
-			 && (swaptest (cstatement[k + 9])))
+			 && (!strncmp (cstatement[k + 1], "if\0", 2)) && (swaptest (cstatement[k + 9])))
 		{
 		    // swap operands and switch compare
 		    strcpy (cstatement[k + 7], cstatement[k + 6]);
@@ -244,9 +237,7 @@ void keywords (char **cstatement)
 	    if (i > 190)
 	    {
 		i = 190;
-		fprintf (stderr,
-			 "%d: Cannot find end of line - statement may have been truncated\n",
-			 linenum ());
+		fprintf (stderr, "%d: Cannot find end of line - statement may have been truncated\n", linenum ());
 	    }
 	    //strcpy(orstatement[i++],":");
 	    strcpy (orstatement[i++], "goto");
@@ -374,8 +365,7 @@ void keywords (char **cstatement)
 	    pokechar (statement);
 	else if (!strncmp (statement[1], "setfade\0", 7))
 	    setfade (statement);
-	else if ((!strncmp (statement[1], "on\0", 3))
-		 && (!strncmp (statement[3], "go\0", 2)))
+	else if ((!strncmp (statement[1], "on\0", 3)) && (!strncmp (statement[3], "go\0", 2)))
 	    ongoto (statement);	// on ... goto or on ... gosub
 	else if (!strncmp (statement[1], "const\0", 6))
 	    doconst (statement);
@@ -553,8 +543,7 @@ void keywords (char **cstatement)
 		  && (statement[0][lastc - 4] <= '9'))
 		 && (statement[0][lastc - 3] == 't')
 		 && (statement[0][lastc - 2] == 'h')
-		 && (statement[0][lastc - 1] == 'e')
-		 && (statement[0][lastc - 0] == 'n')))
+		 && (statement[0][lastc - 1] == 'e') && (statement[0][lastc - 0] == 'n')))
 		return;
 
 	    removeCR (statement[1]);

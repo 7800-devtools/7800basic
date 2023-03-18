@@ -126,8 +126,7 @@ void assertminimumargs (char **statement, char *commandname, int argcount)
     for (t = 2; t < argcount + 2; t++)
     {
 	if ((statement[t] == NULL) || (statement[t][0] == 0)
-	    || (statement[t][0] == '\n') || (statement[t][0] == '\r')
-	    || (statement[t][0] == ':'))
+	    || (statement[t][0] == '\n') || (statement[t][0] == '\r') || (statement[t][0] == ':'))
 	{
 	    t = 0;
 	    break;
@@ -137,8 +136,7 @@ void assertminimumargs (char **statement, char *commandname, int argcount)
 
     if (t < (argcount + 2))
     {
-	prerror ("command %s doesn't contain %d arguments", commandname,
-		 argcount);
+	prerror ("command %s doesn't contain %d arguments", commandname, argcount);
     }
 }
 
@@ -150,10 +148,8 @@ void checkvalidfilename (char *filename)
 	prerror ("'%s' filename must begin with a letter", filename);
     for (t = 0; filename[t] != 0; t++)
     {
-	if ((!isalpha (filename[t])) && (!isdigit (filename[t]))
-	    && (filename[t] != '.') && (filename[t] != '_'))
-	    prerror ("'%s' filename must only contain letters and digits",
-		     filename);
+	if ((!isalpha (filename[t])) && (!isdigit (filename[t])) && (filename[t] != '.') && (filename[t] != '_'))
+	    prerror ("'%s' filename must only contain letters and digits", filename);
     }
 }
 
@@ -198,13 +194,11 @@ int switchjoy (char *input_source)
     }
     if (!strncmp (input_source, "switchleftb\0", 11))
     {
-	//     printf(" lda #$40\n");
 	printf (" bit SWCHB\n");
 	return 1;
     }
     if (!strncmp (input_source, "switchrightb\0", 12))
     {
-	//     printf(" lda #$80\n");
 	printf (" bit SWCHB\n");
 	return 2;
     }
@@ -246,13 +240,11 @@ int switchjoy (char *input_source)
     }
     if (!strncmp (input_source, "joy0left\0", 8))
     {
-	//     printf(" lda #$40\n");
 	printf (" bit SWCHA\n");
 	return 1;
     }
     if (!strncmp (input_source, "joy0right\0", 9))
     {
-	//     printf(" lda #$80\n");
 	printf (" bit SWCHA\n");
 	return 2;
     }
@@ -318,15 +310,11 @@ int switchjoy (char *input_source)
 
     if (!strncmp (input_source, "joy0fire\0", 8))
     {
-	//     printf(" lda #$80\n");
-	//printf(" bit INPT4\n");
 	printf (" bit sINPT1\n");
 	return 3;
     }
     if (!strncmp (input_source, "joy1fire\0", 8))
     {
-	//     printf(" lda #$80\n");
-	//printf(" bit INPT5\n");
 	printf (" bit sINPT3\n");
 	return 3;
     }
@@ -658,8 +646,7 @@ int switchjoy (char *input_source)
 	int port, keynum;
 	int keymask[3] = { 0x04, 0x02, 0x01 };
 	int rowletter[4] = { 'a', 'b', 'c', 'd' };
-	char keynumlut[13] =
-	    { '1', '2', '3', '4', '5', '6', '7', '8', '9', 's', '0', 'h',
+	char keynumlut[13] = { '1', '2', '3', '4', '5', '6', '7', '8', '9', 's', '0', 'h',
 	    'X'
 	};
 	port = input_source[6] - '0';
@@ -706,14 +693,9 @@ int findpoint (char *item)	// determine if fixed point var
 void freemem (char **statement)
 {
     int i;
-/*
-	if(statement==NULL)
-		return;
-*/
     for (i = 0; i < 200; ++i)
 	free (statement[i]);
     free (statement);
-    //statement=NULL;
 }
 
 void printfrac (char *item)
@@ -998,8 +980,7 @@ void bank (char **statement)
     int requestedbank = strictatoi (statement[2]) - 1;
 
     if (bankcount == 0)
-	prerror
-	    ("bank statement encountered, but non-banking rom format was selected");
+	prerror ("bank statement encountered, but non-banking rom format was selected");
 
     if (requestedbank == 0)	//we don't care about the first "bank" definition
 	return;
@@ -1010,12 +991,10 @@ void bank (char **statement)
     // 1. dump and clear any incgraphics from the current bank before changing
     barf_graphic_file ();
 
-    orgprintf
-	(" if START_OF_ROM = . ; avoid dasm empty start-rom truncation.\n");
+    orgprintf (" if START_OF_ROM = . ; avoid dasm empty start-rom truncation.\n");
     orgprintf ("     .byte 0\n");
     orgprintf (" endif\n");
-    orgprintf
-	("START_OF_ROM SET 0 ; scuttle so we always fail subsequent banks\n");
+    orgprintf ("START_OF_ROM SET 0 ; scuttle so we always fail subsequent banks\n");
 
     // 2.issue ORG,RORG
     currentbank = requestedbank;
@@ -1051,8 +1030,7 @@ void dmahole (char **statement)
 
     if (banksetrom == 1)
     {
-	prwarn
-	    ("the dmahole command was ignored. dmahole isn't supported with banksets.");
+	prwarn ("the dmahole command was ignored. dmahole isn't supported with banksets.");
 	return;
     }
 
@@ -1130,39 +1108,33 @@ void displaymode (char **statement)
     assertminimumargs (statement, "displaymode", 1);
 
     removeCR (statement[2]);
-    if ((strncmp (statement[2], "160A", 4) == 0)
-	|| (strncmp (statement[2], "160B", 4) == 0))
+    if ((strncmp (statement[2], "160A", 4) == 0) || (strncmp (statement[2], "160B", 4) == 0))
     {
 	if (doublewide == 1)
 	{
-	    printf
-		("    lda #%%01010000 ;Enable DMA, mode=160x2/160x4, 2x character width\n");
+	    printf ("    lda #%%01010000 ;Enable DMA, mode=160x2/160x4, 2x character width\n");
 	}
 	else
 	{
 	    printf ("    lda #%%01000000 ;Enable DMA, mode=160x2/160x4\n");
 	}
     }
-    else if ((strncmp (statement[2], "320A", 4) == 0)
-	     || (strncmp (statement[2], "320C", 4) == 0))
+    else if ((strncmp (statement[2], "320A", 4) == 0) || (strncmp (statement[2], "320C", 4) == 0))
     {
 	if (doublewide == 1)
 	{
-	    printf
-		("    lda #%%01010011 ;Enable DMA, mode=160x2/160x4, 2x character width\n");
+	    printf ("    lda #%%01010011 ;Enable DMA, mode=160x2/160x4, 2x character width\n");
 	}
 	else
 	{
 	    printf ("    lda #%%01000011 ;Enable DMA, mode=160x2/160x4\n");
 	}
     }
-    else if ((strncmp (statement[2], "320B", 4) == 0)
-	     || (strncmp (statement[2], "320D", 4) == 0))
+    else if ((strncmp (statement[2], "320B", 4) == 0) || (strncmp (statement[2], "320D", 4) == 0))
     {
 	if (doublewide == 1)
 	{
-	    printf
-		("    lda #%%01010010 ;Enable DMA, mode=160x2/160x4, 2x character width\n");
+	    printf ("    lda #%%01010010 ;Enable DMA, mode=160x2/160x4, 2x character width\n");
 	}
 	else
 	{
@@ -1212,19 +1184,15 @@ void plotsprite (char **statement)
 
     int tsi = gettallspriteindex (statement[2]);
 
-    if ((statement[6][0] != 0) && (statement[6][0] != ':')
-	&& (statement[6][0] != '0'))
+    if ((statement[6][0] != 0) && (statement[6][0] != ':') && (statement[6][0] != '0'))
     {
 	removeCR (statement[6]);
 
 	printf ("    lda #<%s\n", statement[2]);
-	if ((tsi >= 0) && (tallspritemode != 2)
-	    && (deprecatedframeheight == 0))
-	    printf ("    ldy #(%s_width*%d)\n", statement[2],
-		    tallspriteheight[tsi]);
+	if ((tsi >= 0) && (tallspritemode != 2) && (deprecatedframeheight == 0))
+	    printf ("    ldy #(%s_width*%d)\n", statement[2], tallspriteheight[tsi]);
 	else if ((statement[6][0] != 0) && (statement[6][0] != ':')
-		 && (statement[7][0] != 0) && (statement[7][0] != ':')
-		 && (deprecatedframeheight == 0))
+		 && (statement[7][0] != 0) && (statement[7][0] != ':') && (deprecatedframeheight == 0))
 	{
 	    removeCR (statement[7]);
 	    printf ("    ldy #(%s_width*%s)\n", statement[2], statement[7]);
@@ -1258,8 +1226,7 @@ void plotsprite (char **statement)
     {
 	int palette;
 	palette = strictatoi (statement[3]);
-	printf ("    lda #(%d|%s_width_twoscompliment)\n", palette << 5,
-		statement[2]);
+	printf ("    lda #(%d|%s_width_twoscompliment)\n", palette << 5, statement[2]);
 	printf ("    sta temp3\n\n");
     }
     else
@@ -1291,8 +1258,7 @@ void plotsprite (char **statement)
 
     jsr ("plotsprite");
 
-    if ((statement[6][0] != 0) && (statement[6][0] != ':')
-	&& (statement[7][0] != 0) && (statement[7][0] != ':'))
+    if ((statement[6][0] != 0) && (statement[6][0] != ':') && (statement[7][0] != 0) && (statement[7][0] != ':'))
     {
 	int tsheight, t;
 	removeCR (statement[7]);
@@ -1355,8 +1321,7 @@ void plotbanner (char **statement)
     {
 	if ((q == 999) || (bannerfilenames[q][0] == 0))
 	{
-	    prerror ("plotbanner didn't find a banner height for %s",
-		     statement[2]);
+	    prerror ("plotbanner didn't find a banner height for %s", statement[2]);
 	}
 	if (strcmp (bannerfilenames[q], statement[2]) == 0)
 	    break;
@@ -1373,13 +1338,11 @@ void plotbanner (char **statement)
 		|| (statement[3][0] == '$') || (statement[3][0] == '%'))
 	    {
 		palette = strictatoi (statement[3]);
-		printf ("    lda #(%d|%s00_width_twoscompliment)\n",
-			palette << 5, statement[2]);
+		printf ("    lda #(%d|%s00_width_twoscompliment)\n", palette << 5, statement[2]);
 		printf ("    sta temp3\n\n");
 	    }
 	    else
-		prerror
-		    ("plotbanner only works with a numeric palette argument");
+		prerror ("plotbanner only works with a numeric palette argument");
 	}
 	else
 	{
@@ -1483,13 +1446,9 @@ void sinedata (char **statement)
 	    if (t != wavelength)
 		printf (" .byte ");
 	}
-	waveindex =
-	    (((double) t * wavecycles * 2.0 * M_PI) / (double) wavelength) +
-	    (wavephaseoffset * 2.0 * M_PI);
+	waveindex = (((double) t * wavecycles * 2.0 * M_PI) / (double) wavelength) + (wavephaseoffset * 2.0 * M_PI);
 	//value = (sin(waveindex) * ((double) waveamplitude + 0.5)) + (double) waveamplitudeoffset;
-	value =
-	    (sin (waveindex) * ((double) waveamplitude) + 0.5) +
-	    (double) waveamplitudeoffset;
+	value = (sin (waveindex) * ((double) waveamplitude) + 0.5) + (double) waveamplitudeoffset;
 	printf ("$%02x", (value & 0xff));
 	if ((t % 16 != 15))
 	    printf (",");
@@ -1513,8 +1472,7 @@ int inlinealphadata (char **statement)
     int quotelen = 0;
 
     if (currentcharset[0] == '\0')
-	prerror
-	    ("the characterset statement needs to precede plotchars with an inline string");
+	prerror ("the characterset statement needs to precede plotchars with an inline string");
 
 
     for (t = 0; statement[2][t] != '\0'; t++)
@@ -1533,11 +1491,9 @@ int inlinealphadata (char **statement)
 	quotelen++;
 	if (charoffset < 0)
 	{
-	    prerror ("plotchars character '%c' is missing from alphachars",
-		     statement[2][t]);
+	    prerror ("plotchars character '%c' is missing from alphachars", statement[2][t]);
 	}
-	if ((doublewide == 1)
-	    && (strncmp (statement[6], "singlewide", 10) != 0))
+	if ((doublewide == 1) && (strncmp (statement[6], "singlewide", 10) != 0))
 	    charoffset = charoffset * 2;
 	if (strncmp (statement[6], "extrawide", 9) == 0)
 	{
@@ -1545,13 +1501,11 @@ int inlinealphadata (char **statement)
 	    charoffset = charoffset * 2;
 	}
 	if (quotelen > 32)
-	    prerror
-		("greater than 32 characters used in plotchars statement");
+	    prerror ("greater than 32 characters used in plotchars statement");
 	gfxprintf (" .byte (<%s + $%02x)\n", currentcharset, charoffset);
 	if (strncmp (statement[6], "extrawide", 9) == 0)
 	{
-	    gfxprintf (" .byte (<%s + $%02x)\n", currentcharset,
-		       charoffset + 1);
+	    gfxprintf (" .byte (<%s + $%02x)\n", currentcharset, charoffset + 1);
 	}
     }
     if (banksetrom == 0)
@@ -1607,8 +1561,7 @@ void plotchars (char **statement)
 	widthval = strictatoi (statement[6]);
 	if ((widthval > 32) || (widthval == 0))
 	{
-	    prerror ("width value must range from 1 to 32, and '%s' was used",
-		     statement[6]);
+	    prerror ("width value must range from 1 to 32, and '%s' was used", statement[6]);
 	}
 
 	widthval = ((0 - widthval) & 31);
@@ -1627,8 +1580,7 @@ void plotchars (char **statement)
 
 
     //check if palette is  a decimal constant. If so, we can avoid opcodes and cycles.
-    if (((statement[3][0] >= '0') && (statement[3][0] <= '9'))
-	|| (statement[3][0] == '$') || (statement[3][0] == '%'))
+    if (((statement[3][0] >= '0') && (statement[3][0] <= '9')) || (statement[3][0] == '$') || (statement[3][0] == '%'))
     {
 	paletteval = strictatoi (statement[3]);
 	if (paletteval > 7)
@@ -1636,8 +1588,7 @@ void plotchars (char **statement)
 	    prerror ("palette value must range from 0 to 7");
 	}
 
-	printf ("    ora #%d ; palette left shifted 5 bits\n",
-		paletteval << 5);
+	printf ("    ora #%d ; palette left shifted 5 bits\n", paletteval << 5);
 	printf ("    sta temp3\n");
     }
     else
@@ -1707,16 +1658,14 @@ void plotvalue (char **statement)
     removeCR (statement[8]);
 
     //check if width is a decimal constant. If so, we can avoid opcodes and cycles.
-    if (((statement[5][0] >= '0') && (statement[5][0] <= '9'))
-	|| (statement[5][0] == '$') || (statement[5][0] == '%'))
+    if (((statement[5][0] >= '0') && (statement[5][0] <= '9')) || (statement[5][0] == '$') || (statement[5][0] == '%'))
     {
 	widthval = strictatoi (statement[5]);
 	if (strncmp (statement[8], "extrawide", 9) == 0)
 	    widthval = widthval * 2;
 	if ((widthval > 32) || (widthval == 0))
 	{
-	    prerror ("width value must range from 1 to 32, and '%s' was used",
-		     statement[5]);
+	    prerror ("width value must range from 1 to 32, and '%s' was used", statement[5]);
 	}
 	widthval = ((0 - widthval) & 31);
 	printf ("    lda #%d ; width in two's complement\n", widthval);
@@ -1733,8 +1682,7 @@ void plotvalue (char **statement)
 
 
     //check if palette is a decimal constant. If so, we can avoid opcodes and cycles.
-    if (((statement[3][0] >= '0') && (statement[3][0] <= '9'))
-	|| (statement[3][0] == '$') || (statement[3][0] == '%'))
+    if (((statement[3][0] >= '0') && (statement[3][0] <= '9')) || (statement[3][0] == '$') || (statement[3][0] == '%'))
     {
 	paletteval = strictatoi (statement[3]);
 	if (paletteval > 7)
@@ -1742,8 +1690,7 @@ void plotvalue (char **statement)
 	    prerror ("palette value must range from 0 to 7");
 	}
 
-	printf ("    ora #%d ; palette left shifted 5 bits\n",
-		paletteval << 5);
+	printf ("    ora #%d ; palette left shifted 5 bits\n", paletteval << 5);
 	printf ("    sta temp3\n");
     }
     else
@@ -1835,8 +1782,7 @@ void plotmapfile (char **statement)
     FILE *fp = fopen (statement[2], "rb");
     if (!fp)
     {
-	prerror ("plotmapfile couldn't open map file '%s' for reading",
-		 statement[2]);
+	prerror ("plotmapfile couldn't open map file '%s' for reading", statement[2]);
     }
 
 
@@ -1900,8 +1846,7 @@ void plotmapfile (char **statement)
 	    {
 		if ((q == 999) || (palettefilenames[q][0] == 0))
 		{
-		    prerror ("plotmapfile didn't find a palette for %s",
-			     datavalues[gid]);
+		    prerror ("plotmapfile didn't find a palette for %s", datavalues[gid]);
 		}
 		if (strcmp (palettefilenames[q], datavalues[gid]) == 0)
 		    break;
@@ -1921,8 +1866,7 @@ void plotmapfile (char **statement)
 	    for (t = 0; t < 1024; t++)
 		if (line[t] == '"')
 		    line[t] = 0;
-	    prerror ("map file '%s' is %s encoded. XML is required",
-		     statement[2], keyword);
+	    prerror ("map file '%s' is %s encoded. XML is required", statement[2], keyword);
 	}
 	keyword = strstr (line, "<layer name=\"");
 	if (keyword != NULL)
@@ -1931,8 +1875,7 @@ void plotmapfile (char **statement)
 	    if (layer > 1)
 	    {
 		fclose (fp);
-		prerror ("map file '%s' contains multiple layers",
-			 statement[2]);
+		prerror ("map file '%s' contains multiple layers", statement[2]);
 	    }
 	}
     }
@@ -1983,9 +1926,7 @@ void plotmapfile (char **statement)
 	    if (doublewide == 1)
 		charwidth = charwidth * 2;
 
-	    for (t = ix;
-		 (t < width) && (palettevalues[(iy * width) + t] == startp)
-		 && (t < (ix + 32)); t++);
+	    for (t = ix; (t < width) && (palettevalues[(iy * width) + t] == startp) && (t < (ix + 32)); t++);
 	    t = t - 1;
 	    pmwidth = t - ix + 1;
 	    pmwidthandpalette = ((0 - pmwidth) & 31) | (startp << 5);
@@ -1995,8 +1936,7 @@ void plotmapfile (char **statement)
 
 	    pmemoffset = (iy * width) + ix;
 	    printf (" .byte <(%s+%d), >(%s+%d), $%02x, %d, %d\n",
-		    statement[3], pmemoffset, statement[3], pmemoffset,
-		    pmwidthandpalette, pmx, pmy);
+		    statement[3], pmemoffset, statement[3], pmemoffset, pmwidthandpalette, pmx, pmy);
 	    ix = t + 1;
 	}
     }
@@ -2026,14 +1966,12 @@ void plotmap (char **statement)
     assertminimumargs (statement, "plotmap", 6);
 
     //check if palette is decimal constant. If so, we can avoid opcodes and cycles.
-    if (((statement[6][0] >= '0') && (statement[6][0] <= '9'))
-	|| (statement[6][0] == '$') || (statement[6][0] == '%'))
+    if (((statement[6][0] >= '0') && (statement[6][0] <= '9')) || (statement[6][0] == '$') || (statement[6][0] == '%'))
     {
 	widthval = strictatoi (statement[6]);
 	if ((widthval > 32) || (widthval == 0))
 	{
-	    prerror ("width value must range from 1 to 32, and '%s' was used",
-		     statement[6]);
+	    prerror ("width value must range from 1 to 32, and '%s' was used", statement[6]);
 	}
 
 	widthval = ((0 - widthval) & 31);
@@ -2053,8 +1991,7 @@ void plotmap (char **statement)
     printf ("    sta temp3\n");
 
     //check if palette is  a decimal constant. If so, we can avoid opcodes and cycles.
-    if (((statement[3][0] >= '0') && (statement[3][0] <= '9'))
-	|| (statement[3][0] == '$') || (statement[3][0] == '%'))
+    if (((statement[3][0] >= '0') && (statement[3][0] <= '9')) || (statement[3][0] == '$') || (statement[3][0] == '%'))
     {
 	paletteval = strictatoi (statement[3]);
 	if (paletteval > 7)
@@ -2062,8 +1999,7 @@ void plotmap (char **statement)
 	    prerror ("palette value must range from 0 to 7");
 	}
 
-	printf ("    ora #%d ; palette left shifted 5 bits\n",
-		paletteval << 5);
+	printf ("    ora #%d ; palette left shifted 5 bits\n", paletteval << 5);
 	printf ("    sta temp3\n");
     }
     else
@@ -2434,8 +2370,7 @@ void getfade (char **statement)
     }
 
     templabel++;
-    if ((statement[7][0] != ')') && (statement[9][0] == ')')
-	&& (statement[8][0] == 'b'))
+    if ((statement[7][0] != ')') && (statement[9][0] == ')') && (statement[8][0] == 'b'))
     {
 	printf ("    lda fourbitfadevalue\n");
 	printf ("    beq .fadezeroskip%d\n", templabel);
@@ -2625,8 +2560,7 @@ void psound (char **statement)
     int nextindex;
     int channel = 255;
 
-    if (((statement[2][0] >= '0') && (statement[2][0] <= '9'))
-	|| (statement[2][0] == '$') || (statement[2][0] == '%'))
+    if (((statement[2][0] >= '0') && (statement[2][0] <= '9')) || (statement[2][0] == '$') || (statement[2][0] == '%'))
     {
 	channel = strictatoi (statement[2]);
 	if ((channel < 0) || (channel > 3))
@@ -2676,8 +2610,7 @@ void psound (char **statement)
 	    &&
 	    (((statement[nextindex + 2][0] >= '0')
 	      && (statement[nextindex + 2][0] <= '9'))
-	     || (statement[nextindex + 2][0] == '$')
-	     || (statement[nextindex + 2][0] == '%')))
+	     || (statement[nextindex + 2][0] == '$') || (statement[nextindex + 2][0] == '%')))
 	{
 	    int wave, volume;
 
@@ -2702,13 +2635,11 @@ void psound (char **statement)
 	    nextindex = nextindex + 1;
 	    removeCR (statement[nextindex]);
 	    if (statement[nextindex][0] == '\0')
-		prerror
-		    ("malformed psound... volume is required with waveform");
+		prerror ("malformed psound... volume is required with waveform");
 	    nextindex = nextindex + 1;
 	    removeCR (statement[nextindex]);
 	    if (statement[nextindex][0] == '\0')
-		prerror
-		    ("malformed psound... volume is required with waveform");
+		prerror ("malformed psound... volume is required with waveform");
 
 	    printf (" adc ");
 	    printimmed (statement[nextindex]);
@@ -2838,26 +2769,22 @@ void changecontrol (char **statement)
 	}
 	if ((port == 0) && (!isimmed ("PADDLE0SUPPORT")))
 	{
-	    strcpy (redefined_variables[numredefvars++],
-		    "PADDLE0SUPPORT = 1");
+	    strcpy (redefined_variables[numredefvars++], "PADDLE0SUPPORT = 1");
 	    sprintf (constants[numconstants++], "PADDLE0SUPPORT");
 	}
 	if ((port == 1) && (!isimmed ("PADDLE1SUPPORT")))
 	{
-	    strcpy (redefined_variables[numredefvars++],
-		    "PADDLE1SUPPORT = 1");
+	    strcpy (redefined_variables[numredefvars++], "PADDLE1SUPPORT = 1");
 	    sprintf (constants[numconstants++], "PADDLE1SUPPORT");
 	}
-	if ((isimmed ("PADDLE1SUPPORT")) && (isimmed ("PADDLE1SUPPORT"))
-	    && (!isimmed ("FOURPADDLESUPPORT")))
+	if ((isimmed ("PADDLE1SUPPORT")) && (isimmed ("PADDLE1SUPPORT")) && (!isimmed ("FOURPADDLESUPPORT")))
 	{
 	    strcpy (redefined_variables[numredefvars++], "FOURPADDLESUPPORT = 1");	// if so, enable four paddle reads
 	    sprintf (constants[numconstants++], "FOURPADDLESUPPORT");
 	}
 	if (!isimmed ("LONGCONTROLLERREAD"))
 	{
-	    strcpy (redefined_variables[numredefvars++],
-		    "LONGCONTROLLERREAD = 1");
+	    strcpy (redefined_variables[numredefvars++], "LONGCONTROLLERREAD = 1");
 	    sprintf (constants[numconstants++], "LONGCONTROLLERREAD");
 	}
 	printf ("  lda #3 ; controller=paddle\n");
@@ -2877,8 +2804,7 @@ void changecontrol (char **statement)
     {
 	if (!isimmed ("TRAKBALLSUPPORT"))
 	{
-	    strcpy (redefined_variables[numredefvars++],
-		    "TRAKBALLSUPPORT = 1");
+	    strcpy (redefined_variables[numredefvars++], "TRAKBALLSUPPORT = 1");
 	    sprintf (constants[numconstants++], "TRAKBALLSUPPORT");
 	}
 	printf ("  lda #4 ; controller=trakball\n");
@@ -2894,8 +2820,7 @@ void changecontrol (char **statement)
 
 	    if (!isimmed ("TRAKBALL0SUPPORT"))
 	    {
-		strcpy (redefined_variables[numredefvars++],
-			"TRAKBALL0SUPPORT = 1");
+		strcpy (redefined_variables[numredefvars++], "TRAKBALL0SUPPORT = 1");
 		sprintf (constants[numconstants++], "TRAKBALL0SUPPORT");
 	    }
 	}
@@ -2910,8 +2835,7 @@ void changecontrol (char **statement)
 	    printf ("  ldx #1\n");
 	    if (!isimmed ("TRAKBALL1SUPPORT"))
 	    {
-		strcpy (redefined_variables[numredefvars++],
-			"TRAKBALL1SUPPORT = 1");
+		strcpy (redefined_variables[numredefvars++], "TRAKBALL1SUPPORT = 1");
 		sprintf (constants[numconstants++], "TRAKBALL1SUPPORT");
 	    }
 	}
@@ -2919,8 +2843,7 @@ void changecontrol (char **statement)
 	printf ("  jsr settwobuttonmode\n");
 	if (!isimmed ("LONGCONTROLLERREAD"))
 	{
-	    strcpy (redefined_variables[numredefvars++],
-		    "LONGCONTROLLERREAD = 1");
+	    strcpy (redefined_variables[numredefvars++], "LONGCONTROLLERREAD = 1");
 	    sprintf (constants[numconstants++], "LONGCONTROLLERREAD");
 	}
     }
@@ -2946,8 +2869,7 @@ void changecontrol (char **statement)
 	printf ("  jsr setonebuttonmode\n");
     }
     else if ((!strcmp (statement[3], "stmouse"))
-	     || (!strcmp (statement[3], "amigamouse"))
-	     || (!strcmp (statement[3], "driving")))
+	     || (!strcmp (statement[3], "amigamouse")) || (!strcmp (statement[3], "driving")))
     {
 	if (!isimmed ("MOUSESUPPORT"))
 	{
@@ -2966,8 +2888,7 @@ void changecontrol (char **statement)
 	}
 	if (!isimmed ("LONGCONTROLLERREAD"))
 	{
-	    strcpy (redefined_variables[numredefvars++],
-		    "LONGCONTROLLERREAD = 1");
+	    strcpy (redefined_variables[numredefvars++], "LONGCONTROLLERREAD = 1");
 	    sprintf (constants[numconstants++], "LONGCONTROLLERREAD");
 	}
 	if (!strcmp (statement[3], "stmouse"))
@@ -3094,14 +3015,12 @@ void fixfilename (char *filename)
 
     // ensure no bad characters in the filename...
     if ((strchr (filename, '-') != NULL) ||
-	(strchr (filename, '+') != NULL) || ((filename[0] >= '0')
-					     && (filename[0] <= '9')))
+	(strchr (filename, '+') != NULL) || ((filename[0] >= '0') && (filename[0] <= '9')))
     {
 	prerror ("problem characters in filename '%s'", filename);
     }
 
-    if ((filename[0] != '/') && (filename[0] != '\\')
-	&& (incbasepath[0] != 0))
+    if ((filename[0] != '/') && (filename[0] != '\\') && (incbasepath[0] != 0))
     {
 	char temppath[1024];
 
@@ -3198,8 +3117,7 @@ void incmapfile (char **statement)
     FILE *fp = fopen (statement[2], "rb");
     if (!fp)
     {
-	prerror ("incmapfile couldn't open map file '%s' for reading",
-		 statement[2]);
+	prerror ("incmapfile couldn't open map file '%s' for reading", statement[2]);
     }
 
     for (;;)
@@ -3255,8 +3173,7 @@ void incmapfile (char **statement)
 	    for (t = 0; t < 1024; t++)
 		if (line[t] == '"')
 		    line[t] = 0;
-	    prerror ("map file '%s' is %s encoded. XML is required",
-		     statement[2], keyword);
+	    prerror ("map file '%s' is %s encoded. XML is required", statement[2], keyword);
 	}
 	keyword = strstr (line, "<layer name=\"");
 	if (keyword != NULL)
@@ -3265,8 +3182,7 @@ void incmapfile (char **statement)
 	    if (layer > 1)
 	    {
 		fclose (fp);
-		prerror ("map file '%s' contains multiple layers",
-			 statement[2]);
+		prerror ("map file '%s' contains multiple layers", statement[2]);
 	    }
 	}
     }
@@ -3334,8 +3250,7 @@ void convertbmp2png (char *bmpname)
     prinfo ("DEBUG: %04x", OurBMPHeader.BMPIdent);
     prinfo ("DEBUG: %08x", OurBMPHeader.BMPFileSize);
     prinfo ("DEBUG: %04x", OurBMPHeader.BMPNumberOfColors);
-    prinfo ("DEBUG: %dx%d", OurBMPHeader.BMPWidthInPixels,
-	    OurBMPHeader.BMPHeightInPixels);
+    prinfo ("DEBUG: %dx%d", OurBMPHeader.BMPWidthInPixels, OurBMPHeader.BMPHeightInPixels);
 
 }
 
@@ -3396,8 +3311,7 @@ void add_graphic (char **statement, int incbanner)
     }
 
     //check if the user is setting the color mode...
-    if ((statement[3][0] != 0) && (statement[3][0] != ':')
-	&& (statement[3][0] != ';'))
+    if ((statement[3][0] != 0) && (statement[3][0] != ':') && (statement[3][0] != ';'))
     {
 	removeCR (statement[3]);
 	if (strcasecmp (statement[3], "160A") == 0)
@@ -3453,8 +3367,7 @@ void add_graphic (char **statement, int incbanner)
     }
 
     //check if the user is reordering the color indexes of the imported graphic
-    if ((statement[4][0] != 0) && (statement[3][0] != ':')
-	&& (statement[3][0] != ';'))
+    if ((statement[4][0] != 0) && (statement[3][0] != ':') && (statement[3][0] != ';'))
     {
 	for (t = 0; t < 16; t++)
 	{
@@ -3463,15 +3376,13 @@ void add_graphic (char **statement, int incbanner)
 	    if (statement[t + 4][0] != 0)
 	    {
 		removeCR (statement[t + 4]);
-		if ((statement[t + 4][0] != 0)
-		    && (statement[t + 4][0] != '\0'))
+		if ((statement[t + 4][0] != 0) && (statement[t + 4][0] != '\0'))
 		    graphiccolorindex[t] = strictatoi (statement[t + 4]);
 	    }
 	}
     }
 
-    if ((strcasecmp (statement[3], "160B") == 0)
-	&& (deprecated160bindexes == 0))
+    if ((strcasecmp (statement[3], "160B") == 0) && (deprecated160bindexes == 0))
     {
 	// We need to reorder the color indexes some more. For 160B the 7800 makes color
 	// indexes 0, 4, 8, and 12 transparent, but a 16 color PNG will likely have
@@ -3512,8 +3423,7 @@ void add_graphic (char **statement, int incbanner)
 
 	if (istallsprite)
 	{
-	    if ((graphicsdatawidth[dmaplain] +
-		 (width * (height / zoneheight))) > 256)
+	    if ((graphicsdatawidth[dmaplain] + (width * (height / zoneheight))) > 256)
 	    {
 		//the next graphic will overflow the DMA plain, so we skip to the next one...
 		dmaplain = dmaplain + 1;
@@ -3540,8 +3450,7 @@ void add_graphic (char **statement, int incbanner)
 		generalname[t] = 0;
 
 	//save the label
-	strcpy (graphicslabels[dmaplain][graphicsdatawidth[dmaplain]],
-		generalname);
+	strcpy (graphicslabels[dmaplain][graphicsdatawidth[dmaplain]], generalname);
 
 	if (istallsprite)
 	{
@@ -3579,11 +3488,8 @@ void add_graphic (char **statement, int incbanner)
 		}
 		if (s > 998)
 		    prerror ("ran out of default graphic palette entries");
-		strcpy (palettefilenames[s],
-			graphicslabels[dmaplain][graphicsdatawidth
-						 [dmaplain]]);
-		graphicfilepalettes[s] =
-		    strictatoi (statement[palettestatement]);
+		strcpy (palettefilenames[s], graphicslabels[dmaplain][graphicsdatawidth[dmaplain]]);
+		graphicfilepalettes[s] = strictatoi (statement[palettestatement]);
 		palettefilenames[s + 1][0] = 0;
 		graphicfilemodes[s] = graphiccolormode;
 	    }
@@ -3601,8 +3507,7 @@ void add_graphic (char **statement, int incbanner)
 
 		//add on the banner zone number to the label, for our extra rows
 		sprintf (indexstr, "%s_tallsprite_%02d", generalname, t);
-		strcat (graphicslabels[dmaplain][graphicsdatawidth[dmaplain]],
-			indexstr);
+		strcat (graphicslabels[dmaplain][graphicsdatawidth[dmaplain]], indexstr);
 	    }
 	}
 	else
@@ -3659,8 +3564,7 @@ void add_graphic (char **statement, int incbanner)
 	if (graphiccolormode == MODE320D)
 	    bannerpixelwidth[s] = 128;
 
-	for (offset = 0; offset < (height - (height % zoneheight));
-	     offset = offset + zoneheight)
+	for (offset = 0; offset < (height - (height % zoneheight)); offset = offset + zoneheight)
 	{
 	    if ((graphicsdatawidth[dmaplain] + width) > 256)
 	    {
@@ -3670,24 +3574,16 @@ void add_graphic (char **statement, int incbanner)
 	    }
 
 	    //our label is based on the filename...
-	    snprintf (graphicslabels[dmaplain][graphicsdatawidth[dmaplain]],
-		      80, "%s", ourbasename (statement[2]));
+	    snprintf (graphicslabels[dmaplain][graphicsdatawidth[dmaplain]], 80, "%s", ourbasename (statement[2]));
 
 	    //but remove the extension...
-	    for (t =
-		 (strlen
-		  (graphicslabels[dmaplain][graphicsdatawidth[dmaplain]]) -
-		  3); t > 0; t--)
-		if (strcasecmp
-		    (graphicslabels[dmaplain][graphicsdatawidth[dmaplain]] +
-		     t, ".png") == 0)
-		    graphicslabels[dmaplain][graphicsdatawidth[dmaplain]][t] =
-			0;
+	    for (t = (strlen (graphicslabels[dmaplain][graphicsdatawidth[dmaplain]]) - 3); t > 0; t--)
+		if (strcasecmp (graphicslabels[dmaplain][graphicsdatawidth[dmaplain]] + t, ".png") == 0)
+		    graphicslabels[dmaplain][graphicsdatawidth[dmaplain]][t] = 0;
 
 	    //add on the banner zone number to the label
 	    sprintf (indexstr, "%02d", offset / zoneheight);
-	    strcat (graphicslabels[dmaplain][graphicsdatawidth[dmaplain]],
-		    indexstr);
+	    strcat (graphicslabels[dmaplain][graphicsdatawidth[dmaplain]], indexstr);
 
 
 	    // Now read the png into memory...
@@ -3711,17 +3607,10 @@ void add_graphic (char **statement, int incbanner)
 
 	for (t = 1; t < modecolors + 1; t++)
 	{
-	    sprintf (redefined_variables[numredefvars++],
-		     "%s_color%d = %s00_color%d", generalname, t, generalname,
-		     t);
+	    sprintf (redefined_variables[numredefvars++], "%s_color%d = %s00_color%d", generalname, t, generalname, t);
 	    sprintf (constants[numconstants++], "%s_color%d", generalname, t);	// record to queue
 	}
-
-
-	//if(width>32)
-	//prerror("image too wide for banner");
     }
-
 }
 
 int getgraphicwidth (char *file_name)
@@ -3750,20 +3639,17 @@ int getgraphicwidth (char *file_name)
 	prerror ("'%s' doesn't appear to be a png file", file_name);
     }
     /* initialize stuff */
-    png_ptr =
-	png_create_read_struct (PNG_LIBPNG_VER_STRING, NULL, NULL, NULL);
+    png_ptr = png_create_read_struct (PNG_LIBPNG_VER_STRING, NULL, NULL, NULL);
 
     if (!png_ptr)
     {
-	prerror ("when preparing '%s', png_create_read_struct failed",
-		 file_name);
+	prerror ("when preparing '%s', png_create_read_struct failed", file_name);
     }
 
     info_ptr = png_create_info_struct (png_ptr);
     if (!info_ptr)
     {
-	prerror ("when preparing '%s', png_create_info_struct failed",
-		 file_name);
+	prerror ("when preparing '%s', png_create_info_struct failed", file_name);
     }
     if (setjmp (png_jmpbuf (png_ptr)))
     {
@@ -3824,20 +3710,17 @@ int getgraphicheight (char *file_name)
 	prerror ("'%s' doesn't appear to be a png file", file_name);
     }
     /* initialize stuff */
-    png_ptr =
-	png_create_read_struct (PNG_LIBPNG_VER_STRING, NULL, NULL, NULL);
+    png_ptr = png_create_read_struct (PNG_LIBPNG_VER_STRING, NULL, NULL, NULL);
 
     if (!png_ptr)
     {
-	prerror ("when preparing '%s', png_create_read_struct failed",
-		 file_name);
+	prerror ("when preparing '%s', png_create_read_struct failed", file_name);
     }
 
     info_ptr = png_create_info_struct (png_ptr);
     if (!info_ptr)
     {
-	prerror ("when preparing '%s', png_create_info_struct failed",
-		 file_name);
+	prerror ("when preparing '%s', png_create_info_struct failed", file_name);
     }
     if (setjmp (png_jmpbuf (png_ptr)))
     {
@@ -3903,20 +3786,17 @@ void incgraphic (char *file_name, int offset)
 	prerror ("'%s' doesn't appear to be a png file", file_name);
     }
     /* initialize stuff */
-    png_ptr =
-	png_create_read_struct (PNG_LIBPNG_VER_STRING, NULL, NULL, NULL);
+    png_ptr = png_create_read_struct (PNG_LIBPNG_VER_STRING, NULL, NULL, NULL);
 
     if (!png_ptr)
     {
-	prerror ("when preparing '%s', png_create_read_struct failed",
-		 file_name);
+	prerror ("when preparing '%s', png_create_read_struct failed", file_name);
     }
 
     info_ptr = png_create_info_struct (png_ptr);
     if (!info_ptr)
     {
-	prerror ("when preparing '%s', png_create_info_struct failed",
-		 file_name);
+	prerror ("when preparing '%s', png_create_info_struct failed", file_name);
     }
     if (setjmp (png_jmpbuf (png_ptr)))
     {
@@ -3948,8 +3828,7 @@ void incgraphic (char *file_name, int offset)
 	    for (s = t + 1; s < num_palette; s++)
 	    {
 		if ((palette[t].red == palette[s].red) &&
-		    (palette[t].green == palette[s].green)
-		    && (palette[t].blue == palette[s].blue))
+		    (palette[t].green == palette[s].green) && (palette[t].blue == palette[s].blue))
 		    break;
 	    }
 	    if (s == num_palette)
@@ -4012,9 +3891,7 @@ void incgraphic (char *file_name, int offset)
 	    if (graphicslabels[dmaplain][graphicsdatawidth[dmaplain]][0] != 0)
 	    {
 		sprintf (redefined_variables[numredefvars++],
-			 "%s_color%d = $%02x",
-			 graphicslabels[dmaplain][graphicsdatawidth
-						  [dmaplain]], t, finalcolor);
+			 "%s_color%d = $%02x", graphicslabels[dmaplain][graphicsdatawidth[dmaplain]], t, finalcolor);
 		sprintf (constants[numconstants++], "%s_color%d", graphicslabels[dmaplain][graphicsdatawidth[dmaplain]], t);	// record to queue
 	    }
 
@@ -4023,8 +3900,7 @@ void incgraphic (char *file_name, int offset)
 	for (; t < (1 << bit_depth); t++)
 	{
 	    sprintf (redefined_variables[numredefvars++], "%s_color%d = 0",
-		     graphicslabels[dmaplain][graphicsdatawidth[dmaplain]],
-		     t);
+		     graphicslabels[dmaplain][graphicsdatawidth[dmaplain]], t);
 	    sprintf (constants[numconstants++], "%s_color%d", graphicslabels[dmaplain][graphicsdatawidth[dmaplain]], t);	// record to queue
 	}
     }
@@ -4058,8 +3934,7 @@ void incgraphic (char *file_name, int offset)
 
     if ((color_type & PNG_COLOR_TYPE_PALETTE) == 0)
     {
-	prerror ("the png file %s isn't a palette-type/indexed image",
-		 file_name);
+	prerror ("the png file %s isn't a palette-type/indexed image", file_name);
     }
 
 
@@ -4080,8 +3955,7 @@ void incgraphic (char *file_name, int offset)
 
 		if (y >= height)	//if the image is shorter than a zone, just leave zeros in those lines
 		{
-		    graphicsdata[dmaplain][graphicsdatawidth[dmaplain] -
-					   1][y] = 0;
+		    graphicsdata[dmaplain][graphicsdatawidth[dmaplain] - 1][y] = 0;
 		    continue;
 		}
 		png_byte *row = row_pointers[y + offset];
@@ -4094,32 +3968,9 @@ void incgraphic (char *file_name, int offset)
 			val = val | graphiccolorindex[row[x + l]];
 		    }
 		}
-		graphicsdata[dmaplain][graphicsdatawidth[dmaplain] - 1][y] =
-		    val;
+		graphicsdata[dmaplain][graphicsdatawidth[dmaplain] - 1][y] = val;
 	    }
 	}
-
-
-	/*
-	   // just a test section to print out 160A graphics as ascii...
-	   fprintf(stderr,"FILENAME: %s\n",file_name); // DEBUG
-	   for (y=0; y<zoneheight; y=y+1) // DEBUG
-	   {
-	   png_byte* row = row_pointers[y+offset];
-	   int l;
-	   for(x=0; x<width; x=x+4)
-	   for(l=0; l<4; l++)
-	   {
-	   if(graphiccolorindex[row[x+l]]>0)
-	   fprintf(stderr,"%d",graphiccolorindex[row[x+l]]);
-	   else
-	   fprintf(stderr,".");
-	   }
-	   fprintf(stderr,"\n");
-	   }
-	   fprintf(stderr,"\n");
-	 */
-
 
 	for (y = 0; y < height; y++)
 	    free (row_pointers[y]);
@@ -4128,7 +3979,6 @@ void incgraphic (char *file_name, int offset)
 	return;
     }
 
-    //if((bit_depth<=4)&&(graphiccolormode==MODE160B))
     if (graphiccolormode == MODE160B)
     {
 	if (num_unique_palette > 16)
@@ -4144,8 +3994,7 @@ void incgraphic (char *file_name, int offset)
 
 		if (y >= height)	//if the image is shorter than a zone, just leave zeros in those lines
 		{
-		    graphicsdata[dmaplain][graphicsdatawidth[dmaplain] -
-					   1][y] = 0;
+		    graphicsdata[dmaplain][graphicsdatawidth[dmaplain] - 1][y] = 0;
 		    continue;
 		}
 
@@ -4181,8 +4030,7 @@ void incgraphic (char *file_name, int offset)
 			val = val | 16;
 		}
 
-		graphicsdata[dmaplain][graphicsdatawidth[dmaplain] - 1][y] =
-		    val;
+		graphicsdata[dmaplain][graphicsdatawidth[dmaplain] - 1][y] = val;
 	    }
 	}
 	for (y = 0; y < height; y++)
@@ -4192,7 +4040,6 @@ void incgraphic (char *file_name, int offset)
 	return;
     }
 
-    //if((bit_depth==1)&&(graphiccolormode==MODE320A))
     if (graphiccolormode == MODE320A)
     {
 	if (num_unique_palette > 2)
@@ -4208,8 +4055,7 @@ void incgraphic (char *file_name, int offset)
 
 		if (y >= height)	//if the image is shorter than a zone, just leave zeros in those lines
 		{
-		    graphicsdata[dmaplain][graphicsdatawidth[dmaplain] -
-					   1][y] = 0;
+		    graphicsdata[dmaplain][graphicsdatawidth[dmaplain] - 1][y] = 0;
 		    continue;
 		}
 
@@ -4223,8 +4069,7 @@ void incgraphic (char *file_name, int offset)
 			val = val | graphiccolorindex[row[x + l]];
 		    }
 		}
-		graphicsdata[dmaplain][graphicsdatawidth[dmaplain] - 1][y] =
-		    val;
+		graphicsdata[dmaplain][graphicsdatawidth[dmaplain] - 1][y] = val;
 	    }
 	}
 	for (y = 0; y < height; y++)
@@ -4234,7 +4079,6 @@ void incgraphic (char *file_name, int offset)
 	return;
     }
 
-    //if((bit_depth<=2)&&(graphiccolormode==MODE320B))
     if (graphiccolormode == MODE320B)
     {
 	if (num_unique_palette > 4)
@@ -4250,8 +4094,7 @@ void incgraphic (char *file_name, int offset)
 
 		if (y >= height)	//if the image is shorter than a zone, just leave zeros in those lines
 		{
-		    graphicsdata[dmaplain][graphicsdatawidth[dmaplain] -
-					   1][y] = 0;
+		    graphicsdata[dmaplain][graphicsdatawidth[dmaplain] - 1][y] = 0;
 		    continue;
 		}
 
@@ -4298,8 +4141,7 @@ void incgraphic (char *file_name, int offset)
 			val = val | 1;
 		}
 
-		graphicsdata[dmaplain][graphicsdatawidth[dmaplain] - 1][y] =
-		    val;
+		graphicsdata[dmaplain][graphicsdatawidth[dmaplain] - 1][y] = val;
 	    }
 	}
 	for (y = 0; y < height; y++)
@@ -4310,7 +4152,6 @@ void incgraphic (char *file_name, int offset)
     }
 
 
-    //if((bit_depth<=2)&&(graphiccolormode==MODE320C))
     if (graphiccolormode == MODE320C)
     {
 	if (num_unique_palette > 4)
@@ -4328,8 +4169,7 @@ void incgraphic (char *file_name, int offset)
 
 		if (y >= height)	//if the image is shorter than a zone, just leave zeros in those lines
 		{
-		    graphicsdata[dmaplain][graphicsdatawidth[dmaplain] -
-					   1][y] = 0;
+		    graphicsdata[dmaplain][graphicsdatawidth[dmaplain] - 1][y] = 0;
 		    continue;
 		}
 
@@ -4357,19 +4197,16 @@ void incgraphic (char *file_name, int offset)
 		if (workval2 > 0)
 		    val = val | 64;
 
-		if ((workval1 > 0) && (workval2 > 0)
-		    && (workval1 != workval2))
+		if ((workval1 > 0) && (workval2 > 0) && (workval1 != workval2))
 		{
 		    if (supresserror == 0)
 		    {
 			char sBuffer[400];
 			sprintf (sBuffer,
-				 "The png file %s doesn't appear to meet the requirements for 320C\n",
-				 file_name);
+				 "The png file %s doesn't appear to meet the requirements for 320C\n", file_name);
 			strcat (sBuffer,
 				"         Each pair of pixels must use the same color if they aren't turned off.\n");
-			strcat (sBuffer,
-				"         The colors for this sprite will be converted incorrectly.");
+			strcat (sBuffer, "         The colors for this sprite will be converted incorrectly.");
 			prwarn (sBuffer);
 			supresserror = 1;
 		    }
@@ -4386,19 +4223,16 @@ void incgraphic (char *file_name, int offset)
 		if (workval2 > 0)
 		    val = val | 16;
 
-		if ((workval1 > 0) && (workval2 > 0)
-		    && (workval1 != workval2))
+		if ((workval1 > 0) && (workval2 > 0) && (workval1 != workval2))
 		{
 		    if (supresserror == 0)
 		    {
 			char sBuffer[400];
 			sprintf (sBuffer,
-				 "The png file %s doesn't appear to meet the requirements for 320C\n",
-				 file_name);
+				 "The png file %s doesn't appear to meet the requirements for 320C\n", file_name);
 			strcat (sBuffer,
 				"         Each pair of pixels must use the same color if they aren't turned off.\n");
-			strcat (sBuffer,
-				"         The colors for this sprite will be converted incorrectly.");
+			strcat (sBuffer, "         The colors for this sprite will be converted incorrectly.");
 			prwarn (sBuffer);
 			supresserror = 1;
 		    }
@@ -4408,8 +4242,7 @@ void incgraphic (char *file_name, int offset)
 		else
 		    val = val | workval1 | workval2;
 
-		graphicsdata[dmaplain][graphicsdatawidth[dmaplain] - 1][y] =
-		    val;
+		graphicsdata[dmaplain][graphicsdatawidth[dmaplain] - 1][y] = val;
 	    }
 	}
 	for (y = 0; y < height; y++)
@@ -4419,7 +4252,6 @@ void incgraphic (char *file_name, int offset)
 	return;
     }
 
-    //if((bit_depth<=2)&&(graphiccolormode==MODE320D))
     if (graphiccolormode == MODE320D)
     {
 	if (num_unique_palette > 4)
@@ -4436,8 +4268,7 @@ void incgraphic (char *file_name, int offset)
 
 		if (y >= height)	//if the image is shorter than a zone, just leave zeros in those lines
 		{
-		    graphicsdata[dmaplain][graphicsdatawidth[dmaplain] -
-					   1][y] = 0;
+		    graphicsdata[dmaplain][graphicsdatawidth[dmaplain] - 1][y] = 0;
 		    continue;
 		}
 
@@ -4456,14 +4287,10 @@ void incgraphic (char *file_name, int offset)
 		    {
 			char sBuffer[400];
 			sprintf (sBuffer,
-				 "The png file %s doesn't appear to meet the requirements for 320D\n",
-				 file_name);
-			strcat (sBuffer,
-				"         All even pixels must be color 0 or color 2.\n");
-			strcat (sBuffer,
-				"         All odd pixels  must be color 1 or color 3.\n");
-			strcat (sBuffer,
-				"         The colors for this sprite will be converted incorrectly.");
+				 "The png file %s doesn't appear to meet the requirements for 320D\n", file_name);
+			strcat (sBuffer, "         All even pixels must be color 0 or color 2.\n");
+			strcat (sBuffer, "         All odd pixels  must be color 1 or color 3.\n");
+			strcat (sBuffer, "         The colors for this sprite will be converted incorrectly.");
 			prwarn (sBuffer);
 
 			break;
@@ -4480,8 +4307,7 @@ void incgraphic (char *file_name, int offset)
 		    if (workval > 1)
 			val = val | 1;
 		}
-		graphicsdata[dmaplain][graphicsdatawidth[dmaplain] - 1][y] =
-		    val;
+		graphicsdata[dmaplain][graphicsdatawidth[dmaplain] - 1][y] = val;
 	    }
 	}
 	for (y = 0; y < height; y++)
@@ -4491,24 +4317,14 @@ void incgraphic (char *file_name, int offset)
 	return;
     }
 
-
     prerror ("unexpected code path");
-
-/*
-	char sBuffer[200];
-	png_destroy_read_struct(&png_ptr,&info_ptr,NULL);
-	sprintf(sBuffer,"the bitdepth '%d' of '%s' doesn't match the requested display mode",bit_depth,file_name);
-	prerror(sBuffer);
-	return;
-*/
 }
 
 
 void add_includes (char *myinclude)
 {
     if (includesfile_already_done)
-	prwarn
-	    ("include ignored (includes should typically precede other statements)");
+	prwarn ("include ignored (includes should typically precede other statements)");
     strcat (user_includes, myinclude);
 }
 
@@ -4516,8 +4332,7 @@ void add_inline (char *myinclude)
 {
     removeCR (myinclude);
     printf (" include %s\n", myinclude);
-    sprintf (redefined_variables[numredefvars++], "included.%s = 1",
-	     myinclude);
+    sprintf (redefined_variables[numredefvars++], "included.%s = 1", myinclude);
     if ((bankcount & 1) && (currentbank > 0))
 	printf ("included.%s.bank = %d\n", myinclude, currentbank - 1);
     else
@@ -4608,8 +4423,7 @@ void barf_graphic_file (void)
     if (strcmp (stdoutfilename, "7800.asm") != 0)
     {
 	strcpy (stdoutfilename, "7800.asm");
-	if ((stdoutfilepointer =
-	     freopen (stdoutfilename, "a", stdout)) == NULL)
+	if ((stdoutfilepointer = freopen (stdoutfilename, "a", stdout)) == NULL)
 	{
 	    prerror ("couldn't reopen the 7800.asm file");
 	}
@@ -4622,18 +4436,14 @@ void barf_graphic_file (void)
     {
 	if (((graphicsdatawidth[dmaplain] > 0) || (dmaplain > 0)) && (banksetrom == 0))	//calculate from graphics area...
 	{
-	    printf
-		(" echo \" \",[($%04X - gameend)]d , \"bytes of ROM space left in the main area.\"\n",
-		 ADDRBASE);
+	    printf (" echo \" \",[($%04X - gameend)]d , \"bytes of ROM space left in the main area.\"\n", ADDRBASE);
 	    printf (" if ($%04X - gameend) < 0\n", ADDRBASE);
 	    printf ("SPACEOVERFLOW SET (SPACEOVERFLOW+1)\n");
 	    printf (" endif\n");
 	}
 	else
 	{
-	    printf
-		(" echo \" \",[($%04X - gameend)]d , \"bytes of ROM space left in the main area.\"\n",
-		 0xF000);
+	    printf (" echo \" \",[($%04X - gameend)]d , \"bytes of ROM space left in the main area.\"\n", 0xF000);
 	    printf (" if ($%04X - gameend) < 0\n", 0xF000);
 	    printf ("SPACEOVERFLOW SET (SPACEOVERFLOW+1)\n");
 	    printf (" endif\n");
@@ -4712,12 +4522,10 @@ void barf_graphic_file (void)
 	{
 	    prerror ("graphics overrun in bank %d", currentbank);
 	}
-	orgprintf
-	    (" if START_OF_ROM = . ; avoid dasm empty start-rom truncation.\n");
+	orgprintf (" if START_OF_ROM = . ; avoid dasm empty start-rom truncation.\n");
 	orgprintf ("     .byte 0\n");
 	orgprintf (" endif\n");
-	orgprintf
-	    ("START_OF_ROM SET 0 ; scuttle so we always fail subsequent banks\n");
+	orgprintf ("START_OF_ROM SET 0 ; scuttle so we always fail subsequent banks\n");
 	for (currentplain = 0; currentplain <= dmaplain; currentplain++)
 	{
 	    if (bankcount == 0)
@@ -4727,29 +4535,23 @@ void barf_graphic_file (void)
 		ADDRBASE = BANKSTART - ((dmaplain - currentplain) * DMASIZE);
 		if (romat4k == 1)
 		    ABADDRBASE =
-			REALSTART + ((currentbank - 1) * 0x4000) + 0x2000 -
-			((dmaplain - currentplain) * DMASIZE);
+			REALSTART + ((currentbank - 1) * 0x4000) + 0x2000 - ((dmaplain - currentplain) * DMASIZE);
 		else
-		    ABADDRBASE =
-			REALSTART + (currentbank * 0x4000) + 0x2000 -
-			((dmaplain - currentplain) * DMASIZE);
+		    ABADDRBASE = REALSTART + (currentbank * 0x4000) + 0x2000 - ((dmaplain - currentplain) * DMASIZE);
 
 	    }
 	    fprintf (stderr, "\n");
 	    if (bankcount == 0)
 	    {
-		prinfo ("GFX Block #%d starts @ $%04X", currentplain,
-			ADDRBASE);
+		prinfo ("GFX Block #%d starts @ $%04X", currentplain, ADDRBASE);
 	    }
 	    else
 	    {
-		prinfo ("bank #%d, GFX Block #%d starts @ $%04X",
-			currentbank + 1, currentplain, ADDRBASE);
+		prinfo ("bank #%d, GFX Block #%d starts @ $%04X", currentbank + 1, currentplain, ADDRBASE);
 	    }
 	    if (dumpgraphics)
 	    {
-		snprintf (dumpgraphics_filename, 255, "dump_gfx_%02d.bin",
-			  dumpgraphics_index);
+		snprintf (dumpgraphics_filename, 255, "dump_gfx_%02d.bin", dumpgraphics_index);
 		prinfo ("dumping GFX Block to \"%s\"", dumpgraphics_filename);
 		dumpgraphics_fileout = fopen (dumpgraphics_filename, "wb");
 		if (dumpgraphics_fileout == NULL)
@@ -4766,8 +4568,7 @@ void barf_graphic_file (void)
 		    gfxprintf ("\n ORG $%04X,0  ; *************\n", ADDRBASE);
 		else
 		{
-		    gfxprintf ("\n ORG $%04X,0  ; *************\n",
-			       ABADDRBASE);
+		    gfxprintf ("\n ORG $%04X,0  ; *************\n", ABADDRBASE);
 		    gfxprintf ("\n RORG $%04X ; *************\n", ADDRBASE);
 		}
 
@@ -4781,35 +4582,24 @@ void barf_graphic_file (void)
 			runi = 0;
 			if (s == (zoneheight - 1))
 			{
-			    printf ("\n%s = $%X\n",
-				    graphicslabels[currentplain][t],
-				    t + ADDRBASE);
-			    gfxprintf ("\n%s\n       HEX ",
-				       graphicslabels[currentplain][t]);
-			    if ((linewidth +
-				 strlen (graphicslabels[currentplain][t])) >
-				60)
+			    printf ("\n%s = $%X\n", graphicslabels[currentplain][t], t + ADDRBASE);
+			    gfxprintf ("\n%s\n       HEX ", graphicslabels[currentplain][t]);
+			    if ((linewidth + strlen (graphicslabels[currentplain][t])) > 60)
 			    {
 				linewidth = 0;
 				fprintf (stderr, "\n       ");
 			    }
-			    fprintf (stderr, " %s",
-				     graphicslabels[currentplain][t]);
-			    linewidth =
-				linewidth +
-				strlen (graphicslabels[currentplain][t]);
+			    fprintf (stderr, " %s", graphicslabels[currentplain][t]);
+			    linewidth = linewidth + strlen (graphicslabels[currentplain][t]);
 			}
 			else
-			    gfxprintf ("\n;%s\n       HEX ",
-				       graphicslabels[currentplain][t]);
+			    gfxprintf ("\n;%s\n       HEX ", graphicslabels[currentplain][t]);
 		    }
 		    gfxprintf ("%02x", graphicsdata[currentplain][t][s]);
 		    if (dumpgraphics)
-			dumpgraphics_data[t] =
-			    graphicsdata[currentplain][t][s];
+			dumpgraphics_data[t] = graphicsdata[currentplain][t][s];
 		    runi++;
-		    if ((runi % 32 == 0)
-			&& ((t + 1) < graphicsdatawidth[currentplain]))
+		    if ((runi % 32 == 0) && ((t + 1) < graphicsdatawidth[currentplain]))
 			gfxprintf ("\n       HEX ");
 		}
 		gfxprintf ("\n");
@@ -4837,44 +4627,34 @@ void barf_graphic_file (void)
 
 	    // if we're in a DMA hole, report on it and barf any code that was saved for it...
 	    if ((currentplain < dmaplain)
-		|| ((currentplain == dmaplain) && (bankcount > 0)
-		    && (currentbank + 1 < bankcount)))
+		|| ((currentplain == dmaplain) && (bankcount > 0) && (currentbank + 1 < bankcount)))
 	    {
 		if (bankcount == 0)
-		    ADDRBASE =
-			BANKSTART - ((dmaplain - currentplain) * DMASIZE) +
-			(DMASIZE / 2);
+		    ADDRBASE = BANKSTART - ((dmaplain - currentplain) * DMASIZE) + (DMASIZE / 2);
 		else
 		{
-		    ADDRBASE =
-			BANKSTART - ((dmaplain - currentplain) * DMASIZE) +
-			(DMASIZE / 2);
+		    ADDRBASE = BANKSTART - ((dmaplain - currentplain) * DMASIZE) + (DMASIZE / 2);
 		    if (romat4k == 1)
 			ABADDRBASE =
 			    REALSTART + ((currentbank - 1) * 0x4000) +
-			    0x2000 - ((dmaplain - currentplain) * DMASIZE) +
-			    (DMASIZE / 2);
+			    0x2000 - ((dmaplain - currentplain) * DMASIZE) + (DMASIZE / 2);
 		    else
 			ABADDRBASE =
 			    REALSTART + (currentbank * 0x4000) + 0x2000 -
-			    ((dmaplain - currentplain) * DMASIZE) +
-			    (DMASIZE / 2);
+			    ((dmaplain - currentplain) * DMASIZE) + (DMASIZE / 2);
 
 		}
 		fprintf (stderr, "\n");
 		if (bankcount == 0)
-		    prinfo ("DMA hole #%d starts @ $%04X", currentplain,
-			    ADDRBASE);
+		    prinfo ("DMA hole #%d starts @ $%04X", currentplain, ADDRBASE);
 		else
-		    prinfo ("bank #%d, DMA hole #%d starts @ $%04X",
-			    currentbank + 1, currentplain, ADDRBASE);
+		    prinfo ("bank #%d, DMA hole #%d starts @ $%04X", currentbank + 1, currentplain, ADDRBASE);
 
 		if (bankcount == 0)
 		    gfxprintf ("\n ORG $%04X,0  ; *************\n", ADDRBASE);
 		else
 		{
-		    gfxprintf ("\n ORG $%04X,0  ; *************\n",
-			       ABADDRBASE);
+		    gfxprintf ("\n ORG $%04X,0  ; *************\n", ABADDRBASE);
 		    gfxprintf ("\n RORG $%04X ; *************\n", ADDRBASE);
 		}
 
@@ -4885,8 +4665,7 @@ void barf_graphic_file (void)
 		holefilepointer = fopen (holefilename, "r");
 		if (holefilepointer != NULL)
 		{
-		    fprintf (stderr,
-			     "        DMA hole code found and imported\n");
+		    fprintf (stderr, "        DMA hole code found and imported\n");
 		    int c;
 		    while ((c = getc (holefilepointer)) != EOF)
 			putchar (c);
@@ -4895,29 +4674,22 @@ void barf_graphic_file (void)
 		}
 		else
 		{
-		    fprintf (stderr,
-			     "        no code defined for DMA hole\n");
+		    fprintf (stderr, "        no code defined for DMA hole\n");
 		}
 
 		if (bankcount == 0)
-		    ADDRBASE =
-			BANKSTART - ((dmaplain - currentplain) * DMASIZE) +
-			DMASIZE;
+		    ADDRBASE = BANKSTART - ((dmaplain - currentplain) * DMASIZE) + DMASIZE;
 		else
 		{
-		    ADDRBASE =
-			BANKSTART - ((dmaplain - currentplain) * DMASIZE) +
-			DMASIZE;
+		    ADDRBASE = BANKSTART - ((dmaplain - currentplain) * DMASIZE) + DMASIZE;
 		    if (romat4k == 1)
 			ABADDRBASE =
 			    REALSTART + ((currentbank - 1) * 0x4000) +
-			    0x2000 - ((dmaplain - currentplain) * DMASIZE) +
-			    (DMASIZE / 2);
+			    0x2000 - ((dmaplain - currentplain) * DMASIZE) + (DMASIZE / 2);
 		    else
 			ABADDRBASE =
 			    REALSTART + (currentbank * 0x4000) + 0x2000 -
-			    ((dmaplain - currentplain) * DMASIZE) +
-			    (DMASIZE / 2);
+			    ((dmaplain - currentplain) * DMASIZE) + (DMASIZE / 2);
 
 		}
 
@@ -4927,8 +4699,7 @@ void barf_graphic_file (void)
 			(" echo \"  \",\"  \",\"  \",\"  \",[(256*WZONEHEIGHT)-(DMAHOLEEND%d - DMAHOLESTART%d)]d , \"bytes of ROM space left in DMA hole %d.\"\n",
 			 currentplain, currentplain, currentplain);
 		    printf
-			(" if ((256*WZONEHEIGHT)-(DMAHOLEEND%d - DMAHOLESTART%d)) < 0\n",
-			 currentplain, currentplain);
+			(" if ((256*WZONEHEIGHT)-(DMAHOLEEND%d - DMAHOLESTART%d)) < 0\n", currentplain, currentplain);
 		    printf ("SPACEOVERFLOW SET (SPACEOVERFLOW+1)\n");
 		    printf (" endif\n");
 		}
@@ -4936,12 +4707,10 @@ void barf_graphic_file (void)
 
 	    if (dumpgraphics)
 	    {
-		snprintf (dumpgraphics_filename, 255, "dump_gfx_%02d.asm",
-			  dumpgraphics_index);
+		snprintf (dumpgraphics_filename, 255, "dump_gfx_%02d.asm", dumpgraphics_index);
 		dumpgraphics_fileout = fopen (dumpgraphics_filename, "wb");
 		if (dumpgraphics_fileout == NULL)
-		    prerror
-			("couldn't open file for dumping graphics assembly");
+		    prerror ("couldn't open file for dumping graphics assembly");
 	    }
 
 	    //stick extra graphic info into variable defines
@@ -4950,33 +4719,23 @@ void barf_graphic_file (void)
 		if (graphicslabels[currentplain][t][0] != 0)
 		{
 		    sprintf (redefined_variables[numredefvars++],
-			     "%s_width = $%02x",
-			     graphicslabels[currentplain][t],
-			     graphicsinfo[currentplain][t]);
+			     "%s_width = $%02x", graphicslabels[currentplain][t], graphicsinfo[currentplain][t]);
 		    sprintf (redefined_variables[numredefvars++],
 			     "%s_width_twoscompliment = $%02x",
-			     graphicslabels[currentplain][t],
-			     ((0 - (graphicsinfo[currentplain][t])) & 31));
+			     graphicslabels[currentplain][t], ((0 - (graphicsinfo[currentplain][t])) & 31));
 		    sprintf (redefined_variables[numredefvars++],
-			     "%s_mode = $%02x",
-			     graphicslabels[currentplain][t],
-			     graphicsmode[currentplain][t]);
+			     "%s_mode = $%02x", graphicslabels[currentplain][t], graphicsmode[currentplain][t]);
 		    if (dumpgraphics)
 		    {
 			fprintf (dumpgraphics_fileout, "%s = $%04x\n",
-				 graphicslabels[currentplain][t],
-				 dumpgraphicsaddr + t);
+				 graphicslabels[currentplain][t], dumpgraphicsaddr + t);
 			fprintf (dumpgraphics_fileout, "%s_width = $%02x\n",
-				 graphicslabels[currentplain][t],
-				 graphicsinfo[currentplain][t]);
+				 graphicslabels[currentplain][t], graphicsinfo[currentplain][t]);
 			fprintf (dumpgraphics_fileout,
 				 "%s_width_twoscompliment = $%02x\n",
-				 graphicslabels[currentplain][t],
-				 ((0 -
-				   (graphicsinfo[currentplain][t])) & 31));
+				 graphicslabels[currentplain][t], ((0 - (graphicsinfo[currentplain][t])) & 31));
 			fprintf (dumpgraphics_fileout, "%s_mode = $%02x\n",
-				 graphicslabels[currentplain][t],
-				 graphicsmode[currentplain][t]);
+				 graphicslabels[currentplain][t], graphicsmode[currentplain][t]);
 		    }
 		}
 	    }
@@ -5011,8 +4770,7 @@ void create_a78info (void)
     out = fopen ("a78info.cfg", "w");
     if (out == NULL)
 	prerror ("couldn't create a78info.cfg parameter file");
-    fprintf (out,
-	     "### parameter file for 7800header, created by 7800basic\n");
+    fprintf (out, "### parameter file for 7800header, created by 7800basic\n");
     fclose (out);
 
 }
@@ -5042,8 +4800,7 @@ void create_includes (char *includesfile)
     if (includespath[0])
     {
 	strcpy (fullpath, includespath);
-	if ((includespath[strlen (includespath) - 1] == '\\')
-	    || (includespath[strlen (includespath) - 1] == '/'))
+	if ((includespath[strlen (includespath) - 1] == '\\') || (includespath[strlen (includespath) - 1] == '/'))
 	    strcat (fullpath, "includes/");
 	else
 	    strcat (fullpath, "/includes/");
@@ -5174,7 +4931,7 @@ int checkmul (int value)
     // check to see if value can be optimized to save cycles
 
     if (!(value % 2))
-	return 1;		//REVENG - still faster than sub
+	return 1;		// still faster than sub
 
     if (value < 11)
 	return 1;		// always optimize these
@@ -5227,8 +4984,8 @@ void mul (char **statement, int bits)
     // we will optimize specifically for 2,3,5,7,9,11
     if (bits == 16)
     {
-	printf ("	ldx #0\n");
-	printf ("	stx temp1\n");
+	printf ("  ldx #0\n");
+	printf ("  stx temp1\n");
     }
     while (multiplicand != 1)
     {
@@ -5237,41 +4994,41 @@ void mul (char **statement, int bits)
 	    if (tempstorage)
 	    {
 		strcpy (statement[4], "temp2");
-		printf ("	sta temp2\n");
+		printf ("  sta temp2\n");
 	    }
 	    multiplicand /= 11;
-	    printf ("	asl\n");
+	    printf ("  asl\n");
 	    if (bits == 16)
 		printf ("  rol temp1\n");
-	    printf ("	asl\n");
+	    printf ("  asl\n");
 	    if (bits == 16)
 		printf ("  rol temp1\n");
-	    printf ("	clc\n");
-	    printf ("	adc ");
+	    printf ("  clc\n");
+	    printf ("  adc ");
 	    printimmed (statement[4]);
 	    printf ("%s\n", statement[4]);
 	    if (bits == 16)
 	    {
-		printf ("	tax\n");
-		printf ("	lda temp1\n");
-		printf ("	adc #0\n");
-		printf ("	sta temp1\n");
-		printf ("	txa\n");
+		printf ("  tax\n");
+		printf ("  lda temp1\n");
+		printf ("  adc #0\n");
+		printf ("  sta temp1\n");
+		printf ("  txa\n");
 	    }
-	    printf ("	asl\n");
+	    printf ("  asl\n");
 	    if (bits == 16)
 		printf ("  rol temp1\n");
-	    printf ("	clc\n");
-	    printf ("	adc ");
+	    printf ("  clc\n");
+	    printf ("  adc ");
 	    printimmed (statement[4]);
 	    printf ("%s\n", statement[4]);
 	    if (bits == 16)
 	    {
-		printf ("	tax\n");
-		printf ("	lda temp1\n");
-		printf ("	adc #0\n");
-		printf ("	sta temp1\n");
-		printf ("	txa\n");
+		printf ("  tax\n");
+		printf ("  lda temp1\n");
+		printf ("  adc #0\n");
+		printf ("  sta temp1\n");
+		printf ("  txa\n");
 	    }
 	    tempstorage = 1;
 	}
@@ -5280,29 +5037,29 @@ void mul (char **statement, int bits)
 	    if (tempstorage)
 	    {
 		strcpy (statement[4], "temp2");
-		printf ("	sta temp2\n");
+		printf ("  sta temp2\n");
 	    }
 	    multiplicand /= 9;
-	    printf ("	asl\n");
+	    printf ("  asl\n");
 	    if (bits == 16)
 		printf ("  rol temp1\n");
-	    printf ("	asl\n");
+	    printf ("  asl\n");
 	    if (bits == 16)
 		printf ("  rol temp1\n");
-	    printf ("	asl\n");
+	    printf ("  asl\n");
 	    if (bits == 16)
 		printf ("  rol temp1\n");
-	    printf ("	clc\n");
-	    printf ("	adc ");
+	    printf ("  clc\n");
+	    printf ("  adc ");
 	    printimmed (statement[4]);
 	    printf ("%s\n", statement[4]);
 	    if (bits == 16)
 	    {
-		printf ("	tax\n");
-		printf ("	lda temp1\n");
-		printf ("	adc #0\n");
-		printf ("	sta temp1\n");
-		printf ("	txa\n");
+		printf ("  tax\n");
+		printf ("  lda temp1\n");
+		printf ("  adc #0\n");
+		printf ("  sta temp1\n");
+		printf ("  txa\n");
 	    }
 	    tempstorage = 1;
 	}
@@ -5311,29 +5068,29 @@ void mul (char **statement, int bits)
 	    if (tempstorage)
 	    {
 		strcpy (statement[4], "temp2");
-		printf ("	sta temp2\n");
+		printf ("  sta temp2\n");
 	    }
 	    multiplicand /= 7;
-	    printf ("	asl\n");
+	    printf ("  asl\n");
 	    if (bits == 16)
 		printf ("  rol temp1\n");
-	    printf ("	asl\n");
+	    printf ("  asl\n");
 	    if (bits == 16)
 		printf ("  rol temp1\n");
-	    printf ("	asl\n");
+	    printf ("  asl\n");
 	    if (bits == 16)
 		printf ("  rol temp1\n");
-	    printf ("	sec\n");
-	    printf ("	sbc ");
+	    printf ("  sec\n");
+	    printf ("  sbc ");
 	    printimmed (statement[4]);
 	    printf ("%s\n", statement[4]);
 	    if (bits == 16)
 	    {
-		printf ("	tax\n");
-		printf ("	lda temp1\n");
-		printf ("	sbc #0\n");
-		printf ("	sta temp1\n");
-		printf ("	txa\n");
+		printf ("  tax\n");
+		printf ("  lda temp1\n");
+		printf ("  sbc #0\n");
+		printf ("  sta temp1\n");
+		printf ("  txa\n");
 	    }
 	    tempstorage = 1;
 	}
@@ -5342,26 +5099,26 @@ void mul (char **statement, int bits)
 	    if (tempstorage)
 	    {
 		strcpy (statement[4], "temp2");
-		printf ("	sta temp2\n");
+		printf ("  sta temp2\n");
 	    }
 	    multiplicand /= 5;
-	    printf ("	asl\n");
+	    printf ("  asl\n");
 	    if (bits == 16)
 		printf ("  rol temp1\n");
-	    printf ("	asl\n");
+	    printf ("  asl\n");
 	    if (bits == 16)
 		printf ("  rol temp1\n");
-	    printf ("	clc\n");
-	    printf ("	adc ");
+	    printf ("  clc\n");
+	    printf ("  adc ");
 	    printimmed (statement[4]);
 	    printf ("%s\n", statement[4]);
 	    if (bits == 16)
 	    {
-		printf ("	tax\n");
-		printf ("	lda temp1\n");
-		printf ("	adc #0\n");
-		printf ("	sta temp1\n");
-		printf ("	txa\n");
+		printf ("  tax\n");
+		printf ("  lda temp1\n");
+		printf ("  adc #0\n");
+		printf ("  sta temp1\n");
+		printf ("  txa\n");
 	    }
 	    tempstorage = 1;
 	}
@@ -5370,39 +5127,38 @@ void mul (char **statement, int bits)
 	    if (tempstorage)
 	    {
 		strcpy (statement[4], "temp2");
-		printf ("	sta temp2\n");
+		printf ("  sta temp2\n");
 	    }
 	    multiplicand /= 3;
-	    printf ("	asl\n");
+	    printf ("  asl\n");
 	    if (bits == 16)
 		printf ("  rol temp1\n");
-	    printf ("	clc\n");
-	    printf ("	adc ");
+	    printf ("  clc\n");
+	    printf ("  adc ");
 	    printimmed (statement[4]);
 	    printf ("%s\n", statement[4]);
 	    if (bits == 16)
 	    {
-		printf ("	tax\n");
-		printf ("	lda temp1\n");
-		printf ("	adc #0\n");
-		printf ("	sta temp1\n");
-		printf ("	txa\n");
+		printf ("  tax\n");
+		printf ("  lda temp1\n");
+		printf ("  adc #0\n");
+		printf ("  sta temp1\n");
+		printf ("  txa\n");
 	    }
 	    tempstorage = 1;
 	}
 	else if (!(multiplicand % 2))
 	{
 	    multiplicand /= 2;
-	    printf ("	asl\n");
+	    printf ("  asl\n");
 	    if (bits == 16)
 		printf ("  rol temp1\n");
 	}
 	else
 	{
-	    printf ("	LDY #%d\n", multiplicand);
-	    printf ("	jsr mul%d\n", bits);
-	    prwarn
-		("there seems to be a problem. your code may not run properly. please report seeing this message.");
+	    printf ("  ldy #%d\n", multiplicand);
+	    printf ("  jsr mul%d\n", bits);
+	    prwarn ("there seems to be a problem. your code may not run properly. please report seeing this message.");
 
 	}
     }
@@ -5413,24 +5169,23 @@ void divd (char **statement, int bits)
     int divisor = strictatoi (statement[6]);
     if (bits == 16)
     {
-	printf ("	ldx #0\n");
-	printf ("	stx temp1\n");
+	printf ("  ldx #0\n");
+	printf ("  stx temp1\n");
     }
     while (divisor != 1)
     {
 	if (!(divisor % 2))	// div by power of two is the only easy thing
 	{
 	    divisor /= 2;
-	    printf ("	lsr\n");
+	    printf ("  lsr\n");
 	    if (bits == 16)
 		printf ("  rol temp1\n");	// I am not sure if this is actually correct
 	}
 	else
 	{
-	    printf ("	LDY #%d\n", divisor);
-	    printf ("	jsr div%d\n", bits);
-	    prwarn
-		("there seems to be a problem. your code may not run properly. please report seeing this message.");
+	    printf ("  ldy #%d\n", divisor);
+	    printf ("  jsr div%d\n", bits);
+	    prwarn ("there seems to be a problem. your code may not run properly. please report seeing this message.");
 	}
     }
 
@@ -5452,8 +5207,8 @@ void function (char **statement)
     // determine number of args, then run until we get an end.
     doingfunction = 1;
     printf ("%s\n", statement[2]);
-    printf ("	STA temp1\n");
-    printf ("	STY temp2\n");
+    printf ("	sta temp1\n");
+    printf ("	sty temp2\n");
 }
 
 void callfunction (char **statement)
@@ -5480,23 +5235,20 @@ void callfunction (char **statement)
     {
 	// get [index]
 	index = 0;
-	index |=
-	    getindex (statement[argnum[--arguments]], &getindex0[0],
-		      &indirectflag);
+	index |= getindex (statement[argnum[--arguments]], &getindex0[0], &indirectflag);
 	if (indirectflag != 0)
-	    prerror
-		("indirect arrays not supported as function call arguments");
+	    prerror ("indirect arrays not supported as function call arguments");
 	if (index)
 	    loadindex (&getindex0[0], indirectflag);
 
 	if (arguments == 1)
-	    printf ("	LDY ");
+	    printf ("  ldy ");
 	else
-	    printf ("	LDA ");
+	    printf ("  lda ");
 	printindex (statement[argnum[arguments]], index, indirectflag);
 
 	if (arguments > 1)
-	    printf ("	STA temp%d\n", arguments + 1);
+	    printf ("  sta temp%d\n", arguments + 1);
     }
     printf (" jsr %s\n", statement[4]);
 
@@ -5545,16 +5297,10 @@ int findlabel (char **statement, int i)
 {
     char statementcache[200];
     // 0 if label, 1 if not
-    if ((statement[i][0] > (unsigned char) 0x2F)
-	&& (statement[i][0] < (unsigned char) 0x3B))
+    if ((statement[i][0] > (unsigned char) 0x2F) && (statement[i][0] < (unsigned char) 0x3B))
 	return 0;
-    if ((statement[i + 1][0] == ':')
-	&& (strncmp (statement[i + 2], "rem\0", 3)))
+    if ((statement[i + 1][0] == ':') && (strncmp (statement[i + 2], "rem\0", 3)))
 	return 1;
-
-    // a single command followed by a rem is automatically turned into a label.
-    //if ((statement[i+1][0]==':') && (!strncmp(statement[i+2],"rem\0",3))) return 0;
-
     if (!strncmp (statement[i + 1], "else\0", 4))
 	return 0;
     if (statement[i + 1][0] != '\0')
@@ -5669,11 +5415,11 @@ int findlabel (char **statement, int i)
 void sread (char **statement)
 {
     // read sequential data
-    printf ("        ldy #0\n");
-    printf ("	lda (%s),y\n", statement[6]);
-    printf ("	inc %s\n", statement[6]);
-    printf ("	bne *+4\n");
-    printf ("	inc %s+1\n", statement[6]);
+    printf ("  ldy #0\n");
+    printf ("  lda (%s),y\n", statement[6]);
+    printf ("  inc %s\n", statement[6]);
+    printf ("  bne *+4\n");
+    printf ("  inc %s+1\n", statement[6]);
     strcpy (Areg, "invalid");
 }
 
@@ -5683,22 +5429,20 @@ void sdata (char **statement)
     char data[200];
     int i;
     removeCR (statement[4]);
-    sprintf (redefined_variables[numredefvars++], "%s = %s", statement[2],
-	     statement[4]);
-    printf ("	lda #<%s_begin\n", statement[2]);
-    printf ("	sta %s\n", statement[4]);
-    printf ("	lda #>%s_begin\n", statement[2]);
-    printf ("	sta %s+1\n", statement[4]);
+    sprintf (redefined_variables[numredefvars++], "%s = %s", statement[2], statement[4]);
+    printf ("  lda #<%s_begin\n", statement[2]);
+    printf ("  sta %s\n", statement[4]);
+    printf ("  lda #>%s_begin\n", statement[2]);
+    printf ("  sta %s+1\n", statement[4]);
 
-    printf ("	JMP .skip%s\n", statement[0]);
+    printf ("  jmp .skip%s\n", statement[0]);
     // not affected by noinlinedata
 
     printf ("%s_begin\n", statement[2]);
     while (1)
     {
 	if (((!fgets (data, 200, stdin))
-	     || ((data[0] < (unsigned char) 0x3A)
-		 && (data[0] > (unsigned char) 0x2F))) && (data[0] != 'e'))
+	     || ((data[0] < (unsigned char) 0x3A) && (data[0] > (unsigned char) 0x2F))) && (data[0] != 'e'))
 	{
 	    prerror ("missing \"end\" keyword at end of data");
 	    exit (1);
@@ -5741,7 +5485,7 @@ void data (char **statement)
 
     if (!thisdatabankset)
 	if (!(optimization & 4))
-	    printf ("    JMP .skip%s\n", statement[0]);
+	    printf ("  jmp .skip%s\n", statement[0]);
 
     if (!thisdatabankset)
 	printf ("%s\n", statement[2]);
@@ -5751,8 +5495,7 @@ void data (char **statement)
     while (1)
     {
 	if (((!fgets (data, 200, stdin))
-	     || ((data[0] < (unsigned char) 0x3A)
-		 && (data[0] > (unsigned char) 0x2F))) && (data[0] != 'e'))
+	     || ((data[0] < (unsigned char) 0x3A) && (data[0] > (unsigned char) 0x2F))) && (data[0] != 'e'))
 	{
 	    prerror ("missing \"end\" keyword at end of data");
 	    exit (1);
@@ -5771,9 +5514,9 @@ void data (char **statement)
 	if (i < 200)
 	{
 	    if (!thisdatabankset)
-		printf ("    .byte %s\n", data);
+		printf ("  .byte %s\n", data);
 	    else
-		gfxprintf ("    .byte %s\n", data);
+		gfxprintf ("  .byte %s\n", data);
 	}
     }
 
@@ -5813,11 +5556,11 @@ void speak (char **statement)
 
     assertminimumargs (statement, "speak", 1);
     removeCR (statement[2]);
-    printf ("    lda #255\n");
-    printf ("    sta voxlock ; disable vox output\n");
-    printf ("    SPEAK %s\n", statement[2]);
-    printf ("    lda #0\n");
-    printf ("    sta voxlock ; re-enable vox output\n");
+    printf ("  lda #255\n");
+    printf ("  sta voxlock ; disable vox output\n");
+    printf ("  SPEAK %s\n", statement[2]);
+    printf ("  lda #0\n");
+    printf ("  sta voxlock ; re-enable vox output\n");
 }
 
 void loadmemory (char **statement)
@@ -5834,16 +5577,16 @@ void loadmemory (char **statement)
     removeCR (statement[4]);
 
     //skip it all if no device is attached...
-    printf ("    lda hsdevice\n");
-    printf ("    bne continueloadmemory%d\n", templabel);
-    printf ("    jmp skiploadmemory%d\n", templabel);
+    printf ("  lda hsdevice\n");
+    printf ("  bne continueloadmemory%d\n", templabel);
+    printf ("  jmp skiploadmemory%d\n", templabel);
     printf ("continueloadmemory%d\n", templabel);
 
     //ensure we invalidate the current entry...
-    printf ("    lda #$ff\n");
-    printf ("    sta hsdifficulty\n");
+    printf ("  lda #$ff\n");
+    printf ("  sta hsdifficulty\n");
 
-    printf ("    jsr loaddifficultytable\n");
+    printf ("  jsr loaddifficultytable\n");
     // ** The loaddifficultytable routine will load our bogus difficulty table.
     // ** Along the way it will setup (HSGameTableLo) to point to either
     // ** the loaded RAW load buffer (AVox) or the in-RAM RAW game table (HSC)
@@ -5852,33 +5595,32 @@ void loadmemory (char **statement)
     if (statement[3][0] == '-')	// range
     {
 	// ** copy the memory from (HSGameTableLo),y to the specified variables
-	printf ("    ldy #(%s-%s)\n", statement[4], statement[2]);
+	printf ("  ldy #(%s-%s)\n", statement[4], statement[2]);
 	printf ("loadmemory%d\n", templabel);
-	printf ("    lda (HSGameTableLo),y\n");
-	printf ("    sta %s,y\n", statement[2]);
-	printf ("    dey\n");
-	printf ("    bpl loadmemory%d\n", templabel);
+	printf ("  lda (HSGameTableLo),y\n");
+	printf ("  sta %s,y\n", statement[2]);
+	printf ("  dey\n");
+	printf ("  bpl loadmemory%d\n", templabel);
     }
     else
     {
 	i = 2;
-	printf ("    ldy #0\n");
+	printf ("  ldy #0\n");
 	while ((statement[i][0] != ':') && (statement[i][0] != '\0'))
 	{
 	    for (k = 0; k < 200; ++k)
-		if ((statement[i][k] == (unsigned char) 0x0A)
-		    || (statement[i][k] == (unsigned char) 0x0D))
+		if ((statement[i][k] == (unsigned char) 0x0A) || (statement[i][k] == (unsigned char) 0x0D))
 		    statement[i][k] = '\0';
 	    if (i > 2)
-		printf ("    iny\n");
-	    printf ("    lda (HSGameTableLo),y\n");
-	    printf ("    sta %s\n", statement[i++]);
+		printf ("  iny\n");
+	    printf ("  lda (HSGameTableLo),y\n");
+	    printf ("  sta %s\n", statement[i++]);
 	}
     }
 
     //ensure we invalidate the next entry...
-    printf ("    lda #$ff\n");
-    printf ("    sta hsdifficulty\n");
+    printf ("  lda #$ff\n");
+    printf ("  sta hsdifficulty\n");
     printf ("skiploadmemory%d\n", templabel);
 
     templabel++;
@@ -5900,12 +5642,12 @@ void savememory (char **statement)
     removeCR (statement[4]);
 
     //skip it all if no device is attached...
-    printf ("    lda hsdevice\n");
-    printf ("    bne continuesavememory%d\n", templabel);
-    printf ("    jmp skipsavememory%d\n", templabel);
+    printf ("  lda hsdevice\n");
+    printf ("  bne continuesavememory%d\n", templabel);
+    printf ("  jmp skipsavememory%d\n", templabel);
     printf ("continuesavememory%d\n", templabel);
 
-    printf ("    jsr loaddifficultytable\n");
+    printf ("  jsr loaddifficultytable\n");
     // ** The loaddifficultytable routine will load our bogus difficulty table.
     // ** Along the way it will setup (HSGameTableLo) to point to either
     // ** the loaded RAW load buffer (AVox) or the in-RAM RAW game table (HSC)
@@ -5914,41 +5656,40 @@ void savememory (char **statement)
     if (statement[3][0] == '-')	// range
     {
 	// ** copy the memory from (HSGameTableLo),y to the specified variables
-	printf ("    ldy #(%s-%s)\n", statement[4], statement[2]);
+	printf ("  ldy #(%s-%s)\n", statement[4], statement[2]);
 	printf ("savememory%d\n", templabel);
-	printf ("    lda %s,y\n", statement[2]);
-	printf ("    sta (HSGameTableLo),y\n");
-	printf ("    dey\n");
-	printf ("    bpl savememory%d\n", templabel);
+	printf ("  lda %s,y\n", statement[2]);
+	printf ("  sta (HSGameTableLo),y\n");
+	printf ("  dey\n");
+	printf ("  bpl savememory%d\n", templabel);
     }
     else
     {
 	i = 2;
-	printf ("    ldy #0\n");
+	printf ("  ldy #0\n");
 	while ((statement[i][0] != ':') && (statement[i][0] != '\0'))
 	{
 	    for (k = 0; k < 200; ++k)
-		if ((statement[i][k] == (unsigned char) 0x0A)
-		    || (statement[i][k] == (unsigned char) 0x0D))
+		if ((statement[i][k] == (unsigned char) 0x0A) || (statement[i][k] == (unsigned char) 0x0D))
 		    statement[i][k] = '\0';
 	    if (i > 2)
-		printf ("    iny\n");
-	    printf ("    lda %s\n", statement[i++]);
-	    printf ("    sta (HSGameTableLo),y\n");
+		printf ("  iny\n");
+	    printf ("  lda %s\n", statement[i++]);
+	    printf ("  sta (HSGameTableLo),y\n");
 	}
     }
     // if its HSC, we already wrote over the game save memory above
     // but we need to save the data if the device is an AtariVox
-    printf ("    lda hsdevice\n");
-    printf ("    cmp #2\n");
-    printf ("    bne skipvoxsave%d\n", templabel);
-    printf ("    jsr savedifficultytableAVOXskipconvert\n");
+    printf ("  lda hsdevice\n");
+    printf ("  cmp #2\n");
+    printf ("  bne skipvoxsave%d\n", templabel);
+    printf ("  jsr savedifficultytableAVOXskipconvert\n");
     printf ("  ifconst DOUBLEBUFFER\n");
     printf ("    lda doublebufferstate\n");
     printf ("    bne skipsavememory%d\n", templabel);
     printf ("  endif\n");
-    printf ("    jsr drawscreen\n");
-    printf ("    jsr drawscreen\n");
+    printf ("  jsr drawscreen\n");
+    printf ("  jsr drawscreen\n");
     printf ("skipvoxsave%d\n", templabel);
     printf ("skipsavememory%d\n", templabel);
     templabel++;
@@ -5959,16 +5700,16 @@ void hiscoreload (char **statement)
 {
     //       1
     // hiscoreload
-    printf (" jsr loaddifficultytable\n");
+    printf ("  jsr loaddifficultytable\n");
 }
 
 void hiscoreclear (char **statement)
 {
     //       1
     // hiscoreclear
-    printf (" jsr loaddifficultytable\n");
-    printf (" jsr cleardifficultytablemem\n");
-    printf (" jsr savedifficultytable\n");
+    printf ("  jsr loaddifficultytable\n");
+    printf ("  jsr cleardifficultytablemem\n");
+    printf ("  jsr savedifficultytable\n");
 }
 
 
@@ -5982,42 +5723,42 @@ void drawhiscores (char **statement)
 
     if (strcmp (statement[2], "attract") == 0)
     {
-	printf (" jsr loaddifficultytable\n");
-	printf (" lda #0\n");
-	printf (" sta hsdisplaymode\n");
-	printf (" jsr hscdrawscreen\n");
+	printf ("  jsr loaddifficultytable\n");
+	printf ("  lda #0\n");
+	printf ("  sta hsdisplaymode\n");
+	printf ("  jsr hscdrawscreen\n");
     }
     else if (strcmp (statement[2], "single") == 0)
     {
-	printf (" lda #1\n");
-	printf (" sta hsdisplaymode\n");
-	printf (" jsr loaddifficultytable\n");
-	printf (" jsr hscdrawscreen\n");
-	printf (" jsr savedifficultytable\n");
+	printf ("  lda #1\n");
+	printf ("  sta hsdisplaymode\n");
+	printf ("  jsr loaddifficultytable\n");
+	printf ("  jsr hscdrawscreen\n");
+	printf ("  jsr savedifficultytable\n");
     }
     else if (strcmp (statement[2], "player1") == 0)
     {
-	printf (" lda #2\n");
-	printf (" sta hsdisplaymode\n");
-	printf (" jsr loaddifficultytable\n");
-	printf (" jsr hscdrawscreen\n");
-	printf (" jsr savedifficultytable\n");
+	printf ("  lda #2\n");
+	printf ("  sta hsdisplaymode\n");
+	printf ("  jsr loaddifficultytable\n");
+	printf ("  jsr hscdrawscreen\n");
+	printf ("  jsr savedifficultytable\n");
     }
     else if (strcmp (statement[2], "player2") == 0)
     {
-	printf (" lda #3\n");
-	printf (" sta hsdisplaymode\n");
-	printf (" jsr loaddifficultytable\n");
-	printf (" jsr hscdrawscreen\n");
-	printf (" jsr savedifficultytable\n");
+	printf ("  lda #3\n");
+	printf ("  sta hsdisplaymode\n");
+	printf ("  jsr loaddifficultytable\n");
+	printf ("  jsr hscdrawscreen\n");
+	printf ("  jsr savedifficultytable\n");
     }
     else if (strcmp (statement[2], "player2joy1") == 0)
     {
-	printf (" lda #4\n");
-	printf (" sta hsdisplaymode\n");
-	printf (" jsr loaddifficultytable\n");
-	printf (" jsr hscdrawscreen\n");
-	printf (" jsr savedifficultytable\n");
+	printf ("  lda #4\n");
+	printf ("  sta hsdisplaymode\n");
+	printf ("  jsr loaddifficultytable\n");
+	printf ("  jsr hscdrawscreen\n");
+	printf ("  jsr savedifficultytable\n");
     }
     else
 	prerror ("unsupported argument for drawscores:%s", statement[2]);
@@ -6037,8 +5778,7 @@ int getnotevalue (char *command)
 	return (-1);
 
     //note characters are always followed by nothing, a sharp, or a digit...
-    if ((command[1] != 0) && (command[1] != '#')
-	&& ((command[1] < '0') || (command[1] > '9')))
+    if ((command[1] != 0) && (command[1] != '#') && ((command[1] < '0') || (command[1] > '9')))
 	return (-1);
 
     //If we're here, it seems to be a note. Lets decode it...
@@ -6061,8 +5801,7 @@ int getnotelength (char *command)
 	return (-1);
 
     //note characters are always followed by nothing, a sharp, or a digit...
-    if ((command[1] != 0) && (command[1] != '#')
-	&& ((command[1] < '0') || (command[1] > '9')))
+    if ((command[1] != 0) && (command[1] != '#') && ((command[1] < '0') || (command[1] > '9')))
 	return (-1);
 
     //If we're here, it seems to be a note. Lets decode it...
@@ -6095,8 +5834,7 @@ int getnoteoctave (char *command)
 	return (-1);
 
     //note characters are always followed by nothing, a sharp, or a digit...
-    if ((command[1] != 0) && (command[1] != '#')
-	&& ((command[1] < '0') || (command[1] > '9')))
+    if ((command[1] != 0) && (command[1] != '#') && ((command[1] < '0') || (command[1] > '9')))
 	return (-1);
 
     //If we're here, it seems to be a note. Lets decode it...
@@ -6143,7 +5881,7 @@ void songdata (char **statement)
     savepatternname[0] = 0;
 
     if (!(optimization & 4))
-	printf ("	JMP .skip%d\n", templabel);
+	printf ("  jmp .skip%d\n", templabel);
     printf ("songdatastart_%s\n", statement[2]);
 
     while (1)
@@ -6160,8 +5898,7 @@ void songdata (char **statement)
 	    if (savepatternname[0] != 0)
 	    {
 		//we have a pattern in progress. end it first.
-		printf (" .byte $ff, <%s, >%s ; pattern end\n",
-			savepatternname, savepatternname);
+		printf ("  .byte $ff, <%s, >%s ; pattern end\n", savepatternname, savepatternname);
 	    }
 	    break;
 	}
@@ -6175,8 +5912,7 @@ void songdata (char **statement)
 	    {
 		if (wordstart[s] == 0)
 		    EOL = TRUE;
-		if ((wordstart[s] == ' ') || (wordstart[s] < 32)
-		    || (wordstart[s] == 0))
+		if ((wordstart[s] == ' ') || (wordstart[s] < 32) || (wordstart[s] == 0))
 		{
 		    wordstart[s] = 0;
 		    strncpy (songstatements[t], wordstart, 99);
@@ -6201,13 +5937,11 @@ void songdata (char **statement)
 	    if (savepatternname[0] != 0)
 	    {
 		//we have a pattern in progress. end it first.
-		printf (" .byte 255, <%s, >%s ; pattern end\n",
-			savepatternname, savepatternname);
+		printf ("  .byte 255, <%s, >%s ; pattern end\n", savepatternname, savepatternname);
 	    }
 	    //non-indented character. ie. the start of a label.
 	    printf ("%s_%s\n", statement[2], songstatements[0]);
-	    sprintf (savepatternname, "%s_%s", statement[2],
-		     songstatements[0]);
+	    sprintf (savepatternname, "%s_%s", statement[2], songstatements[0]);
 	}
 
 	for (t = 1; t < 200; t++)
@@ -6217,15 +5951,13 @@ void songdata (char **statement)
 	    if (songstatements[t][0] == ';')
 		break;		//comment. ignore the rest.
 	    if (savepatternname[0] == 0)
-		prerror ("songdata has data without pattern label '%s'",
-			 songstatements[t]);
+		prerror ("songdata has data without pattern label '%s'", songstatements[t]);
 
 	    if (songstatements[t][0] == '\'')
 	    {
 		// this is 16th note drum notation
 		s = 1;
-		while ((songstatements[t][s] != 0)
-		       && (songstatements[t][s] != '\''))
+		while ((songstatements[t][s] != 0) && (songstatements[t][s] != '\''))
 		{
 		    if (songstatements[t][s] != '.')	//its a beat/note
 		    {
@@ -6234,40 +5966,31 @@ void songdata (char **statement)
 			notevalue = 0;
 			songstatements[t][s] = tolower (songstatements[t][s]);
 			//we either have rests or notes. This doesn't appear to be a rest...
-			if ((songstatements[t][s] >= '0')
-			    && (songstatements[t][s] <= '9'))
+			if ((songstatements[t][s] >= '0') && (songstatements[t][s] <= '9'))
 			    notevalue = songstatements[t][s] - '0';
-			else if ((songstatements[t][s] >= 'a')
-				 && (songstatements[t][s] <= 'b'))
+			else if ((songstatements[t][s] >= 'a') && (songstatements[t][s] <= 'b'))
 			    notevalue = songstatements[t][s] + 10 - 'a';
 			else
-			    prerror
-				("drum pattern has unrecognized character '%s'",
-				 songstatements[t]);
+			    prerror ("drum pattern has unrecognized character '%s'", songstatements[t]);
 			s = s + 1;
-			while ((songstatements[t][s] == '.')
-			       && (notelength < 15))
+			while ((songstatements[t][s] == '.') && (notelength < 15))
 			{
 			    notelength = notelength + 1;
 			    s = s + 1;
 			}
-			printf (" .byte $%02x ; %c\n",
-				(notevalue * 16) | notelength,
-				songstatements[t][u]);
+			printf ("  .byte $%02x ; %c\n", (notevalue * 16) | notelength, songstatements[t][u]);
 		    }
 		    else	//its a rest
 		    {
 			notelength = 0;	// 1x 1/16th note length
 			//conjoin any rests to save on data...
 			s = s + 1;
-			while ((songstatements[t][s] == '.')
-			       && (notelength < 15))
+			while ((songstatements[t][s] == '.') && (notelength < 15))
 			{
 			    notelength = notelength + 1;
 			    s = s + 1;
 			}
-			printf (" .byte $%02x ; rest %d/16th\n",
-				(12 * 16) | notelength, notelength + 1);
+			printf ("  .byte $%02x ; rest %d/16th\n", (12 * 16) | notelength, notelength + 1);
 		    }
 		}
 	    }
@@ -6280,8 +6003,7 @@ void songdata (char **statement)
 		    //its not a note. determine what it is...
 		    if (notelength >= 0)	//if it doesn't have a valid value, but has a note length, its a rest
 		    {
-			printf (" .byte $%02x ; %s\n", (12 * 16) | notelength,
-				songstatements[t]);
+			printf ("  .byte $%02x ; %s\n", (12 * 16) | notelength, songstatements[t]);
 			continue;
 		    }
 		    else if (songstatements[t][1] == '=')
@@ -6291,99 +6013,75 @@ void songdata (char **statement)
 			{
 			    notevalue = getnoteoctave (songstatements[t] + 2);
 			    if (notevalue > 255)
-				prerror ("key change too large '%s'",
-					 songstatements[t]);
+				prerror ("key change too large '%s'", songstatements[t]);
 			    if (notevalue < 0)
-				prerror ("key change invalid format '%s'",
-					 songstatements[t]);
-			    printf (" .byte $FB, $%02x ; %s\n", notevalue,
-				    songstatements[t]);
+				prerror ("key change invalid format '%s'", songstatements[t]);
+			    printf ("  .byte $FB, $%02x ; %s\n", notevalue, songstatements[t]);
 			    continue;
 			}
 			else if (songstatements[t][0] == 't')	// tempo change...
 			{
 			    long tempv;
-			    tempv =
-				(256 * strictatoi (songstatements[t] + 2)) /
-				450;
+			    tempv = (256 * strictatoi (songstatements[t] + 2)) / 450;
 			    tempovalue = tempv;
 			    if (tempovalue > 255)
-				prerror ("tempo too large '%s'",
-					 songstatements[t]);
+				prerror ("tempo too large '%s'", songstatements[t]);
 			    if (tempovalue < 0)
-				prerror ("tempo change invalid format '%s'",
-					 songstatements[t]);
-			    printf (" .byte $F9, $%02x ; %s\n", tempovalue,
-				    songstatements[t]);
+				prerror ("tempo change invalid format '%s'", songstatements[t]);
+			    printf ("  .byte $F9, $%02x ; %s\n", tempovalue, songstatements[t]);
 			    continue;
 			}
 			else if (songstatements[t][0] == 'i')	// instrument change...
 			{
 			    printf (" .byte $F8, <%s, >%s ; %s\n",
-				    songstatements[t] + 2,
-				    songstatements[t] + 2, songstatements[t]);
+				    songstatements[t] + 2, songstatements[t] + 2, songstatements[t]);
 			    continue;
 			}
 			else
 			{
-			    prerror ("songdata unsupported '=' command '%s'",
-				     songstatements[t]);
+			    prerror ("songdata unsupported '=' command '%s'", songstatements[t]);
 			}
 		    }
-		    else if ((songstatements[t][1] == '+')
-			     || (songstatements[t][1] == '-'))
+		    else if ((songstatements[t][1] == '+') || (songstatements[t][1] == '-'))
 		    {
 			//its one of the relative setting commands
 			if (songstatements[t][0] == 'k')	// relative key/octave change...
 			{
 			    notevalue = strictatoi (songstatements[t] + 2);
 			    if (notevalue > 15)
-				prerror ("relative key change too large '%s'",
-					 songstatements[t]);
+				prerror ("relative key change too large '%s'", songstatements[t]);
 			    if (notevalue < 0)
-				prerror
-				    ("relative key change invalid format '%s'",
-				     songstatements[t]);
+				prerror ("relative key change invalid format '%s'", songstatements[t]);
 			    if (songstatements[t][1] == '+')
-				printf (" .byte $%02x ; %s\n",
-					0xD0 | notevalue, songstatements[t]);
+				printf ("  .byte $%02x ; %s\n", 0xD0 | notevalue, songstatements[t]);
 			    else
-				printf (" .byte $%02x ; %s\n",
-					0xE0 | notevalue, songstatements[t]);
+				printf ("  .byte $%02x ; %s\n", 0xE0 | notevalue, songstatements[t]);
 			    continue;
 			}
 			else if (songstatements[t][0] == 't')	// relative tempo change...
 			{
 			    tempovalue = strictatoi (songstatements[t] + 2);
 			    if (tempovalue > 255)
-				prerror
-				    ("relative tempo change too large '%s'",
-				     songstatements[t]);
+				prerror ("relative tempo change too large '%s'", songstatements[t]);
 			    if (tempovalue < 1)
-				prerror
-				    ("relative tempo change invalid format '%s'",
-				     songstatements[t]);
+				prerror ("relative tempo change invalid format '%s'", songstatements[t]);
 			    if (songstatements[t][1] == '-')
 				tempovalue = 256 - tempovalue;
-			    printf (" .byte $FA, $%02x ; %s\n", tempovalue,
-				    songstatements[t]);
+			    printf ("  .byte $FA, $%02x ; %s\n", tempovalue, songstatements[t]);
 			    continue;
 			}
 
 			else
 			    prerror
-				("songdata using relative notation for unsupported command '%s'",
-				 songstatements[t]);
+				("songdata using relative notation for unsupported command '%s'", songstatements[t]);
 		    }
 		    else if (songstatements[t][0] == '>')
 		    {
-			printf (" .byte $%02x ; %s\n", 0xD0 | 12,
-				songstatements[t]);
+			printf ("  .byte $%02x ; %s\n", 0xD0 | 12, songstatements[t]);
 		    }
 		    else if (songstatements[t][0] == '<')
 		    {
-			printf (" .byte $%02x ; %s\n", 0xE0 | 12,
-				songstatements[t]);
+			printf ("  .byte $%02x ; %s\n", 0xE0 | 12, songstatements[t]);
 		    }
 
 		    else
@@ -6392,30 +6090,25 @@ void songdata (char **statement)
 			// Assume it's a pattern call.
 			loopcount = getpatternloops (songstatements[t]);
 			if ((loopcount > 8) || (loopcount < 1))
-			    prerror
-				("bad loop count %d for song pattern '%s'",
-				 loopcount, songstatements[t]);
-			printf (" .byte $%02x, <%s_%s, >%s_%s\n",
+			    prerror ("bad loop count %d for song pattern '%s'", loopcount, songstatements[t]);
+			printf ("  .byte $%02x, <%s_%s, >%s_%s\n",
 				0xf0 | (loopcount - 1), statement[2],
-				songstatements[t], statement[2],
-				songstatements[t]);
+				songstatements[t], statement[2], songstatements[t]);
 		    }
 		}
 		else		//the statement is a note...
-		    printf (" .byte $%02x ; %s\n",
-			    (notevalue * 16) | notelength, songstatements[t]);
+		    printf ("  .byte $%02x ; %s\n", (notevalue * 16) | notelength, songstatements[t]);
 	    }
 	}
     }
-    printf ("songchanneltable_%s ; the address of the channel data\n",
-	    statement[2]);
+    printf ("songchanneltable_%s ; the address of the channel data\n", statement[2]);
     for (t = 0; t < 4; t++)
     {
-	printf (" ifconst %s_main%d\n", statement[2], t + 1);
-	printf ("   .word %s_main%d\n", statement[2], t + 1);
-	printf (" else\n");
-	printf ("   .word $0000\n");
-	printf (" endif\n");
+	printf ("  ifconst %s_main%d\n", statement[2], t + 1);
+	printf ("    .word %s_main%d\n", statement[2], t + 1);
+	printf ("  else\n");
+	printf ("    .word $0000\n");
+	printf ("  endif\n");
     }
     printf
 	(" echo \" \",\"(tracker song '%s' used \" ,[(. - songdatastart_%s)]d , \"bytes)\"\n",
@@ -6428,8 +6121,8 @@ void songdata (char **statement)
 
 void stopsong ()
 {
-    printf (" lda #0\n");
-    printf (" sta songtempo\n");
+    printf ("  lda #0\n");
+    printf ("  sta songtempo\n");
 }
 
 void playsong (char **statement)
@@ -6439,16 +6132,16 @@ void playsong (char **statement)
     removeCR (statement[2]);
     removeCR (statement[3]);
     removeCR (statement[4]);
-    printf (" lda #<songchanneltable_%s\n", statement[2]);
-    printf (" sta songpointerlo\n");
-    printf (" lda #>songchanneltable_%s\n", statement[2]);
-    printf (" sta songpointerhi\n");
+    printf ("  lda #<songchanneltable_%s\n", statement[2]);
+    printf ("  sta songpointerlo\n");
+    printf ("  lda #>songchanneltable_%s\n", statement[2]);
+    printf ("  sta songpointerhi\n");
     //printf(" ldy paldetected\n");
-    printf (" ldy #0\n");
-    printf (" lda tempoinfo_%d,y\n", templabel);
-    printf (" sta songtempo\n");
-    printf (" jsr setsongchannels\n");
-    printf (" jmp skiptempo_%d\n", templabel);
+    printf ("  ldy #0\n");
+    printf ("  lda tempoinfo_%d,y\n", templabel);
+    printf ("  sta songtempo\n");
+    printf ("  jsr setsongchannels\n");
+    printf ("  jmp skiptempo_%d\n", templabel);
     removeCR (statement[3]);
     tempovalue = (256 * strictatoi (statement[3])) / 450;
     paltempovalue = (256 * strictatoi (statement[3])) / 375;
@@ -6457,26 +6150,26 @@ void playsong (char **statement)
     if (tempovalue < 0)
 	prerror ("tempo change invalid format '%s'", statement[3]);
     printf ("tempoinfo_%d\n", templabel);
-    printf (" .byte %d, %d\n", tempovalue, paltempovalue);
+    printf ("  .byte %d, %d\n", tempovalue, paltempovalue);
     printf ("skiptempo_%d\n", templabel++);
     if ((statement[4][0] != 0) && (statement[4][0] != ':'))
     {
 	if (strncmp (statement[4], "repeat", 6) == 0)
 	{
-	    printf (" lda #255\n");
-	    printf (" sta songloops\n");
+	    printf ("  lda #255\n");
+	    printf ("  sta songloops\n");
 	}
 	else
 	{
 	    //TODO: some sanity checking...
-	    printf (" lda #%d\n", strictatoi (statement[4]) - 1);
-	    printf (" sta songloops\n");
+	    printf ("  lda #%d\n", strictatoi (statement[4]) - 1);
+	    printf ("  sta songloops\n");
 	}
     }
     else
     {
-	printf (" lda #0\n");
-	printf (" sta songloops\n");
+	printf ("  lda #0\n");
+	printf ("  sta songloops\n");
     }
 }
 
@@ -6492,7 +6185,7 @@ void speechdata (char **statement)
     lastpitch = 88;		//atarivox pitch default
 
     if (!(optimization & 4))
-	printf ("	JMP .skip%s\n", statement[0]);
+	printf ("  jmp .skip%s\n", statement[0]);
 
     //get the label defined...
     printf ("%s\n", statement[2]);
@@ -6501,8 +6194,7 @@ void speechdata (char **statement)
     {
 	memset (data, 0, 501);
 	if (((!fgets (data, 500, stdin))
-	     || ((data[0] < (unsigned char) 0x3A)
-		 && (data[0] > (unsigned char) 0x2F))) && (data[0] != 'e'))
+	     || ((data[0] < (unsigned char) 0x3A) && (data[0] > (unsigned char) 0x2F))) && (data[0] != 'e'))
 	{
 	    prerror ("missing \"end\" keyword at end of data");
 	    exit (1);
@@ -6515,7 +6207,7 @@ void speechdata (char **statement)
 	if (strncmp (data + 1, "reset", 5) == 0)
 	{
 	    lastpitch = 88;	//atarivox pitch default
-	    printf ("   .byte 0,31 ; reset\n");
+	    printf ("  .byte 0,31 ; reset\n");
 	    continue;
 	}
 
@@ -6525,7 +6217,7 @@ void speechdata (char **statement)
 		prerror ("speechdata pitch data missing value");
 	    argvalue = strictatoi (data + 7);
 	    lastpitch = argvalue;
-	    printf ("   .byte 22, %d ; pitch\n", argvalue);
+	    printf ("  .byte 22, %d ; pitch\n", argvalue);
 	    continue;
 	}
 	else if (strncmp (data + 1, "speed", 5) == 0)	//21
@@ -6533,7 +6225,7 @@ void speechdata (char **statement)
 	    if ((data[6] == 0) || (data[7] == 0))
 		prerror ("speechdata speed data missing value");
 	    argvalue = strictatoi (data + 7);
-	    printf ("   .byte 21, %d ; speed\n", argvalue);
+	    printf ("  .byte 21, %d ; speed\n", argvalue);
 	    continue;
 	}
 	else if (strncmp (data + 1, "raw", 3) == 0)
@@ -6541,64 +6233,57 @@ void speechdata (char **statement)
 	    removeCR (data);
 	    if ((data[3] == 0) || (data[4] == 0))
 		prerror ("speechdata raw data missing actual data");
-	    printf (" .byte %s ; raw\n", data + 4);
+	    printf ("  .byte %s ; raw\n", data + 4);
 	    continue;
 	}
-	else if ((strncmp (data + 1, "dictionary", 10) == 0)
-		 || (strncmp (data + 1, "phonetic", 8) == 0))
+	else if ((strncmp (data + 1, "dictionary", 10) == 0) || (strncmp (data + 1, "phonetic", 8) == 0))
 	{
 	    removeCR (data);
 
 	    if ((data[9] == 0) || (data[10] == 0) || (data[11] == 0))
-		prerror
-		    ("speechdata dictionary/phonetic data missing word arguments");
+		prerror ("speechdata dictionary/phonetic data missing word arguments");
 
 	    if (strncmp (data + 1, "dictionary", 10) == 0)
 		for (i = 11;
-		     ((data[i] != 0) && (data[i] != '\r') && (data[i] != '\n')
-		      && (data[i] != '\'') && (i < 500)); i++);
+		     ((data[i] != 0) && (data[i] != '\r') && (data[i] != '\n') && (data[i] != '\'') && (i < 500)); i++);
 	    if (strncmp (data + 1, "phonetic", 8) == 0)
 		for (i = 9;
-		     ((data[i] != 0) && (data[i] != '\r') && (data[i] != '\n')
-		      && (data[i] != '\'') && (i < 500)); i++);
+		     ((data[i] != 0) && (data[i] != '\r') && (data[i] != '\n') && (data[i] != '\'') && (i < 500)); i++);
 	    if (data[i] == '\'')
 	    {
 		i = i + 1;
 		//convert to upper-case and find end of words data...
 		for (j = i;
-		     ((data[j] != 0) && (data[j] != '\r') && (data[j] != '\n')
-		      && (data[j] != '\'') && (j < 500)); j++)
+		     ((data[j] != 0) && (data[j] != '\r') && (data[j] != '\n') && (data[j] != '\'') && (j < 500)); j++)
 		{
 		    data[j] = toupper (data[j]);
 		    if (data[j] == '^')
 			data[j] = ' ';
 		}
 		if (data[j] != '\'')
-		    prerror
-			("speechdata dictionary/phoenetic data missing end quote");
+		    prerror ("speechdata dictionary/phoenetic data missing end quote");
 		data[j] = 0;
 		// at this point data+i is a null-terminated ascii phrase to translate to data...
 		for (t = i; data[t] != 0; t++)
 		{
 		    if (data[t] == ' ')
 		    {
-			printf ("   .byte $05 ; pause 60ms\n");
+			printf ("  .byte $05 ; pause 60ms\n");
 			continue;
 		    }
 		    if (data[t] == ',')
 		    {
-			printf ("   .byte $02 ; pause 200ms\n");
+			printf ("  .byte $02 ; pause 200ms\n");
 			continue;
 		    }
 		    if (data[t] == '.')
 		    {
-			printf ("   .byte $03 ; pause 700ms\n");
+			printf ("  .byte $03 ; pause 700ms\n");
 			continue;
 		    }
 		    if ((data[t] >= 'A') && (data[t] <= 'Z'))
 		    {
-			for (s = t; ((data[s] >= 'A') && (data[s] <= 'Z'));
-			     s++)
+			for (s = t; ((data[s] >= 'A') && (data[s] <= 'Z')); s++)
 			    word[s - t] = data[s];
 			word[s - t] = 0;
 			inflection = 0;
@@ -6614,12 +6299,11 @@ void speechdata (char **statement)
 				if (strcmp (dictionary[i], word) == 0)
 				{
 				    wordphonemes[200] = 0;
-				    strncpy (wordphonemes, dictionary[i + 1],
-					     200);
+				    strncpy (wordphonemes, dictionary[i + 1], 200);
 				    if (inflection > 0)
 				    {
 					//modify data based on inflection
-					printf (" .byte ");
+					printf ("  .byte ");
 					phonemecount = 1;
 					for (u = 0; wordphonemes[u] != 0; u++)
 					    if (wordphonemes[u] == ',')
@@ -6629,47 +6313,33 @@ void speechdata (char **statement)
 					    if (inflection == 1)
 						printf
 						    ("22,%d, %s, 22,%d; %s?\n",
-						     lastpitch + 16,
-						     wordphonemes, lastpitch,
-						     word);
+						     lastpitch + 16, wordphonemes, lastpitch, word);
 					    if (inflection == 2)
 						printf
 						    ("22,%d, %s, 22,%d; %s.\n",
-						     lastpitch - 8,
-						     wordphonemes, lastpitch,
-						     word);
+						     lastpitch - 8, wordphonemes, lastpitch, word);
 					}
 					else
 					{
 					    char *insertpoint, *lastcomma;
-					    lastcomma =
-						strrchr (wordphonemes, ',');
+					    lastcomma = strrchr (wordphonemes, ',');
 					    *lastcomma = 0;
-					    insertpoint =
-						strrchr (wordphonemes, ',');
+					    insertpoint = strrchr (wordphonemes, ',');
 					    *lastcomma = ',';
 					    *insertpoint = 0;
 					    if (inflection == 1)
 						printf
 						    ("%s, 22,%d, %s, 22,%d; %s? (dictionary)\n",
-						     wordphonemes,
-						     lastpitch + 16,
-						     insertpoint + 1,
-						     lastpitch, word);
+						     wordphonemes, lastpitch + 16, insertpoint + 1, lastpitch, word);
 					    if (inflection == 2)
 						printf
 						    ("%s, 22,%d, %s, 22,%d; %s (dictionary)\n",
-						     wordphonemes,
-						     lastpitch - 8,
-						     insertpoint + 1,
-						     lastpitch, word);
+						     wordphonemes, lastpitch - 8, insertpoint + 1, lastpitch, word);
 					}
 
 				    }
 				    else	//plain inflection
-					printf
-					    (" .byte %s ; %s (dictionary)\n",
-					     wordphonemes, word);
+					printf ("  .byte %s ; %s (dictionary)\n", wordphonemes, word);
 				    break;
 				}
 			    }
@@ -6678,9 +6348,7 @@ void speechdata (char **statement)
 				t = s - 1;	//advance to the end of our word
 				continue;
 			    }
-			    prwarn
-				("the word '%s' isn't in the speech dictionary",
-				 word);
+			    prwarn ("the word '%s' isn't in the speech dictionary", word);
 			}
 			printphonemes (word, inflection, lastpitch);
 			if (inflection == 0)
@@ -6701,7 +6369,7 @@ void speechdata (char **statement)
 	}
 
     }
-    printf (" .byte 255 ; end of avox data\n");
+    printf ("  .byte 255 ; end of avox data\n");
     printf (".skip%s\n", statement[0]);
 }
 
@@ -6728,15 +6396,12 @@ void printphonemes (char *word, int inflection, int lastpitch)
     // a crude phonetic breakdown of the word.
     int i;
 
-    printf (" .byte ");
+    printf ("  .byte ");
     for (i = 0; word[i] != 0; i++)
     {
-	if ((i > 0)
-	    && ((strlen (word) < 4) || (word[i] != 'E')
-		|| (word[i + 1] != 0)))
+	if ((i > 0) && ((strlen (word) < 4) || (word[i] != 'E') || (word[i + 1] != 0)))
 	    printf (",");
-	if (((strlen (word) > 3) && (i == (strlen (word) - 3)))
-	    || ((strlen (word) < 4) && (i == 0)))
+	if (((strlen (word) > 3) && (i == (strlen (word) - 3))) || ((strlen (word) < 4) && (i == 0)))
 	{
 	    if (inflection == 1)	//question
 		printf (" 22,%d, ", lastpitch + 16);
@@ -6982,9 +6647,7 @@ void printphonemes (char *word, int inflection, int lastpitch)
 		printf ("164");	//OWWW
 		break;
 	    case 'W':
-		if ((i > 0)
-		    && ((word[i - 1] == 'C') || (word[i - 1] == 'H')
-			|| (word[i - 1] == 'N')))
+		if ((i > 0) && ((word[i - 1] == 'C') || (word[i - 1] == 'H') || (word[i - 1] == 'N')))
 		    printf ("163");	//AYWW
 		else
 		    printf ("164");	//OWWW
@@ -7193,8 +6856,7 @@ void alphachars (char **statement)
     else if (strncmp (statement[2], "HISCORE", 7) == 0)
     {
 	memset (charactersetchars, 0, 257);
-	strcpy (charactersetchars,
-		"abcdefghijklmnopqrstuvwxyz:.- \"<#0123456789,C?");
+	strcpy (charactersetchars, "abcdefghijklmnopqrstuvwxyz:.- \"<#0123456789,C?");
     }
     else if (statement[2][0] == '\'')
     {
@@ -7259,7 +6921,7 @@ void alphadata (char **statement)
 
     if (!thisdatabankset)
 	if (!(optimization & 4))
-	    printf ("    JMP .skip%s\n", statement[0]);
+	    printf ("  jmp .skip%s\n", statement[0]);
     // if optimization level >=4 then data cannot be placed inline with code!
 
     if (!thisdatabankset)
@@ -7270,8 +6932,7 @@ void alphadata (char **statement)
     while (1)
     {
 	if (((!fgets (data, 200, stdin))
-	     || ((data[0] < (unsigned char) 0x3A)
-		 && (data[0] > (unsigned char) 0x2F))) && (data[0] != 'e'))
+	     || ((data[0] < (unsigned char) 0x3A) && (data[0] > (unsigned char) 0x2F))) && (data[0] != 'e'))
 	{
 	    prerror ("missing \"end\" keyword at end of alphadata");
 	    exit (1);
@@ -7282,8 +6943,7 @@ void alphadata (char **statement)
 
 	alphachr = strchr (data, '\'');
 	alphaend = strrchr (data, '\'');
-	if ((alphaend == NULL) || (alphachr == alphaend)
-	    || (alphachr == (alphaend - 1)))
+	if ((alphaend == NULL) || (alphachr == alphaend) || (alphachr == (alphaend - 1)))
 	{
 	    prerror ("malformed alphadata line");
 	    exit (1);
@@ -7295,19 +6955,16 @@ void alphadata (char **statement)
 	    charoffset = lookupcharacter (*alphachr);
 	    if (charoffset < 0)
 	    {
-		prerror
-		    ("alphadata character '%c' is missing from alphachars",
-		     *alphachr);
+		prerror ("alphadata character '%c' is missing from alphachars", *alphachr);
 	    }
-	    if ((doublewide == 1)
-		&& (strncmp (statement[4], "singlewide", 10) != 0))
+	    if ((doublewide == 1) && (strncmp (statement[4], "singlewide", 10) != 0))
 		charoffset = charoffset * 2;
 	    if (strncmp (statement[4], "extrawide", 9) == 0)
 		charoffset = charoffset * 2;
 
 	    if (!thisdatabankset)
 	    {
-		printf (" .byte (<%s + $%02x)", statement[3], charoffset);
+		printf ("  .byte (<%s + $%02x)", statement[3], charoffset);
 		if (strncmp (statement[4], "extrawide", 9) == 0)
 		    printf (", (<%s + $%02x)", statement[3], charoffset + 1);
 		if (alphachr[1] != '\0')
@@ -7315,10 +6972,9 @@ void alphadata (char **statement)
 	    }
 	    else
 	    {
-		gfxprintf (" .byte (<%s + $%02x)", statement[3], charoffset);
+		gfxprintf ("  .byte (<%s + $%02x)", statement[3], charoffset);
 		if (strncmp (statement[4], "extrawide", 9) == 0)
-		    gfxprintf (", (<%s + $%02x)", statement[3],
-			       charoffset + 1);
+		    gfxprintf (", (<%s + $%02x)", statement[3], charoffset + 1);
 		if (alphachr[1] != '\0')
 		    gfxprintf ("\n");
 	    }
@@ -7386,38 +7042,36 @@ void ongoto (char **statement)
     if (!strncmp (statement[3], "gosub\0", 5))
     {
 	assertminimumargs (statement, "on...gosub", 3);
-	printf ("	lda #>(ongosub%d-1)\n", ongosub);
-	printf ("	PHA\n");
-	printf ("	lda #<(ongosub%d-1)\n", ongosub);
-	printf ("	PHA\n");
+	printf ("  lda #>(ongosub%d-1)\n", ongosub);
+	printf ("  pha\n");
+	printf ("  lda #<(ongosub%d-1)\n", ongosub);
+	printf ("  pha\n");
     }
     else
 	assertminimumargs (statement, "on...goto", 3);
     if (strcmp (statement[2], Areg))
-	printf ("	LDX %s\n", statement[2]);
-    printf ("	LDA .%sjumptablehi,x\n", statement[0]);
-    printf ("	PHA\n");
-    printf ("	LDA .%sjumptablelo,x\n", statement[0]);
-    printf ("	PHA\n");
-    printf ("	RTS\n");
+	printf ("  ldx %s\n", statement[2]);
+    printf ("  lda .%sjumptablehi,x\n", statement[0]);
+    printf ("  pha\n");
+    printf ("  lda .%sjumptablelo,x\n", statement[0]);
+    printf ("  pha\n");
+    printf ("  rts\n");
     printf (".%sjumptablehi\n", statement[0]);
     while ((statement[i][0] != ':') && (statement[i][0] != '\0'))
     {
 	for (k = 0; k < 200; ++k)
-	    if ((statement[i][k] == (unsigned char) 0x0A)
-		|| (statement[i][k] == (unsigned char) 0x0D))
+	    if ((statement[i][k] == (unsigned char) 0x0A) || (statement[i][k] == (unsigned char) 0x0D))
 		statement[i][k] = '\0';
-	printf ("	.byte >(.%s-1)\n", statement[i++]);
+	printf ("  .byte >(.%s-1)\n", statement[i++]);
     }
     printf (".%sjumptablelo\n", statement[0]);
     i = 4;
     while ((statement[i][0] != ':') && (statement[i][0] != '\0'))
     {
 	for (k = 0; k < 200; ++k)
-	    if ((statement[i][k] == (unsigned char) 0x0A)
-		|| (statement[i][k] == (unsigned char) 0x0D))
+	    if ((statement[i][k] == (unsigned char) 0x0A) || (statement[i][k] == (unsigned char) 0x0D))
 		statement[i][k] = '\0';
-	printf ("	.byte <(.%s-1)\n", statement[i++]);
+	printf ("  .byte <(.%s-1)\n", statement[i++]);
     }
     if (!strncmp (statement[3], "gosub\0", 5))
 	printf ("ongosub%d\n", ongosub++);
@@ -7428,12 +7082,12 @@ void dofor (char **statement)
     assertminimumargs (statement, "for", 5);
     if (strcmp (statement[4], Areg))
     {
-	printf ("	LDA ");
+	printf ("  lda ");
 	printimmed (statement[4]);
 	printf ("%s\n", statement[4]);
     }
 
-    printf ("	STA %s\n", statement[2]);
+    printf ("  sta %s\n", statement[2]);
 
     forlabel[numfors][0] = '\0';
     sprintf (forlabel[numfors], "%sfor%s", statement[0], statement[2]);
@@ -7475,21 +7129,20 @@ void next (char **statement)
     numfors--;
     if (!strncmp (forstep[numfors], "1\0", 2))	// step 1
     {
-	printf ("	LDA %s\n", forvar[numfors]);
-	printf ("	CMP ");
+	printf ("  lda %s\n", forvar[numfors]);
+	printf ("  cmp ");
 	printimmed (forend[numfors]);
 	printf ("%s\n", forend[numfors]);
-	printf ("	INC %s\n", forvar[numfors]);
+	printf ("  inc %s\n", forvar[numfors]);
 	bcc (forlabel[numfors]);
     }
-    else if ((!strncmp (forstep[numfors], "-1\0", 3))
-	     || (!strncmp (forstep[numfors], "255\0", 4)))
+    else if ((!strncmp (forstep[numfors], "-1\0", 3)) || (!strncmp (forstep[numfors], "255\0", 4)))
     {				// step -1
-	printf ("	DEC %s\n", forvar[numfors]);
+	printf ("  dec %s\n", forvar[numfors]);
 	if (strncmp (forend[numfors], "1\0", 2))
 	{
-	    printf ("	LDA %s\n", forvar[numfors]);
-	    printf ("	CMP ");
+	    printf ("  lda %s\n", forvar[numfors]);
+	    printf ("  cmp ");
 	    if (!strncmp (forend[numfors], "0\0", 2))
 	    {
 		// the special case of 0 as end, since we can't check to see if it was smaller than 0
@@ -7515,9 +7168,9 @@ void next (char **statement)
 	// if the step and end are known.  If the step and end are not known (that is,
 	// either is a variable) then much more complex code must be generated.
 
-	printf ("	LDA %s\n", forvar[numfors]);
-	printf ("	CLC\n");
-	printf ("	ADC ");
+	printf ("  lda %s\n", forvar[numfors]);
+	printf ("  clc\n");
+	printf ("  adc ");
 	immed = printimmed (forstep[numfors]);
 	printf ("%s\n", forstep[numfors]);
 
@@ -7525,8 +7178,7 @@ void next (char **statement)
 	{
 	    if (strictatoi (forstep[numfors]) & 128)	// step is negative
 	    {
-		if ((256 - (strictatoi (forstep[numfors]) & 255)) >=
-		    strictatoi (forend[numfors]))
+		if ((256 - (strictatoi (forstep[numfors]) & 255)) >= strictatoi (forend[numfors]))
 		{		// if we are in danger of going < 0...we will have carry clear after ADC
 		    failsafe = 1;
 		    sprintf (failsafelabel, "%s_failsafe", forlabel[numfors]);
@@ -7535,8 +7187,7 @@ void next (char **statement)
 	    }
 	    else
 	    {			// step is positive
-		if ((strictatoi (forstep[numfors]) +
-		     strictatoi (forend[numfors])) > 255)
+		if ((strictatoi (forstep[numfors]) + strictatoi (forend[numfors])) > 255)
 		{		// if we are in danger of going > 255...we will have carry set after ADC
 		    failsafe = 1;
 		    sprintf (failsafelabel, "%s_failsafe", forlabel[numfors]);
@@ -7545,9 +7196,8 @@ void next (char **statement)
 	    }
 
 	}
-	printf ("	STA %s\n", forvar[numfors]);
-
-	printf ("	CMP ");
+	printf ("  sta %s\n", forvar[numfors]);
+	printf ("  cmp ");
 	immedend = printimmed (forend[numfors]);
 	// add 1 to immediate compare for increasing loops
 	if (immedend && !(strictatoi (forstep[numfors]) & 128))
@@ -7560,10 +7210,10 @@ void next (char **statement)
 	// programmer's job to make sure the end value doesn't overflow
 	if (!immed)
 	{
-	    printf ("	LDX %s\n", forstep[numfors]);
-	    printf ("	BMI .%sbcs\n", statement[0]);
+	    printf ("  ldx %s\n", forstep[numfors]);
+	    printf ("  bmi .%sbcs\n", statement[0]);
 	    bcc (forlabel[numfors]);
-	    printf ("	CLC\n");
+	    printf ("  clc\n");
 	    printf (".%sbcs\n", statement[0]);
 	    bcs (forlabel[numfors]);
 	}
@@ -7642,11 +7292,9 @@ void doreturn (char **statement)
     // 1=return thisbank
     // 2=return otherbank
 
-    if (!strncmp (statement[2], "thisbank\0", 8)
-	|| !strncmp (statement[3], "thisbank\0", 8))
+    if (!strncmp (statement[2], "thisbank\0", 8) || !strncmp (statement[3], "thisbank\0", 8))
 	bankedreturn = 1;
-    else if (!strncmp (statement[2], "otherbank\0", 9)
-	     || !strncmp (statement[3], "otherbank\0", 9))
+    else if (!strncmp (statement[2], "otherbank\0", 9) || !strncmp (statement[3], "otherbank\0", 9))
 	bankedreturn = 2;
 
     // several types of returns:
@@ -7663,8 +7311,7 @@ void doreturn (char **statement)
 
     if (statement[2][0] && (statement[2][0] != ' ')
 	&& (statement[2][0] != ':')
-	&& (strncmp (statement[2], "thisbank\0", 8))
-	&& (strncmp (statement[2], "otherbank\0", 9)))
+	&& (strncmp (statement[2], "thisbank\0", 8)) && (strncmp (statement[2], "otherbank\0", 9)))
     {
 	index |= getindex (statement[2], &getindex0[0], &indirectflag);
 	if (indirectflag != 0)
@@ -7674,20 +7321,20 @@ void doreturn (char **statement)
 	    loadindex (&getindex0[0], indirectflag);
 
 	if (!bankedreturn)
-	    printf ("    LDY ");
+	    printf ("  ldy ");
 	else
-	    printf ("       LDA ");
+	    printf ("  lda ");
 	printindex (statement[2], index & 1, indirectflag);
     }
 
     if (bankedreturn == 1)
     {
-	printf ("    RTS\n");
+	printf ("  rts\n");
 	return;
     }
     if (bankedreturn == 2)
     {
-	printf ("    JMP BS_return\n");
+	printf ("  jmp BS_return\n");
 	return;
     }
 
@@ -7701,20 +7348,19 @@ void doreturn (char **statement)
 	printf ("  beq bankswitchret%d\n", ++templabel);	//if it's 0, it's not an address
 	if (statement[2][0] && (statement[2][0] != ' '))
 	    printf ("  tya\n");
-	printf ("  RTS\n");
+	printf ("  rts\n");
 
 	// if it's non-0 it must be a plain address
 	printf ("bankswitchret%d\n", templabel);
 	if (statement[2][0] && (statement[2][0] != ' '))
 	    printf ("  tya\n");
-	printf ("  JMP BS_return\n");
+	printf ("  jmp BS_return\n");
 	return;
     }
 
-    if (statement[2][0] && (statement[2][0] != ' ')
-	&& (statement[2][0] != ':'))
+    if (statement[2][0] && (statement[2][0] != ' ') && (statement[2][0] != ':'))
 	printf ("  tya\n");
-    printf ("  RTS\n");
+    printf ("  rts\n");
 }
 
 void doasm ()
@@ -7723,8 +7369,7 @@ void doasm ()
     while (1)
     {
 	if (((!fgets (data, 200, stdin))
-	     || ((data[0] < (unsigned char) 0x3A)
-		 && (data[0] > (unsigned char) 0x2F))) && (data[0] != 'e'))
+	     || ((data[0] < (unsigned char) 0x3A) && (data[0] > (unsigned char) 0x2F))) && (data[0] != 'e'))
 	{
 	    prerror ("missing \"end\" keyword at end of inline asm");
 	    exit (1);
@@ -7746,8 +7391,7 @@ void domacro (char **statement)
     while ((statement[i][0] != ':') && (statement[i][0] != '\0'))
     {
 	for (k = 0; k < 200; ++k)
-	    if ((statement[i][k] == (unsigned char) 0x0A)
-		|| (statement[i][k] == (unsigned char) 0x0D))
+	    if ((statement[i][k] == (unsigned char) 0x0A) || (statement[i][k] == (unsigned char) 0x0D))
 		statement[i][k] = '\0';
 	if (!strncmp (statement[i], "const\0", 5))
 	    strcpy (constants[numconstants++], statement[i + 1]);	// record to const queue
@@ -7766,8 +7410,7 @@ void callmacro (char **statement)
     while ((statement[i][0] != ':') && (statement[i][0] != '\0'))
     {
 	for (k = 0; k < 200; ++k)
-	    if ((statement[i][k] == (unsigned char) 0x0A)
-		|| (statement[i][k] == (unsigned char) 0x0D))
+	    if ((statement[i][k] == (unsigned char) 0x0A) || (statement[i][k] == (unsigned char) 0x0D))
 		statement[i][k] = '\0';
 	if (isimmed (statement[i]))
 	    printf (" #%s,", statement[i]);	// we're assuming the assembler doesn't mind extra commas!
@@ -7811,8 +7454,7 @@ void dosizeof (char **statement)
     removeCR (statement[2]);
     if ((statement[2] == 0) || (statement[2][0] == 0))
 	prerror ("missing argument in sizeof statement");
-    printf (" echo \" \",\"SIZEOF(%s):\",[* - %s]d,[* - .%s]d,\"bytes\"\n",
-	    statement[2], statement[2], statement[2]);
+    printf ("  echo \" \",\"SIZEOF(%s):\",[* - %s]d,[* - .%s]d,\"bytes\"\n", statement[2], statement[2], statement[2]);
 }
 
 void ifconst (char **statement)
@@ -7842,7 +7484,7 @@ void incbin (char **statement)
     removeCR (statement[2]);
     if ((statement[2] == 0) || (statement[2][0] == 0))
 	prerror ("missing argument in incbin statement");
-    printf (" incbin %s\n", statement[2]);
+    printf ("  incbin %s\n", statement[2]);
 }
 
 
@@ -7918,8 +7560,7 @@ void doif (char **statement)
 	    compressdata (statement, 2, 1);	//remove first parenthesis
 	    for (i = 2; i < 199; ++i)
 		if ((!strncmp (statement[i], "then\0", 4)) ||
-		    (!strncmp (statement[i], "&&\0", 2))
-		    || (!strncmp (statement[i], "||\0", 2)))
+		    (!strncmp (statement[i], "&&\0", 2)) || (!strncmp (statement[i], "||\0", 2)))
 		    break;
 	    if (i != 199)
 	    {
@@ -7942,8 +7583,7 @@ void doif (char **statement)
 	|| (!strncmp (statement[2], "snes1\0", 5))
 	|| (!strncmp (statement[2], "snes#\0", 5))
 	|| (!strncmp (statement[2], "softswitches\0", 12))
-	|| (!strncmp (statement[2], "softselect\0", 10))
-	|| (!strncmp (statement[2], "softreset\0", 9)))
+	|| (!strncmp (statement[2], "softselect\0", 10)) || (!strncmp (statement[2], "softreset\0", 9)))
     {
 	i = switchjoy (statement[2]);
 	if (!islabel (statement))
@@ -8007,51 +7647,51 @@ void doif (char **statement)
 	    if (!i)
 	    {
 		if (not)
-		    printf ("	BEQ ");
+		    printf ("  beq ");
 		else
-		    printf ("	BNE ");
+		    printf ("  bne ");
 	    }
 	    if (i == 1)
 	    {
 		if (not)
-		    printf ("	BVC ");
+		    printf ("  bvc ");
 		else
-		    printf ("	BVS ");
+		    printf ("  bvs ");
 	    }
 	    if (i == 2)
 	    {
 		if (not)
-		    printf ("	BPL ");
+		    printf ("  bpl ");
 		else
-		    printf ("	BMI ");
+		    printf ("  bmi ");
 	    }
 	    else if (i == 3)	// bmi/bpl
 	    {
 		if (not)
-		    printf ("	BMI ");
+		    printf ("  bmi ");
 		else
-		    printf ("	BPL ");
+		    printf ("  bpl ");
 	    }
 	    else if (i == 4)	// bne/beq
 	    {
 		if (not)
-		    printf ("	BNE ");
+		    printf ("  bne ");
 		else
-		    printf ("	BEQ ");
+		    printf ("  beq ");
 	    }
 	    else if (i == 5)
 	    {
 		if (not)
-		    printf ("	BVS ");
+		    printf ("  bvs ");
 		else
-		    printf ("	BVC ");
+		    printf ("  bvc ");
 	    }
 	    else if (i == 6)	// beq/bne
 	    {
 		if (not)
-		    printf ("	BEQ ");
+		    printf ("  beq ");
 		else
-		    printf ("	BNE ");
+		    printf ("  bne ");
 	    }
 
 	    printf (".skip%s\n", statement[0]);
@@ -8095,16 +7735,16 @@ void doif (char **statement)
 	    if (not)
 	    {
 		if (bit == 7)
-		    printf ("	BMI ");
+		    printf ("  bmi ");
 		else
-		    printf ("	BVS ");
+		    printf ("  bvs ");
 	    }
 	    else
 	    {
 		if (bit == 7)
-		    printf ("	BPL ");
+		    printf ("  bpl ");
 		else
-		    printf ("	BVC ");
+		    printf ("  bvc ");
 	    }
 
 	    printf (".skip%s\n", statement[0]);
@@ -8144,9 +7784,9 @@ void doif (char **statement)
 	else			// then statement
 	{
 	    if (not)
-		printf (" BCS ");
+		printf ("  bcs ");
 	    else
-		printf ("   BCC ");
+		printf ("  bcc ");
 	    printf (".skip%s\n", statement[0]);
 	    // separate statement
 	    for (i = 20; i < 200; ++i)
@@ -8179,9 +7819,9 @@ void doif (char **statement)
 	else			// then statement
 	{
 	    if (not)
-		printf (" BCS ");
+		printf ("  bcs ");
 	    else
-		printf ("   BCC ");
+		printf ("  bcc ");
 	    printf (".skip%s\n", statement[0]);
 	    // separate statement
 	    for (i = 3; i < 200; ++i)
@@ -8221,7 +7861,7 @@ void doif (char **statement)
 	}
 	if ((bit == 7) || (bit == 6))	// if bit 6 or 7, we can use BIT and save 2 bytes
 	{
-	    printf ("	BIT ");
+	    printf ("  bit ");
 	    for (i = 0; i < 200; ++i)
 	    {
 		if (statement[2][i] == '{')
@@ -8253,16 +7893,16 @@ void doif (char **statement)
 		if (not)
 		{
 		    if (bit == 7)
-			printf ("	BMI ");
+			printf ("  bmi ");
 		    else
-			printf ("	BVS ");
+			printf ("  bvs ");
 		}
 		else
 		{
 		    if (bit == 7)
-			printf ("	BPL ");
+			printf ("  bpl ");
 		    else
-			printf ("	BVC ");
+			printf ("  bvc ");
 		}
 
 		printf (".skip%s\n", statement[0]);
@@ -8285,7 +7925,7 @@ void doif (char **statement)
 	else
 	{
 	    Aregmatch = 0;
-	    printf ("	LDA ");
+	    printf ("  lda ");
 	    for (i = 0; i < 200; ++i)
 	    {
 		if (statement[2][i] == '{')
@@ -8294,9 +7934,9 @@ void doif (char **statement)
 	    }
 	    printf ("\n");
 	    if (!bit)		// if bit 0, we can use LSR and save a byte
-		printf ("	LSR\n");
+		printf ("  lsr\n");
 	    else
-		printf ("	AND #%d\n", 1 << bit);	//(int)pow(2,bit));
+		printf ("  and #%d\n", 1 << bit);	//(int)pow(2,bit));
 	    if (!islabel (statement))
 	    {
 		if (not)
@@ -8321,16 +7961,16 @@ void doif (char **statement)
 		if (not)
 		{
 		    if (!bit)
-			printf ("	BCS ");
+			printf ("  bcs ");
 		    else
-			printf ("	BNE ");
+			printf ("  bne ");
 		}
 		else
 		{
 		    if (!bit)
-			printf ("	BCC ");
+			printf ("  bcc ");
 		    else
-			printf ("	BEQ ");
+			printf ("  beq ");
 		}
 
 		printf (".skip%s\n", statement[0]);
@@ -8350,8 +7990,6 @@ void doif (char **statement)
 		return;
 	    }
 
-
-
 	}
 
     }
@@ -8364,8 +8002,7 @@ void doif (char **statement)
 
     for (i = 3; i < 200; ++i)
 	if ((!strncmp (statement[i], "then\0", 4)) ||
-	    (!strncmp (statement[i], "&&\0", 2))
-	    || (!strncmp (statement[i], "||\0", 2)))
+	    (!strncmp (statement[i], "&&\0", 2)) || (!strncmp (statement[i], "||\0", 2)))
 	    break;
 
     j = 0;
@@ -8373,8 +8010,7 @@ void doif (char **statement)
     {
 	if (statement[k][0] == '&' && statement[k][1] == '\0')
 	    j = k;
-	if ((statement[k][0] == '<') || (statement[k][0] == '>')
-	    || (statement[k][0] == '='))
+	if ((statement[k][0] == '<') || (statement[k][0] == '>') || (statement[k][0] == '='))
 	    break;
     }
     if ((k == i) && j)
@@ -8402,9 +8038,9 @@ void doif (char **statement)
 	{			// first, take negative of condition and branch around statement
 	    j = i;
 	    if (not)
-		printf ("	BNE ");
+		printf ("  bne ");
 	    else
-		printf ("	BEQ ");
+		printf ("  beq ");
 	}
 	printf (".skip%s\n", statement[0]);
 	// separate statement
@@ -8476,8 +8112,7 @@ void doif (char **statement)
 	// <, >=, &, = do not swap
 	// > or <= swap
 
-	if (push1 == 1 && push2 == 1 && (strncmp (statement[k], ">\0", 2))
-	    && (strncmp (statement[k], "<=\0", 2)))
+	if (push1 == 1 && push2 == 1 && (strncmp (statement[k], ">\0", 2)) && (strncmp (statement[k], "<=\0", 2)))
 	{
 	    // Assign to Areg and push
 	    strcpy (cstatement[2], "Areg\0");
@@ -8518,7 +8153,7 @@ void doif (char **statement)
 		}
 	    }
 	    let (cstatement);
-	    printf ("  PHA\n");
+	    printf ("  pha\n");
 
 	    // first statement second
 	    strcpy (cstatement[2], "Areg\0");
@@ -8531,7 +8166,7 @@ void doif (char **statement)
 		}
 	    }
 	    let (cstatement);
-	    printf ("  PHA\n");
+	    printf ("  pha\n");
 
 	    // now change operator
 	    // > or <= swap
@@ -8541,8 +8176,7 @@ void doif (char **statement)
 		strcpy (statement[k], ">=\0");
 	    situation = 2;
 	}
-	else if (push1 == 1 && (strncmp (statement[k], ">\0", 2))
-		 && (strncmp (statement[k], "<=\0", 2)))
+	else if (push1 == 1 && (strncmp (statement[k], ">\0", 2)) && (strncmp (statement[k], "<=\0", 2)))
 	{
 	    // first statement only, no swap
 	    strcpy (cstatement[2], "Areg\0");
@@ -8572,7 +8206,7 @@ void doif (char **statement)
 		}
 	    }
 	    let (cstatement);
-	    printf ("  PHA\n");
+	    printf ("  pha\n");
 
 	    // now change operator
 	    // > or <= swap
@@ -8588,8 +8222,7 @@ void doif (char **statement)
 	    situation = 4;
 
 	}
-	else if (push2 == 1 && (strncmp (statement[k], ">\0", 2))
-		 && (strncmp (statement[k], "<=\0", 2)))
+	else if (push2 == 1 && (strncmp (statement[k], ">\0", 2)) && (strncmp (statement[k], "<=\0", 2)))
 	{
 	    // second statement only, no swap:
 	    strcpy (cstatement[2], "Areg\0");
@@ -8602,7 +8235,7 @@ void doif (char **statement)
 		}
 	    }
 	    let (cstatement);
-	    printf ("  PHA\n");
+	    printf ("  pha\n");
 	    situation = 5;
 	}
 	else if (push2 == 1)
@@ -8638,11 +8271,11 @@ void doif (char **statement)
 	}
 	if (situation != 6 && situation != 3)
 	{
-	    printf ("  TSX\n");	//index to stack
+	    printf ("  tsx\n");	//index to stack
 	    if (push1)
-		printf ("  PLA\n");
+		printf ("  pla\n");
 	    if (push2)
-		printf ("  PLA\n");
+		printf ("  pla\n");
 	}
 	if (push1 && push2)
 	    strcpy (cstatement[2], " $102[TSX]\0");
@@ -8680,8 +8313,7 @@ void doif (char **statement)
 	{
 	    //FIXME - kludge to fix spurious LDA...
 	    if (situation != 4 && situation != 5)
-		printf
-		    ("; todo: this LDA is spurious and should be prevented ->");
+		printf ("; todo: this LDA is spurious and should be prevented ->");
 	    keywords (cstatement);	// statement still has booleans - attempt to reanalyze
 	}
 	else
@@ -8697,7 +8329,7 @@ void doif (char **statement)
 	index |= getindex (statement[4], &getindex1[0], &indirectflag1) << 1;
 
     /*
-       REVENG - bug alert! seems to be introducing spurious LDA 1,x when two or
+       bug alert! seems to be introducing spurious LDA 1,x when two or
        more complex statements are used.
      */
 
@@ -8705,7 +8337,7 @@ void doif (char **statement)
     {
 	if (index & 1)
 	    loadindex (&getindex0[0], indirectflag0);
-	printf ("	LDA ");
+	printf ("  lda ");
 	printindex (statement[2], index & 1, indirectflag0);
 	strcpy (Areg, Aregcopy);
     }
@@ -8731,7 +8363,7 @@ void doif (char **statement)
 	    }
 	}
 	else
-	    printf ("	CMP ");
+	    printf ("  cmp ");
 	printindex (statement[4], index & 2, indirectflag1);
     }
 
@@ -8758,22 +8390,22 @@ void doif (char **statement)
     else			// then statement
     {				// first, take negative of condition and branch around statement
 	if (statement[3][0] == '=')
-	    printf ("     BNE ");
+	    printf ("  bne ");
 	if (!strcmp (statement[3], "<>"))
-	    printf ("     BEQ ");
+	    printf ("  beq ");
 	else if (statement[3][0] == '<')
-	    printf ("     BCS ");
+	    printf ("  bcs ");
 	if (statement[3][0] == '>')
-	    printf ("     BCC ");
+	    printf ("  bcc ");
 	j = 5;
 
 	if (!strncmp (statement[3], "then\0", 4))
 	{
 	    j = 3;
 	    if (not)
-		printf ("	BNE ");
+		printf ("  bne ");
 	    else
-		printf ("	BEQ ");
+		printf ("  beq ");
 	}
 	printf (".skip%s\n", statement[0]);
 	// separate statement
@@ -8802,11 +8434,7 @@ void boxcollision (char **statement)
     // boxcollision ( X1 , Y1 , W1 , H1 ,  X2  , Y2 ,  W2 ,  H2 )
 
     int t;
-
-
     invalidate_Areg ();
-
-
 
     for (t = 4; t < 19; t = t + 2)
     {
@@ -8816,8 +8444,7 @@ void boxcollision (char **statement)
     }
 
     // check if widths and heights are all constants. if so, use quick box collision
-    if (isimmed (statement[8]) && isimmed (statement[10])
-	&& isimmed (statement[16]) && isimmed (statement[18]))
+    if (isimmed (statement[8]) && isimmed (statement[10]) && isimmed (statement[16]) && isimmed (statement[18]))
     {
 	printf ("  QBOXCOLLISIONCHECK %s,%s,%s,%s,%s,%s,%s,%s\n",
 		statement[4], statement[6], statement[8], statement[10],
@@ -8912,8 +8539,7 @@ void boxcollision (char **statement)
 	//collision wrapping is selected. we need to adjust the x and y variables...
 	printf ("\n");
 
-	printf
-	    ("  clc ; one clc only. If we overflow we're screwed anyway.\n");
+	printf ("  clc ; one clc only. If we overflow we're screwed anyway.\n");
 
 	// ### boxh1
 	if (isimmed (statement[8]))
@@ -9002,8 +8628,7 @@ int orderofoperations (char op1, char op2)
 	return 0;
     else if (op2 == ')')
 	return 1;
-    else if (((op1 == '^') || (op1 == '|') || (op1 == '&'))
-	     && ((op2 == '^') || (op2 == '|') || (op2 == '&')))
+    else if (((op1 == '^') || (op1 == '|') || (op1 == '&')) && ((op2 == '^') || (op2 == '|') || (op2 == '&')))
 	return 0;
     else if ((op1 == '*') || (op1 == '/'))
 	return 1;
@@ -9020,8 +8645,7 @@ int orderofoperations (char op1, char op2)
 int isoperator (char op)
 {
     if (!((op == '+') || (op == '-') || (op == '/') ||
-	  (op == '*') || (op == '&') || (op == '|') || (op == '^')
-	  || (op == ')') || (op == '(')))
+	  (op == '*') || (op == '&') || (op == '|') || (op == '^') || (op == ')') || (op == '(')))
 	return 0;
     else
 	return 1;
@@ -9035,24 +8659,24 @@ void displayoperation (char *opcode, char *operand, int index)
 	if (opcode[0] == '-')
 	{
 	    // operands swapped
-	    printf ("  TAY\n");
-	    printf ("  PLA\n");
-	    printf ("  STY tempmath\n");
-	    printf ("  SEC\n");
-	    printf ("  SBC tempmath\n");
+	    printf ("  tay\n");
+	    printf ("  pla\n");
+	    printf ("  sty tempmath\n");
+	    printf ("  sec\n");
+	    printf ("  sbc tempmath\n");
 	}
 	else if (opcode[0] == '/')
 	{
 	    // operands swapped
-	    printf ("  TAY\n");
-	    printf ("  PLA\n");
+	    printf ("  tay\n");
+	    printf ("  pla\n");
 	}
 	else
 	{
-	    printf ("  TSX\n");
-	    printf ("  INX\n");
+	    printf ("  tsx\n");
+	    printf ("  inx\n");
 	    printf ("  %s $100,x\n", opcode + 1);
-	    printf ("  TXS\n");
+	    printf ("  txs\n");
 	}
     }
     else
@@ -9062,12 +8686,12 @@ void displayoperation (char *opcode, char *operand, int index)
     }
 }
 
-void dec (char **cstatement)	//REVENG - "dec" is variation of "let" that uses decimal mode
+void dec (char **cstatement)	// "dec" is variation of "let" that uses decimal mode
 {
     decimal = 1;
-    printf ("	SED\n");
+    printf ("  sed\n");
     let (cstatement);
-    printf ("	CLD\n");
+    printf ("  cld\n");
     decimal = 0;
 }
 
@@ -9150,8 +8774,7 @@ void let (char **cstatement)
 	}
 
 	// this converts expression to rpn
-	for (k = 4; (statement[k][0] != '\0') && (statement[k][0] != ':');
-	     k++)
+	for (k = 4; (statement[k][0] != '\0') && (statement[k][0] != ':'); k++)
 	{
 	    // ignore CR/LF
 	    if (statement[k][0] == (unsigned char) 0x0A)
@@ -9166,10 +8789,7 @@ void let (char **cstatement)
 	    }
 	    else
 	    {
-		while ((sp)
-		       &&
-		       (orderofoperations
-			(rpn_stack[sp - 1][0], tempstatement1[0])))
+		while ((sp) && (orderofoperations (rpn_stack[sp - 1][0], tempstatement1[0])))
 		{
 		    strcpy (tempstatement2, rpn_stack[sp - 1]);
 		    sp--;
@@ -9226,7 +8846,7 @@ void let (char **cstatement)
 	    {
 		// val,val,operator: stackpush, then Areg=val1 (op) val2
 		if (sp)
-		    printf ("	PHA\n");
+		    printf ("  pha\n");
 		strcpy (atomic_statement[2], "Areg");
 		strcpy (atomic_statement[3], "=");
 		strcpy (atomic_statement[4], rpn_statement[sp++]);
@@ -9236,15 +8856,14 @@ void let (char **cstatement)
 	    }
 	    else
 	    {
-		if ((rpn_statement[sp] == 0) || (rpn_statement[sp + 1] == 0)
-		    || (rpn_statement[sp + 2] == 0))
+		if ((rpn_statement[sp] == 0) || (rpn_statement[sp + 1] == 0) || (rpn_statement[sp + 2] == 0))
 		{
 		    // incomplete or unrecognized expression
 		    prerror ("cannot evaluate expression");
 		}
 		// val,val,val: stackpush, then load of next value
 		if (sp)
-		    printf ("	PHA\n");
+		    printf ("  pha\n");
 		strcpy (atomic_statement[2], "Areg");
 		strcpy (atomic_statement[3], "=");
 		strcpy (atomic_statement[4], rpn_statement[sp++]);
@@ -9311,7 +8930,7 @@ void let (char **cstatement)
 
 	if (statement[4][0] == '0')
 	{
-	    printf ("	LDA ");
+	    printf ("  lda ");
 	    for (i = 0; i < 200; ++i)
 	    {
 		if (statement[2][i] == '{')
@@ -9319,11 +8938,11 @@ void let (char **cstatement)
 		printf ("%c", statement[2][i]);
 	    }
 	    printf ("\n");
-	    printf ("	AND #%d\n", 255 ^ (1 << bit));	//(int)pow(2,bit));
+	    printf ("  and #%d\n", 255 ^ (1 << bit));	//(int)pow(2,bit));
 	}
 	else if (statement[4][0] == '1')
 	{
-	    printf ("	LDA ");
+	    printf ("  lda ");
 	    for (i = 0; i < 200; ++i)
 	    {
 		if (statement[2][i] == '{')
@@ -9331,40 +8950,38 @@ void let (char **cstatement)
 		printf ("%c", statement[2][i]);
 	    }
 	    printf ("\n");
-	    printf ("	ORA #%d\n", 1 << bit);	//(int)pow(2,bit));
+	    printf ("  ora #%d\n", 1 << bit);	//(int)pow(2,bit));
 	}
 	else if ((getbitvar = strtok (statement[4], "{")))
 	{			// assign one bit to another
 	    if (getbitvar[0] == '!')
-		printf ("	LDA %s\n", getbitvar + 1);
+		printf ("  lda %s\n", getbitvar + 1);
 	    else
-		printf ("	LDA %s\n", getbitvar);
-	    printf ("	AND #%d\n",
-		    (1 <<
-		     ((int) statement[4][strlen (getbitvar) + 1] - '0')));
-	    printf ("  PHP\n");
-	    printf ("	LDA ");
+		printf ("  lda %s\n", getbitvar);
+	    printf ("  and #%d\n", (1 << ((int) statement[4][strlen (getbitvar) + 1] - '0')));
+	    printf ("  php\n");
+	    printf ("  lda ");
 	    for (i = 0; i < 200; ++i)
 	    {
 		if (statement[2][i] == '{')
 		    break;
 		printf ("%c", statement[2][i]);
 	    }
-	    printf ("\n	AND #%d\n", 255 ^ (1 << bit));	//(int)pow(2,bit));
-	    printf ("  PLP\n");
+	    printf ("\n  and #%d\n", 255 ^ (1 << bit));	//(int)pow(2,bit));
+	    printf ("  plp\n");
 	    if (getbitvar[0] == '!')
-		printf ("	.byte $D0, $02\n");	//bad, bad way to do BEQ addr+5
+		printf ("  .byte $D0, $02\n");	//bad, bad way to do BEQ addr+5
 	    else
-		printf ("	.byte $F0, $02\n");	//bad, bad way to do BNE addr+5
+		printf ("  .byte $F0, $02\n");	//bad, bad way to do BNE addr+5
 
-	    printf ("	ORA #%d\n", 1 << bit);	//(int)pow(2,bit));
+	    printf ("  ora #%d\n", 1 << bit);	//(int)pow(2,bit));
 
 	}
 	else
 	{
 	    prerror ("can only assign 0, 1 or another bit to a bit");
 	}
-	printf ("	STA ");
+	printf ("  sta ");
 	for (i = 0; i < 200; ++i)
 	{
 	    if (statement[2][i] == '{')
@@ -9383,12 +9000,12 @@ void let (char **cstatement)
 	{
 	    if (statement[5][0] > (unsigned char) 0x39)	// perhaps include constants too?
 	    {
-		printf ("	LDA #0\n");
-		printf ("  SEC\n");
-		printf ("	SBC %s\n", statement[5]);
+		printf ("  lda #0\n");
+		printf ("  sec\n");
+		printf ("  sbc %s\n", statement[5]);
 	    }
 	    else
-		printf ("	LDA #%d\n", 256 - strictatoi (statement[5]));
+		printf ("  lda #%d\n", 256 - strictatoi (statement[5]));
 	}
 	else
 	{
@@ -9396,26 +9013,25 @@ void let (char **cstatement)
 	    {
 		if (statement[5][0] > (unsigned char) 0x39)	// perhaps include constants too?
 		{
-		    printf ("	LDA #0\n");
-		    printf ("  SEC\n");
-		    printf ("	SBC %s\n", statement[5]);
+		    printf ("  lda #0\n");
+		    printf ("  sec\n");
+		    printf ("  sbc %s\n", statement[5]);
 		}
 		else
-		    printf ("	LDA #%d\n",
-			    (int) ((16 - atof (statement[5])) * 16));
-		printf ("	STA %s\n", statement[2]);
+		    printf ("  lda #%d\n", (int) ((16 - atof (statement[5])) * 16));
+		printf ("  sta %s\n", statement[2]);
 		free (deallocstatement);
 		return;
 	    }
 	    if (fixpoint1 == 8)
 	    {
-		printf ("	LDX ");
+		printf ("  ldx ");
 		sprintf (statement[4], "%f", 256.0 - atof (statement[5]));
 		printfrac (statement[4]);
-		printf ("	STX ");
+		printf ("  stx ");
 		printfrac (statement[2]);
-		printf ("	LDA #%s\n", statement[4]);
-		printf ("	STA %s\n", statement[2]);
+		printf ("  lda #%s\n", statement[4]);
+		printf ("  sta %s\n", statement[2]);
 		free (deallocstatement);
 		return;
 	    }
@@ -9426,25 +9042,23 @@ void let (char **cstatement)
 	strcpy (Areg, "invalid");
 	if (optimization & 8)
 	{
-	    printf ("        lda rand\n");
-	    printf ("        lsr\n");
+	    printf ("  lda rand\n");
+	    printf ("  lsr\n");
 	    printf (" ifconst rand16\n");
-	    printf ("        rol rand16\n");
+	    printf ("  rol rand16\n");
 	    printf (" endif\n");
-	    printf ("        bcc *+4\n");
-	    printf ("        eor #$B4\n");
-	    printf ("        sta rand\n");
+	    printf ("  bcc *+4\n");
+	    printf ("  eor #$B4\n");
+	    printf ("  sta rand\n");
 	    printf (" ifconst rand16\n");
-	    printf ("        eor rand16\n");
+	    printf ("  eor rand16\n");
 	    printf (" endif\n");
 	}
 	else
 	    jsr ("randomize");
     }
     else if ((strncmp (statement[2], "score", 5) == 0)
-	     && (strlen (statement[2]) == 6) && ((isalpha (statement[2][5]))
-						 ||
-						 (isdigit (statement[2][5]))))
+	     && (strlen (statement[2]) == 6) && ((isalpha (statement[2][5])) || (isdigit (statement[2][5]))))
     {
 	char scorei;
 	scorei = statement[2][5];
@@ -9458,8 +9072,8 @@ void let (char **cstatement)
 	if (statement[5][0] == '+')
 	{
 	    removeCR (statement[6]);
-	    printf ("	SED\n");
-	    printf ("	CLC\n");
+	    printf ("  sed\n");
+	    printf ("  clc\n");
 	    for (i = 5; i >= 0; i--)
 	    {
 		if (statement[6][i] != '\0')
@@ -9470,39 +9084,39 @@ void let (char **cstatement)
 	    }
 	    if (score[0] | score[1])
 	    {
-		printf ("	LDA score%c+2\n", scorei);
+		printf ("  lda score%c+2\n", scorei);
 		if (statement[6][0] >= 'A')
 		{
-		    printf ("	ADC ");
+		    printf ("  adc ");
 		    printimmed (statement[6]);
 		    printf ("%s\n", statement[6]);
 		}
 		else
-		    printf ("	ADC #$%d%d\n", score[1], score[0]);
-		printf ("	STA score%c+2\n", scorei);
+		    printf ("  adc #$%d%d\n", score[1], score[0]);
+		printf ("  sta score%c+2\n", scorei);
 	    }
 	    if (score[0] | score[1] | score[2] | score[3])
 	    {
-		printf ("	LDA score%c+1\n", scorei);
+		printf ("  lda score%c+1\n", scorei);
 		if (score[0] > 9)
-		    printf ("	ADC #0\n");
+		    printf ("  adc #0\n");
 		else
-		    printf ("	ADC #$%d%d\n", score[3], score[2]);
-		printf ("	STA score%c+1\n", scorei);
+		    printf ("  adc #$%d%d\n", score[3], score[2]);
+		printf ("  sta score%c+1\n", scorei);
 	    }
-	    printf ("	LDA score%c\n", scorei);
+	    printf ("  lda score%c\n", scorei);
 	    if (score[0] > 9)
-		printf ("	ADC #0\n");
+		printf ("  adc #0\n");
 	    else
-		printf ("	ADC #$%d%d\n", score[5], score[4]);
-	    printf ("	STA score%c\n", scorei);
-	    printf ("	CLD\n");
+		printf ("  adc #$%d%d\n", score[5], score[4]);
+	    printf ("  sta score%c\n", scorei);
+	    printf ("  cld\n");
 	}
 	else if (statement[5][0] == '-')
 	{
 	    removeCR (statement[6]);
-	    printf ("	SED\n");
-	    printf ("	SEC\n");
+	    printf ("  sed\n");
+	    printf ("  sec\n");
 	    for (i = 5; i >= 0; i--)
 	    {
 		if (statement[6][i] != '\0')
@@ -9511,29 +9125,29 @@ void let (char **cstatement)
 		if ((score[j] < 10) && (score[j] >= 0))
 		    j++;
 	    }
-	    printf ("	LDA score%c+2\n", scorei);
+	    printf ("  lda score%c+2\n", scorei);
 	    if (score[0] > 9)
 	    {
-		printf ("	SBC ");
+		printf ("  sbc ");
 		printimmed (statement[6]);
 		printf ("%s\n", statement[6]);
 	    }
 	    else
-		printf ("	SBC #$%d%d\n", score[1], score[0]);
-	    printf ("	STA score%c+2\n", scorei);
-	    printf ("	LDA score%c+1\n", scorei);
+		printf ("  sbc #$%d%d\n", score[1], score[0]);
+	    printf ("  sta score%c+2\n", scorei);
+	    printf ("  lda score%c+1\n", scorei);
 	    if (score[0] > 9)
-		printf ("	SBC #0\n");
+		printf ("  sbc #0\n");
 	    else
-		printf ("	SBC #$%d%d\n", score[3], score[2]);
-	    printf ("	STA score%c+1\n", scorei);
-	    printf ("	LDA score%c\n", scorei);
+		printf ("  sbc #$%d%d\n", score[3], score[2]);
+	    printf ("  sta score%c+1\n", scorei);
+	    printf ("  lda score%c\n", scorei);
 	    if (score[0] > 9)
-		printf ("	SBC #0\n");
+		printf ("  sbc #0\n");
 	    else
-		printf ("	SBC #$%d%d\n", score[5], score[4]);
-	    printf ("	STA score%c\n", scorei);
-	    printf ("	CLD\n");
+		printf ("  sbc #$%d%d\n", score[5], score[4]);
+	    printf ("  sta score%c\n", scorei);
+	    printf ("  cld\n");
 	}
 	else
 	{
@@ -9545,63 +9159,17 @@ void let (char **cstatement)
 		if ((score[j] < 10) && (score[j] >= 0))
 		    j++;
 	    }
-	    printf ("	LDA #$%d%d\n", score[1], score[0]);
-	    printf ("	STA score%c+2\n", scorei);
-	    printf ("	LDA #$%d%d\n", score[3], score[2]);
-	    printf ("	STA score%c+1\n", scorei);
-	    printf ("	LDA #$%d%d\n", score[5], score[4]);
-	    printf ("	STA score%c\n", scorei);
+	    printf ("  lda #$%d%d\n", score[1], score[0]);
+	    printf ("  sta score%c+2\n", scorei);
+	    printf ("  lda #$%d%d\n", score[3], score[2]);
+	    printf ("  sta score%c+1\n", scorei);
+	    printf ("  lda #$%d%d\n", score[5], score[4]);
+	    printf ("  sta score%c\n", scorei);
 	}
 	free (deallocstatement);
 	return;
 
     }
-#ifdef TURNEDOFF
-    // for now var=var+1 optimization removed because it messes with the CARRY command...
-
-    else if ((statement[6][0] == '1') && ((statement[6][1] > (unsigned char) 0x39) || (statement[6][1] < (unsigned char) 0x30)) && ((statement[5][0] == '+') || (statement[5][0] == '-')) && (!strncmp (statement[2], statement[4], 200)) && (strncmp (statement[2], "Areg\0", 4)) && (statement[6][1] == '\0' || statement[6][1] == ' ' || statement[6][1] == '\n') && (decimal == 0))	//REVENG - suppress INC when using "dec" command
-    {				// var=var +/- something
-	strcpy (Areg, "invalid");
-	if ((fixpoint1 == 4) && (fixpoint2 == 4))
-	{
-	    if (statement[5][0] == '+')
-	    {
-		printf ("	LDA %s\n", statement[2]);
-		printf ("	CLC\n");
-		printf ("	ADC #16\n");
-		printf ("	STA %s\n", statement[2]);
-		free (deallocstatement);
-		return;
-	    }
-	    if (statement[5][0] == '-')
-	    {
-		printf ("	LDA %s\n", statement[2]);
-		printf ("	SEC\n");
-		printf ("	SBC #16\n");
-		printf ("	STA %s\n", statement[2]);
-		free (deallocstatement);
-		return;
-	    }
-	}
-
-	if (index & 1)
-	    loadindex (&getindex0[0], indirectflag0);
-	if (statement[5][0] == '+')
-	    printf ("	INC ");
-	else
-	    printf ("	DEC ");
-	if (!(index & 1))
-	    printf ("%s\n", statement[2]);
-	else if (indirectflag0 != 0)
-	    printf ("(%s),y\n", statement[4]);	// indexed with y!
-	else
-	    printf ("%s,x\n", statement[4]);	// indexed with x!
-	free (deallocstatement);
-
-	return;
-    }
-
-#endif // TURNEDOFF
     else
     {				// This is generic x=num or var
 
@@ -9612,12 +9180,11 @@ void let (char **cstatement)
 
 	    // if 8.8=8.8+8.8: this LDA will be superfluous - fix this at some point
 
-	    if (((!fixpoint1 && !fixpoint2) || (!fixpoint1 && fixpoint2 == 8))
-		&& statement[5][0] != '(')
+	    if (((!fixpoint1 && !fixpoint2) || (!fixpoint1 && fixpoint2 == 8)) && statement[5][0] != '(')
 	    {
 		if (strncmp (statement[4], "Areg\n", 4))
 		{
-		    printf ("	LDA ");
+		    printf ("  lda ");
 		    printindex (statement[4], index & 2, indirectflag1);
 		}
 	    }
@@ -9632,185 +9199,165 @@ void let (char **cstatement)
 	    loadindex (&getindex2[0], indirectflag2);
 	if (statement[5][0] == '+')
 	{
-	    if ((fixpoint1 == 8) && ((fixpoint2 & 8) == 8)
-		&& ((fixpoint3 & 8) == 8))
+	    if ((fixpoint1 == 8) && ((fixpoint2 & 8) == 8) && ((fixpoint3 & 8) == 8))
 	    {			//8.8=8.8+8.8
-		printf ("	LDA ");
+		printf ("  lda ");
 		printfrac (statement[4]);
-		printf ("	CLC \n");
-		printf ("	ADC ");
+		printf ("  clc \n");
+		printf ("  adc ");
 		printfrac (statement[6]);
-		printf ("	STA ");
+		printf ("  sta ");
 		printfrac (statement[2]);
-		printf ("	LDA ");
+		printf ("  lda ");
 		printimmed (statement[4]);
 		printf ("%s\n", statement[4]);
-		printf ("	ADC ");
+		printf ("  adc ");
 		printimmed (statement[6]);
 		printf ("%s\n", statement[6]);
 	    }
-	    else if ((fixpoint1 == 8) && ((fixpoint2 & 8) == 8)
-		     && (fixpoint3 == 4))
+	    else if ((fixpoint1 == 8) && ((fixpoint2 & 8) == 8) && (fixpoint3 == 4))
 	    {
-		printf ("	LDY %s\n", statement[6]);
-		printf ("	LDX ");
+		printf ("  ldy %s\n", statement[6]);
+		printf ("  ldx ");
 		printfrac (statement[4]);
-		printf ("	LDA ");
+		printf ("  lda ");
 		printimmed (statement[4]);
 		printf ("%s\n", statement[4]);
-		printf ("	jsr Add44to88\n");
-		printf ("	STX ");
+		printf ("  jsr Add44to88\n");
+		printf ("  stx ");
 		printfrac (statement[2]);
 	    }
-	    else if ((fixpoint1 == 8) && ((fixpoint3 & 8) == 8)
-		     && (fixpoint2 == 4))
+	    else if ((fixpoint1 == 8) && ((fixpoint3 & 8) == 8) && (fixpoint2 == 4))
 	    {
-		printf ("	LDY %s\n", statement[4]);
-		printf ("	LDX ");
+		printf ("  ldy %s\n", statement[4]);
+		printf ("  ldx ");
 		printfrac (statement[6]);
-		printf ("	LDA ");
+		printf ("  lda ");
 		printimmed (statement[6]);
 		printf ("%s\n", statement[6]);
-		printf ("	jsr Add44to88\n");
-		printf ("	STX ");
+		printf ("  jsr Add44to88\n");
+		printf ("  stx ");
 		printfrac (statement[2]);
 	    }
-	    else if ((fixpoint1 == 4) && (fixpoint2 == 8)
-		     && ((fixpoint3 & 4) == 4))
+	    else if ((fixpoint1 == 4) && (fixpoint2 == 8) && ((fixpoint3 & 4) == 4))
 	    {
 		if (fixpoint3 == 4)
-		    printf ("	LDY %s\n", statement[6]);
+		    printf ("  ldy %s\n", statement[6]);
 		else
-		    printf ("	LDY #%d\n",
-			    (int) (atof (statement[6]) * 16.0));
-		printf ("	LDA %s\n", statement[4]);
-		printf ("	LDX ");
+		    printf ("  ldy #%d\n", (int) (atof (statement[6]) * 16.0));
+		printf ("  lda %s\n", statement[4]);
+		printf ("  ldx ");
 		printfrac (statement[4]);
-		printf ("	jsr Add88to44\n");
+		printf ("  jsr Add88to44\n");
 	    }
-	    else if ((fixpoint1 == 4) && (fixpoint2 == 4)
-		     && (fixpoint3 == 12))
+	    else if ((fixpoint1 == 4) && (fixpoint2 == 4) && (fixpoint3 == 12))
 	    {
-		printf ("	CLC\n");
-		printf ("	LDA %s\n", statement[4]);
-		printf ("	ADC #%d\n",
-			(int) (atof (statement[6]) * 16.0));
+		printf ("  clc\n");
+		printf ("  lda %s\n", statement[4]);
+		printf ("  adc #%d\n", (int) (atof (statement[6]) * 16.0));
 	    }
-	    else if ((fixpoint1 == 4) && (fixpoint2 == 12)
-		     && (fixpoint3 == 4))
+	    else if ((fixpoint1 == 4) && (fixpoint2 == 12) && (fixpoint3 == 4))
 	    {
-		printf ("	CLC\n");
-		printf ("	LDA %s\n", statement[6]);
-		printf ("	ADC #%d\n",
-			(int) (atof (statement[4]) * 16.0));
+		printf ("  clc\n");
+		printf ("  lda %s\n", statement[6]);
+		printf ("  adc #%d\n", (int) (atof (statement[4]) * 16.0));
 	    }
 	    else		// this needs work - 44+8+44 and probably others are screwy
 	    {
 		if (fixpoint2 == 4)
-		    printf ("	LDA %s\n", statement[4]);
+		    printf ("  lda %s\n", statement[4]);
 		if ((fixpoint3 == 4) && (fixpoint2 == 0))
 		{
-		    printf ("	LDA ");	// this LDA might be superfluous
+		    printf ("  lda ");	// this LDA might be superfluous
 		    printimmed (statement[4]);
 		    printf ("%s\n", statement[4]);
 		}
-		displayoperation ("+CLC\n	ADC", statement[6],
-				  index & 4);
+		displayoperation ("+CLC\n	ADC", statement[6], index & 4);
 	    }
 	}
 	else if (statement[5][0] == '-')
 	{
-	    if ((fixpoint1 == 8) && ((fixpoint2 & 8) == 8)
-		&& ((fixpoint3 & 8) == 8))
+	    if ((fixpoint1 == 8) && ((fixpoint2 & 8) == 8) && ((fixpoint3 & 8) == 8))
 	    {			//8.8=8.8-8.8
-		printf ("	LDA ");
+		printf ("  lda ");
 		printfrac (statement[4]);
-		printf ("	SEC \n");
-		printf ("	SBC ");
+		printf ("  sec \n");
+		printf ("  sbc ");
 		printfrac (statement[6]);
-		printf ("	STA ");
+		printf ("  sta ");
 		printfrac (statement[2]);
-		printf ("	LDA ");
+		printf ("  lda ");
 		printimmed (statement[4]);
 		printf ("%s\n", statement[4]);
-		printf ("	SBC ");
+		printf ("  sbc ");
 		printimmed (statement[6]);
 		printf ("%s\n", statement[6]);
 	    }
-	    else if ((fixpoint1 == 8) && ((fixpoint2 & 8) == 8)
-		     && (fixpoint3 == 4))
+	    else if ((fixpoint1 == 8) && ((fixpoint2 & 8) == 8) && (fixpoint3 == 4))
 	    {
-		printf ("	LDY %s\n", statement[6]);
-		printf ("	LDX ");
+		printf ("  ldy %s\n", statement[6]);
+		printf ("  ldx ");
 		printfrac (statement[4]);
-		printf ("	LDA ");
+		printf ("  lda ");
 		printimmed (statement[4]);
 		printf ("%s\n", statement[4]);
-		printf ("	jsr Sub44from88\n");
-		printf ("	STX ");
+		printf ("  jsr Sub44from88\n");
+		printf ("  stx ");
 		printfrac (statement[2]);
 	    }
-	    else if ((fixpoint1 == 4) && (fixpoint2 == 8)
-		     && ((fixpoint3 & 4) == 4))
+	    else if ((fixpoint1 == 4) && (fixpoint2 == 8) && ((fixpoint3 & 4) == 4))
 	    {
 		if (fixpoint3 == 4)
-		    printf ("	LDY %s\n", statement[6]);
+		    printf ("  ldy %s\n", statement[6]);
 		else
-		    printf ("	LDY #%d\n",
-			    (int) (atof (statement[6]) * 16.0));
-		printf ("	LDA %s\n", statement[4]);
-		printf ("	LDX ");
+		    printf ("  ldy #%d\n", (int) (atof (statement[6]) * 16.0));
+		printf ("  lda %s\n", statement[4]);
+		printf ("  ldx ");
 		printfrac (statement[4]);
-		printf ("	jsr Sub88from44\n");
+		printf ("  jsr Sub88from44\n");
 	    }
-	    else if ((fixpoint1 == 4) && (fixpoint2 == 4)
-		     && (fixpoint3 == 12))
+	    else if ((fixpoint1 == 4) && (fixpoint2 == 4) && (fixpoint3 == 12))
 	    {
-		printf ("	SEC\n");
-		printf ("	LDA %s\n", statement[4]);
-		printf ("	SBC #%d\n",
-			(int) (atof (statement[6]) * 16.0));
+		printf ("  sec\n");
+		printf ("  lda %s\n", statement[4]);
+		printf ("  sbc #%d\n", (int) (atof (statement[6]) * 16.0));
 	    }
-	    else if ((fixpoint1 == 4) && (fixpoint2 == 12)
-		     && (fixpoint3 == 4))
+	    else if ((fixpoint1 == 4) && (fixpoint2 == 12) && (fixpoint3 == 4))
 	    {
-		printf ("	SEC\n");
-		printf ("	LDA #%d\n",
-			(int) (atof (statement[4]) * 16.0));
-		printf ("	SBC %s\n", statement[6]);
+		printf ("  sec\n");
+		printf ("  lda #%d\n", (int) (atof (statement[4]) * 16.0));
+		printf ("  sbc %s\n", statement[6]);
 	    }
 	    else
 	    {
 		if (fixpoint2 == 4)
-		    printf ("	LDA %s\n", statement[4]);
+		    printf ("  lda %s\n", statement[4]);
 		if ((fixpoint3 == 4) && (fixpoint2 == 0))
-		    printf ("	LDA #%s\n", statement[4]);
-		displayoperation ("-SEC\n	SBC", statement[6],
-				  index & 4);
+		    printf ("  lda #%s\n", statement[4]);
+		displayoperation ("-SEC\n	SBC", statement[6], index & 4);
 	    }
 	}
 	else if (statement[5][0] == '&')
 	{
 	    if (fixpoint2 == 4)
-		printf ("	LDA %s\n", statement[4]);
+		printf ("  lda %s\n", statement[4]);
 	    displayoperation ("&AND", statement[6], index & 4);
 	}
 	else if (statement[5][0] == '^')
 	{
 	    if (fixpoint2 == 4)
-		printf ("	LDA %s\n", statement[4]);
+		printf ("  lda %s\n", statement[4]);
 	    displayoperation ("^EOR", statement[6], index & 4);
 	}
 	else if (statement[5][0] == '|')
 	{
 	    if (fixpoint2 == 4)
-		printf ("	LDA %s\n", statement[4]);
+		printf ("  lda %s\n", statement[4]);
 	    displayoperation ("|ORA", statement[6], index & 4);
 	}
 	else if (statement[5][0] == '*')
 	{
-	    if (isimmed (statement[4]) && !isimmed (statement[6])
-		&& checkmul (strictatoi (statement[4])))
+	    if (isimmed (statement[4]) && !isimmed (statement[6]) && checkmul (strictatoi (statement[4])))
 	    {
 		// swap operands to avoid mul routine
 		strcpy (operandcopy, statement[4]);	// place here temporarily
@@ -9818,15 +9365,14 @@ void let (char **cstatement)
 		strcpy (statement[6], operandcopy);
 	    }
 	    if (fixpoint2 == 4)
-		printf ("	LDA %s\n", statement[4]);
-	    if ((!isimmed (statement[6]))
-		|| (!checkmul (strictatoi (statement[6]))))
+		printf ("  lda %s\n", statement[4]);
+	    if ((!isimmed (statement[6])) || (!checkmul (strictatoi (statement[6]))))
 	    {
 		displayoperation ("*LDY", statement[6], index & 4);
 		if (statement[5][1] == '*')
-		    printf ("	jsr mul16\n");	// general mul routine
+		    printf ("  jsr mul16\n");	// general mul routine
 		else
-		    printf ("	jsr mul8\n");
+		    printf ("  jsr mul8\n");
 	    }
 	    else if (statement[5][1] == '*')
 		mul (statement, 16);
@@ -9837,15 +9383,14 @@ void let (char **cstatement)
 	else if (statement[5][0] == '/')
 	{
 	    if (fixpoint2 == 4)
-		printf ("	LDA %s\n", statement[4]);
-	    if ((!isimmed (statement[6]))
-		|| (!checkdiv (strictatoi (statement[6]))))
+		printf ("  lda %s\n", statement[4]);
+	    if ((!isimmed (statement[6])) || (!checkdiv (strictatoi (statement[6]))))
 	    {
 		displayoperation ("/LDY", statement[6], index & 4);
 		if (statement[5][1] == '/')
-		    printf ("	jsr div16\n");	// general div routine
+		    printf ("  jsr div16\n");	// general div routine
 		else
-		    printf ("	jsr div8\n");
+		    printf ("  jsr div8\n");
 	    }
 	    else if (statement[5][1] == '/')
 		divd (statement, 16);
@@ -9882,69 +9427,69 @@ void let (char **cstatement)
 	// bugfix: forgot the LDA (?) did I do this correctly???
 	if ((fixpoint1 == 4) && (fixpoint2 == 0))
 	{
-	    printf ("	LDA ");
+	    printf ("  lda ");
 	    printimmed (statement[4]);
 	    printf ("%s\n", statement[4]);
-	    printf ("  ASL\n");
-	    printf ("  ASL\n");
-	    printf ("  ASL\n");
-	    printf ("  ASL\n");
+	    printf ("  asl\n");
+	    printf ("  asl\n");
+	    printf ("  asl\n");
+	    printf ("  asl\n");
 	}
 	else if ((fixpoint1 == 0) && (fixpoint2 == 4))
 	{
-	    printf ("	LDA ");
+	    printf ("  lda ");
 	    printimmed (statement[4]);
 	    printf ("%s\n", statement[4]);
-	    printf ("  LSR\n");
-	    printf ("  LSR\n");
-	    printf ("  LSR\n");
-	    printf ("  LSR\n");
+	    printf ("  lsr\n");
+	    printf ("  lsr\n");
+	    printf ("  lsr\n");
+	    printf ("  lsr\n");
 	}
 	else if ((fixpoint1 == 4) && (fixpoint2 == 8))
 	{
-	    printf ("	LDA ");
+	    printf ("  lda ");
 	    printimmed (statement[4]);
 	    printf ("%s\n", statement[4]);
-	    printf ("  LDX ");
+	    printf ("  ldx ");
 	    printfrac (statement[4]);
 	    // note: this shouldn't be changed to jsr(); (why???)
-	    printf (" jsr Assign88to44");
+	    printf ("  jsr Assign88to44");
 	    printf ("\n");
 	}
 	else if ((fixpoint1 == 8) && (fixpoint2 == 4))
 	{
 	    // note: this shouldn't be changed to jsr();
-	    printf ("	LDA ");
+	    printf ("  lda ");
 	    printimmed (statement[4]);
 	    printf ("%s\n", statement[4]);
-	    printf ("  JSR Assign44to88");
+	    printf ("  jsr Assign44to88");
 	    printf ("\n");
-	    printf ("  STX ");
+	    printf ("  stx ");
 	    printfrac (statement[2]);
 	}
 	else if ((fixpoint1 == 8) && ((fixpoint2 & 8) == 8))
 	{
-	    printf ("	LDX ");
+	    printf ("  ldx ");
 	    printfrac (statement[4]);
-	    printf ("	STX ");
+	    printf ("  stx ");
 	    printfrac (statement[2]);
-	    printf ("	LDA ");
+	    printf ("  lda ");
 	    printimmed (statement[4]);
 	    printf ("%s\n", statement[4]);
 	}
 	else if ((fixpoint1 == 4) && ((fixpoint2 & 4) == 4))
 	{
 	    if (fixpoint2 == 4)
-		printf ("	LDA %s\n", statement[4]);
+		printf ("  lda %s\n", statement[4]);
 	    else
-		printf ("	LDA #%d\n", (int) (atof (statement[4]) * 16));
+		printf ("  lda #%d\n", (int) (atof (statement[4]) * 16));
 	}
 	else if ((fixpoint1 == 8) && (fixpoint2 == 0))
 	{			// should handle 8.8=number w/o point or int var
-	    printf ("	LDA #0\n");
-	    printf ("	STA ");
+	    printf ("  lda #0\n");
+	    printf ("  sta ");
 	    printfrac (statement[2]);
-	    printf ("	LDA ");
+	    printf ("  lda ");
 	    printimmed (statement[4]);
 	    printf ("%s\n", statement[4]);
 	}
@@ -9953,7 +9498,7 @@ void let (char **cstatement)
 	loadindex (&getindex0[0], indirectflag0);
     if (strncmp (statement[2], "Areg\0", 4))
     {
-	printf ("	STA ");
+	printf ("  sta ");
 	printindex (statement[2], index & 1, indirectflag0);
     }
     free (deallocstatement);
@@ -9985,16 +9530,16 @@ void loadrombank (char **statement)
     if (anotherbank == (bankcount - 1))
 	prerror ("loadrombank can not switch the last bank");
 
-    printf (" lda #%d\n", anotherbank);
+    printf ("  lda #%d\n", anotherbank);
     printf (" ifconst BANKRAM\n");
-    printf ("   sta currentbank\n");
-    printf ("   ora currentrambank\n");
+    printf ("  sta currentbank\n");
+    printf ("  ora currentrambank\n");
     printf (" endif\n");
     printf (" ifconst MCPDEVCART\n");
-    printf ("   ora #$18\n");
-    printf ("   sta $3000\n");
+    printf ("  ora #$18\n");
+    printf ("  sta $3000\n");
     printf (" else\n");
-    printf ("   sta $8000\n");
+    printf ("  sta $8000\n");
     printf (" endif\n");
 
 }
@@ -10022,14 +9567,14 @@ void loadrambank (char **statement)
     if ((anotherbank < 0) || (anotherbank > 1))
 	prerror ("bad bank# used with loadrambank");
 
-    printf (" lda #%d\n", anotherbank << 5);
-    printf (" sta currentrambank\n");
-    printf (" ora currentbank\n");
+    printf ("  lda #%d\n", anotherbank << 5);
+    printf ("  sta currentrambank\n");
+    printf ("  ora currentbank\n");
     printf (" ifconst MCPDEVCART\n");
-    printf ("   ora #$18\n");
-    printf ("   sta $3000\n");
+    printf ("  ora #$18\n");
+    printf ("  sta $3000\n");
     printf (" else\n");
-    printf ("   sta $8000\n");
+    printf ("  sta $8000\n");
     printf (" endif\n");
 }
 
@@ -10043,51 +9588,48 @@ void dogoto (char **statement)
     if (!strncmp (statement[3], "bank", 4))
     {
 	if ((statement[3][4] < '1') || (statement[3][4] > '9'))
-	    prerror
-		("destination bank is malformed. should be in form 'bank#'");
+	    prerror ("destination bank is malformed. should be in form 'bank#'");
 	anotherbank = strictatoi (statement[3] + 4);
 	anotherbank = anotherbank - 1;
     }
     else
     {
-	printf (" jmp .%s\n", statement[2]);
+	printf ("  jmp .%s\n", statement[2]);
 	return;
     }
 
     if (anotherbank == (bankcount - 1))
     {
-	prerror
-	    ("bank switch not required for the last bank, since its always present in the rom format.");
+	prerror ("bank switch not required for the last bank, since its always present in the rom format.");
     }
     if ((romat4k == 1) && (anotherbank == 0))
     {
-	prerror
-	    ("bank switch not required for the first bank, since its always present in this rom format.");
+	prerror ("bank switch not required for the first bank, since its always present in this rom format.");
     }
 
     if (romat4k == 1)
 	anotherbank--;
 
-    printf (" sta temp9\n");	//save A register
+    printf ("  sta temp9\n");	//save A register
 
-    printf (" lda #>(.%s-1)\n", statement[2]);
-    printf (" pha\n");
-    printf (" lda #<(.%s-1)\n", statement[2]);
-    printf (" pha\n");
+    printf ("  lda #>(.%s-1)\n", statement[2]);
+    printf ("  pha\n");
+    printf ("  lda #<(.%s-1)\n", statement[2]);
+    printf ("  pha\n");
 
-    printf (" lda temp9\n");
-    printf (" pha\n");
-    printf (" txa\n");
-    printf (" pha\n");
+    printf ("  lda temp9\n");
+    printf ("  pha\n");
+    printf ("  txa\n");
+    printf ("  pha\n");
 
     printf (" ifconst BANKRAM\n");
-    printf ("   lda #%d\n", anotherbank);
-    printf ("   sta currentbank\n");
-    printf ("   ora currentrambank\n");
+    printf ("  lda #%d\n", anotherbank);
+    printf ("  sta currentbank\n");
+    printf ("  ora currentrambank\n");
     printf (" else\n");
-    printf ("   lda #%d\n", anotherbank);
+    printf ("  lda #%d\n", anotherbank);
     printf (" endif\n");
-    printf (" jmp BS_jsr\n");
+    printf ("  jmp BS_jsr\n");
 
 }
 
@@ -10109,11 +9651,11 @@ void adjustvisible (char **statement)
     // adjustvisible first last
     assertminimumargs (statement, "adjustvisible", 2);
     removeCR (statement[3]);	//remove CR if present
-    printf (" lda #(%s*3)\n", statement[2]);
-    printf (" sta temp1\n");
-    printf (" lda #(%s*3)\n", statement[3]);
-    printf (" sta temp2\n");
-    printf (" jsr adjustvisible\n");
+    printf ("  lda #(%s*3)\n", statement[2]);
+    printf ("  sta temp1\n");
+    printf ("  lda #(%s*3)\n", statement[3]);
+    printf ("  sta temp2\n");
+    printf ("  jsr adjustvisible\n");
     printf ("USED_ADJUSTVISIBLE = 1\n");
 }
 
@@ -10135,17 +9677,17 @@ void doublebuffer (char **statement)
 
     if (strcmp (statement[2], "on") == 0)
     {
-	printf (" lda #1\n");
-	printf (" sta doublebufferstate\n");
+	printf ("  lda #1\n");
+	printf ("  sta doublebufferstate\n");
     }
     else if (strcmp (statement[2], "off") == 0)
     {
 	// we need to restore things back to normal.
-	printf (" jsr doublebufferoff\n");
+	printf ("  jsr doublebufferoff\n");
     }
     else if (strcmp (statement[2], "flip") == 0)
     {
-	printf (" jsr flipdisplaybuffer\n");
+	printf ("  jsr flipdisplaybuffer\n");
     }
     else
     {
@@ -10155,8 +9697,8 @@ void doublebuffer (char **statement)
     {
 	int framerate;
 	framerate = strictatoi (statement[3]);
-	printf (" lda #%d\n", framerate);
-	printf (" sta doublebufferminimumframetarget\n");
+	printf ("  lda #%d\n", framerate);
+	printf ("  sta doublebufferminimumframetarget\n");
     }
 }
 
@@ -10170,27 +9712,24 @@ void gosub (char **statement)
     if (!strncmp (statement[3], "bank", 4))
     {
 	if ((statement[3][4] < '1') || (statement[3][4] > '9'))
-	    prerror
-		("destination bank is malformed. should be in form 'bank#'");
+	    prerror ("destination bank is malformed. should be in form 'bank#'");
 	anotherbank = strictatoi (statement[3] + 4);
 	anotherbank = anotherbank - 1;
     }
     else
     {
-	printf (" jsr .%s\n", statement[2]);
+	printf ("  jsr .%s\n", statement[2]);
 	return;
     }
 
     if (anotherbank == (bankcount - 1))
     {
-	prerror
-	    ("bank switch not required to the last bank, since its always present");
+	prerror ("bank switch not required to the last bank, since its always present");
     }
 
     if ((romat4k == 1) && (anotherbank == 0))
     {
-	prerror
-	    ("bank switch not required to the first bank, since its always present");
+	prerror ("bank switch not required to the first bank, since its always present");
     }
 
     if (romat4k && (currentbank == 0))
@@ -10202,45 +9741,45 @@ void gosub (char **statement)
     if (romat4k == 1)
 	anotherbank--;
 
-    printf (" sta temp9\n");	//save A register
+    printf ("  sta temp9\n");	//save A register
 
     //return address
-    printf (" lda #>(ret_point%d-1)\n", ++numjsrs);
-    printf (" pha\n");
-    printf (" lda #<(ret_point%d-1)\n", numjsrs);
-    printf (" pha\n");
+    printf ("  lda #>(ret_point%d-1)\n", ++numjsrs);
+    printf ("  pha\n");
+    printf ("  lda #<(ret_point%d-1)\n", numjsrs);
+    printf ("  pha\n");
 
     // the bank switch return info... don't push this if we're switching from a non-switched bank
     // we can detect the bank from a regular return address, because its less than $100
     if (permanentreturn == 0)
     {
-	printf (" lda #0\n");
-	printf (" pha\n");
+	printf ("  lda #0\n");
+	printf ("  pha\n");
 	if (romat4k == 1)
-	    printf (" lda #%d\n", currentbank - 1);
+	    printf ("  lda #%d\n", currentbank - 1);
 	else
-	    printf (" lda #%d\n", currentbank);
-	printf (" pha\n");
+	    printf ("  lda #%d\n", currentbank);
+	printf ("  pha\n");
     }
 
-    printf (" lda #>(.%s-1)\n", statement[2]);
-    printf (" pha\n");
-    printf (" lda #<(.%s-1)\n", statement[2]);
-    printf (" pha\n");
+    printf ("  lda #>(.%s-1)\n", statement[2]);
+    printf ("  pha\n");
+    printf ("  lda #<(.%s-1)\n", statement[2]);
+    printf ("  pha\n");
 
-    printf (" lda temp9\n");
-    printf (" pha\n");
-    printf (" txa\n");
-    printf (" pha\n");
+    printf ("  lda temp9\n");
+    printf ("  pha\n");
+    printf ("  txa\n");
+    printf ("  pha\n");
 
     printf (" ifconst BANKRAM\n");
-    printf ("   lda #%d\n", anotherbank);
-    printf ("   sta currentbank\n");
-    printf ("   ora currentrambank\n");
+    printf ("  lda #%d\n", anotherbank);
+    printf ("  sta currentbank\n");
+    printf ("  ora currentrambank\n");
     printf (" else\n");
-    printf ("   lda #%d\n", anotherbank);
+    printf ("  lda #%d\n", anotherbank);
     printf (" endif\n");
-    printf (" jmp BS_jsr\n");
+    printf ("  jmp BS_jsr\n");
     printf ("ret_point%d\n", numjsrs);
 
 }
@@ -10309,8 +9848,7 @@ void set (char **statement)
     {
 	assertminimumargs (statement, "set softresetpause", 1);
 	if (!strncmp (statement[3], "off", 3))
-	    strcpy (redefined_variables[numredefvars++],
-		    "SOFTRESETASPAUSEOFF = 1");
+	    strcpy (redefined_variables[numredefvars++], "SOFTRESETASPAUSEOFF = 1");
     }
     else if (!strncmp (statement[2], "snes0pause\0", 10))
     {
@@ -10348,8 +9886,7 @@ void set (char **statement)
     {
 	assertminimumargs (statement + 1, "set plotvaluepage", 1);	//+1 to skip "dlmemory"
 	removeCR (statement[3]);	//remove CR from the value, if present
-	sprintf (redefined_variables[numredefvars++], "PLOTVALUEPAGE = %s",
-		 statement[3]);
+	sprintf (redefined_variables[numredefvars++], "PLOTVALUEPAGE = %s", statement[3]);
     }
     else if (!strncmp (statement[2], "extradlmemory\0", 13))
     {
@@ -10401,10 +9938,8 @@ void set (char **statement)
 	    if (gameidval == 0)
 		prerror ("'set hssupport' requires a numeric argument");
 
-	    sprintf (redefined_variables[numredefvars++], "HSIDHI = $%02x",
-		     (gameidval / 256) & 0xFF);
-	    sprintf (redefined_variables[numredefvars++], "HSIDLO = $%02x",
-		     gameidval & 0xFF);
+	    sprintf (redefined_variables[numredefvars++], "HSIDHI = $%02x", (gameidval / 256) & 0xFF);
+	    sprintf (redefined_variables[numredefvars++], "HSIDLO = $%02x", gameidval & 0xFF);
 	    strcpy (redefined_variables[numredefvars++], "HSSUPPORT = 1");
 	    append_a78info ("set savekey");
 	    remove ("7800hsgamename.asm");
@@ -10422,8 +9957,7 @@ void set (char **statement)
 	removeCR (statement[3]);	//remove CR from the name
 	if (strcmp (statement[3], "off") == 0)
 	{
-	    strcpy (redefined_variables[numredefvars++],
-		    "HSNOLEVELNAMES = 1");
+	    strcpy (redefined_variables[numredefvars++], "HSNOLEVELNAMES = 1");
 	    return;
 	}
 
@@ -10432,9 +9966,8 @@ void set (char **statement)
 	outfile = fopen ("7800hsgamediffnames.asm", "w");
 	if (outfile == NULL)
 	    prerror ("couldn't create 7800hsgamediffnames.asm file.");
-	sprintf (redefined_variables[numredefvars++],
-		 "HSCUSTOMLEVELNAMES = 1");
-	fprintf (outfile, "\n    ifnconst isBANKSETBANK\n");
+	sprintf (redefined_variables[numredefvars++], "HSCUSTOMLEVELNAMES = 1");
+	fprintf (outfile, "\n ifnconst isBANKSETBANK\n");
 	fprintf (outfile, "highscoredifficultytextlen\n");
 	fprintf (outfile, "  .byte ");
 	for (strindex = 3; strindex < 7; strindex++)
@@ -10451,15 +9984,15 @@ void set (char **statement)
 		fprintf (outfile, "%d", (int) strlen (statement[strindex]));
 	    }
 	}
-	fprintf (outfile, "\n    endif ; isBANKSETBANK\n");
-	fprintf (outfile, "\n    ifconst HSCHARSHERE\n");
+	fprintf (outfile, "\n endif ; isBANKSETBANK\n");
+	fprintf (outfile, "\n ifconst HSCHARSHERE\n");
 
 	for (strindex = 3; strindex < 7; strindex++)
 	{
 	    if (strindex == 3)
 		fprintf (outfile, "\neasylevelname\n  .byte ");
 	    if (strindex == 4)
-		fprintf (outfile, "\nmediumlevelname\n .byte ");
+		fprintf (outfile, "\nmediumlevelname\n  .byte ");
 	    if (strindex == 5)
 		fprintf (outfile, "\nhardlevelname\n  .byte ");
 	    if (strindex == 6)
@@ -10521,7 +10054,7 @@ void set (char **statement)
 	    }
 	}
 	fprintf (outfile, "\n");
-	fprintf (outfile, "\n    endif ; HSCHARSHERE\n");
+	fprintf (outfile, "\n endif ; HSCHARSHERE\n");
 	fclose (outfile);
 
     }
@@ -10530,16 +10063,14 @@ void set (char **statement)
 	assertminimumargs (statement, "set hscolorbase", 1);
 	int hscolorval;
 	hscolorval = strictatoi (statement[3]);
-	sprintf (redefined_variables[numredefvars++],
-		 "HSCOLORCHASESTART = %d", hscolorval);
+	sprintf (redefined_variables[numredefvars++], "HSCOLORCHASESTART = %d", hscolorval);
     }
     else if (!strncmp (statement[2], "hsseconds", 10))
     {
 	assertminimumargs (statement, "set hsseconds", 1);
 	int hsseconds;
 	hsseconds = strictatoi (statement[3]);
-	sprintf (redefined_variables[numredefvars++], "HSSECONDS = %d",
-		 hsseconds);
+	sprintf (redefined_variables[numredefvars++], "HSSECONDS = %d", hsseconds);
     }
     else if (!strncmp (statement[2], "hsscoresize", 11))
     {
@@ -10548,8 +10079,7 @@ void set (char **statement)
 	hsscoresize = strictatoi (statement[3]);
 	if ((hsscoresize < 1) || (hsscoresize > 6))
 	    prerror ("invalid high score size used");
-	sprintf (redefined_variables[numredefvars++], "HSSCORESIZE = %d",
-		 hsscoresize);
+	sprintf (redefined_variables[numredefvars++], "HSSCORESIZE = %d", hsscoresize);
     }
 
     else if (!strncmp (statement[2], "hsgamename", 10))
@@ -10561,7 +10091,7 @@ void set (char **statement)
 	outfile = fopen ("7800hsgamename.asm", "w");
 	if (outfile == NULL)
 	    prerror ("couldn't create 7800hsgamename.asm file.");
-	fprintf (outfile, " .byte ");
+	fprintf (outfile, "  .byte ");
 	removeCR (statement[3]);	//remove CR from the name
 	while ((statement[strindex] != 0) && (statement[strindex][0] != 0))
 	{
@@ -10636,8 +10166,7 @@ void set (char **statement)
 	    strindex = strindex + 1;
 	    removeCR (statement[strindex]);	//remove CR from the name
 	}
-	sprintf (redefined_variables[numredefvars++], "HSGAMENAMELEN = %d",
-		 s);
+	sprintf (redefined_variables[numredefvars++], "HSGAMENAMELEN = %d", s);
 	fclose (outfile);
 
     }
@@ -10848,44 +10377,34 @@ void set (char **statement)
 	    sprintf (constants[numconstants++], "PRANDOM");
 	    sprintf (constants[numconstants++], "PSKCTL");
 
-	    if ((!strncmp (statement[3], "on", 2))
-		|| (!strncmp (statement[3], "auto", 4)))
+	    if ((!strncmp (statement[3], "on", 2)) || (!strncmp (statement[3], "auto", 4)))
 	    {
-		strcpy (redefined_variables[numredefvars++],
-			"pokeysupport = 1");
+		strcpy (redefined_variables[numredefvars++], "pokeysupport = 1");
 		append_a78info ("set pokey@450");
 		prwarn ("pokey autodetection is deprecated.");
 	    }
 	    else if (!strncmp (statement[3], "$450", 4))
 	    {
-		strcpy (redefined_variables[numredefvars++],
-			"pokeysupport = 1");
-		strcpy (redefined_variables[numredefvars++],
-			"pokeyaddress = $450");
+		strcpy (redefined_variables[numredefvars++], "pokeysupport = 1");
+		strcpy (redefined_variables[numredefvars++], "pokeyaddress = $450");
 		append_a78info ("set pokey@450");
 	    }
 	    else if (!strncmp (statement[3], "$800", 4))
 	    {
-		strcpy (redefined_variables[numredefvars++],
-			"pokeysupport = 1");
-		strcpy (redefined_variables[numredefvars++],
-			"pokeyaddress = $800");
+		strcpy (redefined_variables[numredefvars++], "pokeysupport = 1");
+		strcpy (redefined_variables[numredefvars++], "pokeyaddress = $800");
 		append_a78info ("set pokey@800");
 	    }
 	    else if (!strncmp (statement[3], "$4000", 5))
 	    {
-		strcpy (redefined_variables[numredefvars++],
-			"pokeysupport = 1");
-		strcpy (redefined_variables[numredefvars++],
-			"pokeyaddress = $4000");
+		strcpy (redefined_variables[numredefvars++], "pokeysupport = 1");
+		strcpy (redefined_variables[numredefvars++], "pokeyaddress = $4000");
 		append_a78info ("set pokey@4000");
 	    }
 	    else		// some other address
 	    {
-		strcpy (redefined_variables[numredefvars++],
-			"pokeysupport = 1");
-		snprintf (redefined_variables[numredefvars++], 30,
-			  "pokeyaddress = %s", statement[3]);
+		strcpy (redefined_variables[numredefvars++], "pokeysupport = 1");
+		snprintf (redefined_variables[numredefvars++], 30, "pokeyaddress = %s", statement[3]);
 	    }
 	}
 
@@ -10913,23 +10432,19 @@ void set (char **statement)
 	assertminimumargs (statement, "set plotvalueonscreen", 1);
 	if (!strncmp (statement[3], "on", 2))
 	{
-	    strcpy (redefined_variables[numredefvars++],
-		    "plotvalueonscreen = 1");
+	    strcpy (redefined_variables[numredefvars++], "plotvalueonscreen = 1");
 	}
     }
     else if (!strncmp (statement[2], "frameskipfix", 12))
     {
 	assertminimumargs (statement, "set frameskipfix", 1);
-	if ((!strncmp (statement[3], "on", 2))
-	    || (!strncmp (statement[3], "strong", 5)))
+	if ((!strncmp (statement[3], "on", 2)) || (!strncmp (statement[3], "strong", 5)))
 	{
-	    strcpy (redefined_variables[numredefvars++],
-		    "FRAMESKIPGLITCHFIX = 1");
+	    strcpy (redefined_variables[numredefvars++], "FRAMESKIPGLITCHFIX = 1");
 	}
 	if (!strncmp (statement[3], "weak", 4))
 	{
-	    strcpy (redefined_variables[numredefvars++],
-		    "FRAMESKIPGLITCHFIXWEAK = 1");
+	    strcpy (redefined_variables[numredefvars++], "FRAMESKIPGLITCHFIXWEAK = 1");
 	}
     }
     else if (!strncmp (statement[2], "zoneprotection", 14))
@@ -10937,8 +10452,7 @@ void set (char **statement)
 	assertminimumargs (statement, "set zoneprotection", 1);
 	if (!strncmp (statement[3], "on", 2))
 	{
-	    strcpy (redefined_variables[numredefvars++],
-		    "CHECKOVERWRITE = 1");
+	    strcpy (redefined_variables[numredefvars++], "CHECKOVERWRITE = 1");
 	}
     }
 
@@ -10947,8 +10461,7 @@ void set (char **statement)
 	assertminimumargs (statement, "set pauseroutine", 1);
 	if (!strncmp (statement[3], "off", 3))
 	{
-	    strcpy (redefined_variables[numredefvars++],
-		    "pauseroutineoff = 1");
+	    strcpy (redefined_variables[numredefvars++], "pauseroutineoff = 1");
 	}
     }
     else if (!strncmp (statement[2], "paddlerange", 11))
@@ -10966,8 +10479,7 @@ void set (char **statement)
 	assertminimumargs (statement, "set paddlepair", 1);
 	if (!strncmp (statement[3], "on", 2))
 	{
-	    strcpy (redefined_variables[numredefvars++],
-		    "TWOPADDLESUPPORT = 1");
+	    strcpy (redefined_variables[numredefvars++], "TWOPADDLESUPPORT = 1");
 	}
     }
     else if (!strncmp (statement[2], "paddlescalex2", 13))
@@ -11027,22 +10539,18 @@ void set (char **statement)
 	assertminimumargs (statement, "set screenheight", 1);
 	if (!strncmp (statement[3], "192", 3))
 	{
-	    strcpy (redefined_variables[numredefvars++],
-		    "SCREENHEIGHT = 192");
+	    strcpy (redefined_variables[numredefvars++], "SCREENHEIGHT = 192");
 	}
 	else if (!strncmp (statement[3], "208", 3))
 	{
-	    strcpy (redefined_variables[numredefvars++],
-		    "SCREENHEIGHT = 208");
+	    strcpy (redefined_variables[numredefvars++], "SCREENHEIGHT = 208");
 	}
 	else if (!strncmp (statement[3], "224", 3))
 	{
-	    strcpy (redefined_variables[numredefvars++],
-		    "SCREENHEIGHT = 224");
+	    strcpy (redefined_variables[numredefvars++], "SCREENHEIGHT = 224");
 	}
 	else
-	    prerror
-		("set using illegal screen height... valid values are 192, 208, and 224");
+	    prerror ("set using illegal screen height... valid values are 192, 208, and 224");
     }
 
     else if (!strncmp (statement[2], "debug", 5))
@@ -11057,8 +10565,7 @@ void set (char **statement)
 	}
 	if (!strncmp (statement[3], "interrupt", 9))
 	{
-	    strcpy (redefined_variables[numredefvars++],
-		    "DEBUGINTERRUPT = 1");
+	    strcpy (redefined_variables[numredefvars++], "DEBUGINTERRUPT = 1");
 	}
     }
 
@@ -11076,8 +10583,7 @@ void set (char **statement)
 	    zoneheight = 16;
 	}
 	else
-	    prerror
-		("set using illegal zone height... valid values are 8 and 16");
+	    prerror ("set using illegal zone height... valid values are 8 and 16");
     }
     else if (!strncmp (statement[2], "mcpdevcart", 10))
     {
@@ -11101,8 +10607,7 @@ void set (char **statement)
     {
 	assertminimumargs (statement, "set breakprotect", 1);
 	if (strncmp (statement[3], "off", 3) != 0)
-	    strcpy (redefined_variables[numredefvars++],
-		    "BREAKPROTECTOFF = 1");
+	    strcpy (redefined_variables[numredefvars++], "BREAKPROTECTOFF = 1");
     }
     else if (!strncmp (statement[2], "optimization", 12))
     {
@@ -11161,8 +10666,8 @@ void rem (char **statement)
 
 void dopop ()
 {
-    printf ("	pla\n");
-    printf ("	pla\n");
+    printf ("  pla\n");
+    printf ("  pla\n");
 }
 
 
@@ -11171,18 +10676,16 @@ void bmi (char *linenumber)
     removeCR (linenumber);
     if (smartbranching)
     {
-	printf (" if ((* - .%s) < 127) && ((* - .%s) > -128)\n	bmi .%s\n",
-		linenumber, linenumber, linenumber);
+	printf (" if ((* - .%s) < 127) && ((* - .%s) > -128)\n  bmi .%s\n", linenumber, linenumber, linenumber);
 	// branches might be allowed as below - check carefully to make sure!
-	// printf(" if ((* - .%s) < 127) && ((* - .%s) > -129)\n        bmi .%s\n",linenumber,linenumber,linenumber);
-	printf (" else\n	bpl .%dskip%s\n	jmp .%s\n",
-		branchtargetnumber, linenumber, linenumber);
+	// printf(" if ((* - .%s) < 127) && ((* - .%s) > -129)\n  bmi .%s\n",linenumber,linenumber,linenumber);
+	printf (" else\n  bpl .%dskip%s\n  jmp .%s\n", branchtargetnumber, linenumber, linenumber);
 	printf (".%dskip%s\n", branchtargetnumber++, linenumber);
 	printf (" endif\n");
     }
     else
     {
-	printf ("	bmi .%s\n", linenumber);
+	printf ("  bmi .%s\n", linenumber);
     }
 }
 
@@ -11191,16 +10694,14 @@ void bpl (char *linenumber)
     removeCR (linenumber);
     if (smartbranching)
     {
-	printf (" if ((* - .%s) < 127) && ((* - .%s) > -128)\n	bpl .%s\n",
-		linenumber, linenumber, linenumber);
-	printf (" else\n	bmi .%dskip%s\n	jmp .%s\n",
-		branchtargetnumber, linenumber, linenumber);
+	printf (" if ((* - .%s) < 127) && ((* - .%s) > -128)\n  bpl .%s\n", linenumber, linenumber, linenumber);
+	printf (" else\n  bmi .%dskip%s\n  jmp .%s\n", branchtargetnumber, linenumber, linenumber);
 	printf (".%dskip%s\n", branchtargetnumber++, linenumber);
 	printf (" endif\n");
     }
     else
     {
-	printf ("	bpl .%s\n", linenumber);
+	printf ("  bpl .%s\n", linenumber);
     }
 }
 
@@ -11209,16 +10710,14 @@ void bne (char *linenumber)
     removeCR (linenumber);
     if (smartbranching)
     {
-	printf (" if ((* - .%s) < 127) && ((* - .%s) > -128)\n	BNE .%s\n",
-		linenumber, linenumber, linenumber);
-	printf (" else\n	beq .%dskip%s\n	jmp .%s\n",
-		branchtargetnumber, linenumber, linenumber);
+	printf (" if ((* - .%s) < 127) && ((* - .%s) > -128)\n  bne .%s\n", linenumber, linenumber, linenumber);
+	printf (" else\n  beq .%dskip%s\n  jmp .%s\n", branchtargetnumber, linenumber, linenumber);
 	printf (".%dskip%s\n", branchtargetnumber++, linenumber);
 	printf (" endif\n");
     }
     else
     {
-	printf ("	bne .%s\n", linenumber);
+	printf ("  bne .%s\n", linenumber);
     }
 }
 
@@ -11227,16 +10726,14 @@ void beq (char *linenumber)
     removeCR (linenumber);
     if (smartbranching)
     {
-	printf (" if ((* - .%s) < 127) && ((* - .%s) > -128)\n	BEQ .%s\n",
-		linenumber, linenumber, linenumber);
-	printf (" else\n	bne .%dskip%s\n	jmp .%s\n",
-		branchtargetnumber, linenumber, linenumber);
+	printf (" if ((* - .%s) < 127) && ((* - .%s) > -128)\n  beq .%s\n", linenumber, linenumber, linenumber);
+	printf (" else\n  bne .%dskip%s\n  jmp .%s\n", branchtargetnumber, linenumber, linenumber);
 	printf (".%dskip%s\n", branchtargetnumber++, linenumber);
 	printf (" endif\n");
     }
     else
     {
-	printf ("	beq .%s\n", linenumber);
+	printf ("  beq .%s\n", linenumber);
     }
 }
 
@@ -11245,16 +10742,14 @@ void bcc (char *linenumber)
     removeCR (linenumber);
     if (smartbranching)
     {
-	printf (" if ((* - .%s) < 127) && ((* - .%s) > -128)\n	bcc .%s\n",
-		linenumber, linenumber, linenumber);
-	printf (" else\n	bcs .%dskip%s\n	jmp .%s\n",
-		branchtargetnumber, linenumber, linenumber);
+	printf (" if ((* - .%s) < 127) && ((* - .%s) > -128)\n  bcc .%s\n", linenumber, linenumber, linenumber);
+	printf (" else\n  bcs .%dskip%s\n  jmp .%s\n", branchtargetnumber, linenumber, linenumber);
 	printf (".%dskip%s\n", branchtargetnumber++, linenumber);
 	printf (" endif\n");
     }
     else
     {
-	printf ("	bcc .%s\n", linenumber);
+	printf ("  bcc .%s\n", linenumber);
     }
 
 }
@@ -11264,16 +10759,14 @@ void bcs (char *linenumber)
     removeCR (linenumber);
     if (smartbranching)
     {
-	printf (" if ((* - .%s) < 127) && ((* - .%s) > -128)\n	bcs .%s\n",
-		linenumber, linenumber, linenumber);
-	printf (" else\n	bcc .%dskip%s\n	jmp .%s\n",
-		branchtargetnumber, linenumber, linenumber);
+	printf (" if ((* - .%s) < 127) && ((* - .%s) > -128)\n  bcs .%s\n", linenumber, linenumber, linenumber);
+	printf (" else\n  bcc .%dskip%s\n  jmp .%s\n", branchtargetnumber, linenumber, linenumber);
 	printf (".%dskip%s\n", branchtargetnumber++, linenumber);
 	printf (" endif\n");
     }
     else
     {
-	printf ("	bcs .%s\n", linenumber);
+	printf ("  bcs .%s\n", linenumber);
     }
 }
 
@@ -11282,16 +10775,14 @@ void bvc (char *linenumber)
     removeCR (linenumber);
     if (smartbranching)
     {
-	printf (" if ((* - .%s) < 127) && ((* - .%s) > -128)\n	bvc .%s\n",
-		linenumber, linenumber, linenumber);
-	printf (" else\n	bvs .%dskip%s\n	jmp .%s\n",
-		branchtargetnumber, linenumber, linenumber);
+	printf (" if ((* - .%s) < 127) && ((* - .%s) > -128)\n  bvc .%s\n", linenumber, linenumber, linenumber);
+	printf (" else\n  bvs .%dskip%s\n  jmp .%s\n", branchtargetnumber, linenumber, linenumber);
 	printf (".%dskip%s\n", branchtargetnumber++, linenumber);
 	printf (" endif\n");
     }
     else
     {
-	printf ("	bvc .%s\n", linenumber);
+	printf ("  bvc .%s\n", linenumber);
     }
 }
 
@@ -11300,16 +10791,14 @@ void bvs (char *linenumber)
     removeCR (linenumber);
     if (smartbranching)
     {
-	printf (" if ((* - .%s) < 127) && ((* - .%s) > -128)\n	bvs .%s\n",
-		linenumber, linenumber, linenumber);
-	printf (" else\n	bvc .%dskip%s\n	jmp .%s\n",
-		branchtargetnumber, linenumber, linenumber);
+	printf (" if ((* - .%s) < 127) && ((* - .%s) > -128)\n  bvs .%s\n", linenumber, linenumber, linenumber);
+	printf (" else\n  bvc .%dskip%s\n  jmp .%s\n", branchtargetnumber, linenumber, linenumber);
 	printf (".%dskip%s\n", branchtargetnumber++, linenumber);
 	printf (" endif\n");
     }
     else
     {
-	printf ("	bvs .%s\n", linenumber);
+	printf ("  bvs .%s\n", linenumber);
     }
 }
 
@@ -11364,8 +10853,7 @@ void orgprintf (char *format, ...)
     FILE *banksetout;
     banksetout = fopen (BANKSETASM, "ab");
     if (banksetout == NULL)
-	prerror ("Couldn't open bankset assembly file %s for update\n",
-		 BANKSETASM);
+	prerror ("Couldn't open bankset assembly file %s for update\n", BANKSETASM);
     fprintf (banksetout, "%s", buffer);
     fclose (banksetout);
 }
@@ -11391,8 +10879,7 @@ void gfxprintf (char *format, ...)
     FILE *banksetout;
     banksetout = fopen (BANKSETASM, "ab");
     if (banksetout == NULL)
-	prerror ("Couldn't open bankset assembly file %s for update\n",
-		 BANKSETASM);
+	prerror ("Couldn't open bankset assembly file %s for update\n", BANKSETASM);
     fprintf (banksetout, "%s", buffer);
     fclose (banksetout);
 }
@@ -11452,16 +10939,14 @@ int isimmed (char *value)
 	    return 1;
 	}
     }
-    if (!strcmp
-	(value + (strlen (value) > 7 ? strlen (value) - 7 : 0), "_length"))
+    if (!strcmp (value + (strlen (value) > 7 ? strlen (value) - 7 : 0), "_length"))
     {
 	// Warning about use of data_length before data statement
 	prwarn
 	    ("possible use of data statement length before data statement is defined\n      workaround: forward declaration may be done by const %s=%s at beginning of code",
 	     value, value);
     }
-    if ((value[0] == '$') || (value[0] == '%')
-	|| (value[0] < (unsigned char) 0x3A))
+    if ((value[0] == '$') || (value[0] == '%') || (value[0] < (unsigned char) 0x3A))
     {
 	return 1;
     }
@@ -11494,8 +10979,7 @@ void remove_trailing_commas (char *linenumber)	// remove trailing commas from st
     {
 	if ((linenumber[i] != ',') &&
 	    (linenumber[i] != ' ') &&
-	    (linenumber[i] != (unsigned char) 0x0A)
-	    && (linenumber[i] != (unsigned char) 0x0D))
+	    (linenumber[i] != (unsigned char) 0x0A) && (linenumber[i] != (unsigned char) 0x0D))
 	    break;
 	if (linenumber[i] == ',')
 	{
@@ -11503,10 +10987,6 @@ void remove_trailing_commas (char *linenumber)	// remove trailing commas from st
 	    break;
 	}
     }
-}
-
-void header_open (FILE * header)
-{
 }
 
 void header_write (FILE * header, char *filename)
