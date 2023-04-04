@@ -1256,7 +1256,7 @@ int checkset (char *option, int typemask)
 	    if ((myheader.mapper_options & 7) == 6)
 		return (1);
     }
-    if (!strcmp (option, "mram"))
+    if (!strcmp (option, "mram@4000"))
     {
 	if ((!v4only) && (typemask & 3))
 	    if (myheader.carttype2 & 128)
@@ -1265,10 +1265,10 @@ int checkset (char *option, int typemask)
 	    if ((myheader.mapper_options & 7) == 2)
 		return (1);
     }
-    if (!strcmp (option, "hram"))
+    if (!strcmp (option, "hram@4000"))
     {
 	if ((!v4only) && (typemask & 3))
-	    if (myheader.carttype2 & 64)
+	    if (myheader.carttype1 & 64)
 		return (1);
 	if ((!v3only) && (typemask & 4))
 	    if ((myheader.mapper_options & 7) == 3)
