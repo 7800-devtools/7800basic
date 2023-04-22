@@ -225,7 +225,7 @@ int main (int argc, char **argv)
 	printf ("\n");
 	printf ("Options:  linear supergame souper bankset absolute activision\n");
 	printf ("  rom@4000 bank6@4000 ram@4000 mram@4000 hram@4000 bankram pokey@440 pokey@450\n");
-	printf ("  pokey@800 pokey@4000 ym2151@460 covox@430 irqpokey1 irqpokey2 irqym2152\n");
+	printf ("  pokey@800 pokey@4000 ym2151@460 covox@430 irqpokey1 irqpokey2 irqym2151\n");
 	printf ("  7800joy1 7800joy2 lightgun1 lightgun2 paddle1 paddle2 tball1 tball2\n");
 	printf ("  2600joy1 2600joy2 driving1 driving2 keypad1 keypad2 stmouse1 stmouse2\n");
 	printf ("  amouse1 amouse2 snes1 snes2 hsc savekey xm tvpal tvntsc composite\n");
@@ -917,7 +917,7 @@ void setunset (char *command)
 		myheader.interrupt2 = myheader.interrupt2 & (2 ^ 0xff);
 	}
     }
-    else if (strcmp (noun, "irqym2152") == 0)
+    else if (strcmp (noun, "irqym2151") == 0)
     {
 	if (set)
 	{
@@ -932,9 +932,9 @@ void setunset (char *command)
 	}
 	else
 	{
-	    if ((!v4only) && (checkset ("irqym2152", 3)))
+	    if ((!v4only) && (checkset ("irqym2151", 3)))
 		myheader.irq = myheader.irq & (8 ^ 0xff);	// strip @440
-	    if ((!v3only) && (checkset ("irqym2152", 4)))
+	    if ((!v3only) && (checkset ("irqym2151", 4)))
 		myheader.interrupt2 = myheader.interrupt2 & (4 ^ 0xff);
 	}
     }
@@ -1174,8 +1174,8 @@ void syncheader (void)
 	setunset ("set irqpokey1");
     if (checkset ("irqpokey2", 7))
 	setunset ("set irqpokey2");
-    if (checkset ("irqym2152", 7))
-	setunset ("set irqym2152");
+    if (checkset ("irqym2151", 7))
+	setunset ("set irqym2151");
 }
 
 int checkset (char *option, int typemask)
@@ -1361,7 +1361,7 @@ int checkset (char *option, int typemask)
 	    if (myheader.interrupt2 & 2)
 		return (1);
     }
-    if (!strcmp (option, "irqym2152"))
+    if (!strcmp (option, "irqym2151"))
     {
 	if ((!v4only) && (typemask & 3))
 	    if (myheader.irq & 8)
@@ -1497,8 +1497,8 @@ void report (void)
 		printf ("irqpokey1 ");
 	    if (checkset ("irqpokey2", 3))
 		printf ("irqpokey2 ");
-	    if (checkset ("irqym2152", 3))
-		printf ("irqym2152 ");
+	    if (checkset ("irqym2151", 3))
+		printf ("irqym2151 ");
 	}
 	printf ("\n");
     }
@@ -1550,8 +1550,8 @@ void report (void)
 		printf ("irqpokey1 ");
 	    if (checkset ("irqpokey2", 4))
 		printf ("irqpokey2 ");
-	    if (checkset ("irqym2152", 4))
-		printf ("irqym2152 ");
+	    if (checkset ("irqym2151", 4))
+		printf ("irqym2151 ");
 	}
 	printf ("\n");
     }
