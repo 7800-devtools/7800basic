@@ -12,7 +12,7 @@
 //      7800header - a simple app to generate/interrogate a a78 header.
 //                      Michael Saarna (aka RevEng@AtariAge)
 
-#define HEADER_VERSION_INFO "7800header 0.17"
+#define HEADER_VERSION_INFO "7800header 0.19"
 
 void usage (char *binaryname);
 uint32_t phtole32 (uint32_t value);
@@ -226,9 +226,9 @@ int main (int argc, char **argv)
 	printf ("Options:  linear supergame souper bankset absolute activision\n");
 	printf ("  rom@4000 bank6@4000 ram@4000 mram@4000 hram@4000 bankram pokey@440 pokey@450\n");
 	printf ("  pokey@800 pokey@4000 ym2151@460 covox@430 irqpokey1 irqpokey2 irqym2151\n");
-	printf ("  7800joy1 7800joy2 lightgun1 lightgun2 paddle1 paddle2 tball1 tball2\n");
-	printf ("  2600joy1 2600joy2 driving1 driving2 keypad1 keypad2 stmouse1 stmouse2\n");
-	printf ("  amouse1 amouse2 snes1 snes2 hsc savekey xm tvpal tvntsc composite\n");
+	printf ("  7800joy1/2 lightgun1/2 paddle1/2 tball1/2 7800joy1/2 lightgun1/2 paddle1/2\n");
+	printf ("  tball1/2 2600joy1/2 driving1/2 keypad1/2 stmouse1/2 amouse1/2 snes1/2\n");
+	printf ("  mega78001/2 hsc savekey xm tvpal tvntsc composite mregion\n");
 	printf ("> ");
 
 	if (fgets (usercommand, 1024, stdin))
@@ -967,6 +967,13 @@ void setunset (char *command)
 	else
 	    myheader.tvformat = myheader.tvformat & 0xfd;
     }
+    else if (strcmp (noun, "mregion") == 0)
+    {
+	if (set)
+	    myheader.tvformat = myheader.tvformat | 4;
+	else
+	    myheader.tvformat = myheader.tvformat & 0xfb;
+    }
     else if (strcmp (noun, "savekey") == 0)
     {
 	if (set)
@@ -1132,6 +1139,21 @@ void setunset (char *command)
 	if (set)
 	    myheader.controller2 = 11;
 	else if (myheader.controller2 == 11)
+	    myheader.controller2 = 0;
+    }
+
+    else if (strcmp (noun, "mega78001") == 0)
+    {
+	if (set)
+	    myheader.controller1 = 12;
+	else if (myheader.controller1 == 12)
+	    myheader.controller1 = 0;
+    }
+    else if (strcmp (noun, "mega78002") == 0)
+    {
+	if (set)
+	    myheader.controller2 = 12;
+	else if (myheader.controller2 == 12)
 	    myheader.controller2 = 0;
     }
 
@@ -1586,6 +1608,8 @@ void report (void)
 	printf ("amouse1 ");
     if (myheader.controller1 == 11)
 	printf ("snes1 ");
+    if (myheader.controller1 == 12)
+	printf ("mega78001 ");
     if (myheader.controller2 == 0)
 	printf ("none ");
     if (myheader.controller2 == 1)
@@ -1608,6 +1632,8 @@ void report (void)
 	printf ("amouse2 ");
     if (myheader.controller2 == 11)
 	printf ("snes2 ");
+    if (myheader.controller2 == 12)
+	printf ("mega78002 ");
 
     printf ("\n");
 
@@ -1639,6 +1665,8 @@ void report (void)
 	printf ("PAL");
     if (myheader.tvformat & 2)
 	printf (" composite");
+    if (myheader.tvformat & 4)
+	printf (" multi-region");
 
     printf ("\n\n");
 }

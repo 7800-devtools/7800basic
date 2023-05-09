@@ -22,7 +22,7 @@ extern char currentcharset[256];
 extern int graphicsdatawidth[16];
 extern char charactersetchars[257];
 
-#define BASIC_VERSION_INFO "7800basic v0.24"
+#define BASIC_VERSION_INFO "7800basic v0.26"
 
 int main (int argc, char *argv[])
 {
