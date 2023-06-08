@@ -1,10 +1,11 @@
 // Provided under the GPL v2 license. See the included LICENSE.txt for details.
-
-// 7800rmt2asm - Reads in either a SAP wrapped RMT file, or an RMT file, 
-// and creates relocatable assembly code from it.
+// 7800rmt2asm - Reads in either a SAP wrapped RMT file, or an RMT file, and
+// creates relocatable assembly code from it.
 
 // The program does what it says, but could use some source clean-up and 
 // options.
+
+// Format info: https://github.com/VinsCool/RASTER-Music-Tracker/blob/main/asm_src/Patch-16/rmtformat.txt
 
 #define HEADER_VERSION_INFO "7800rmt2asm 0.1"
 
@@ -12,8 +13,6 @@
 #include <stdlib.h>
 #include <string.h>
 #include <stdint.h>
-
-#define DESTADDR 0x0000
 
 #pragma pack(push, 1)
 struct rmtheader {
@@ -49,6 +48,9 @@ int main (int argc, char **argv)
 	struct rmtheader *rmthead;
 	struct upoint *myupoint;
 
+	uint8_t *lo,*hi;
+	uint16_t val;
+
 	fprintf(stderr, "\n%s %s %s\n", HEADER_VERSION_INFO, __DATE__, __TIME__);
 
 	if(argc==1)
@@ -58,9 +60,18 @@ int main (int argc, char **argv)
 	}
 	strncpy(outname,argv[1],1024);
 	int len=strlen(outname);
-	if((len>4) && (outname[len-4]=='.'))
-		outname[len-4]=0; 
-	strcat(outname,".rmtasm");
+	// strip the first extension found in the original filename
+	for(t=len;t>0;t--)
+	{
+		if(outname[t]=='.')
+		{	
+			outname[t]=0; 
+			break;
+		}
+		if((outname[t]=='/')||(outname[t]=='/'))
+			break;
+	}
+	strcat(outname,".rmta");
 
 	in=fopen(argv[1],"rb");
 	if(in==NULL)
@@ -120,16 +131,17 @@ int main (int argc, char **argv)
 	int i;
 
 	// start outputing the he
+	fprintf(out,";RMTA - This line is required for 7800basic autodetection. Don't remove.\n");
+	fprintf(out,";#### %s - converted by %s %s %s\n\n", outname, HEADER_VERSION_INFO, __DATE__, __TIME__);
 	fprintf(out,".RMTSTART SET .\n");
 	fprintf(out,"\n");
-	fprintf(out," ; #### %s - converted by %s %s %s\n", outname, HEADER_VERSION_INFO, __DATE__, __TIME__);
 	fprintf(out,"\n");
 	fprintf(out," ; #### RMT header...\n");
 	fprintf(out,"   .byte \"RMT4\"              ; magic\n");
-	fprintf(out,"   .byte $%02x             ; tracklen\n",rmthead->track_len);
-	fprintf(out,"   .byte $%02x             ; song speed\n",rmthead->song_speed);
-	fprintf(out,"   .byte $%02x             ; player freq\n",rmthead->player_freq);
-	fprintf(out,"   .byte $%02x             ; format version number\n",rmthead->format_version_number);
+	fprintf(out,"   .byte $%02x                 ; tracklen\n",rmthead->track_len);
+	fprintf(out,"   .byte $%02x                 ; song speed\n",rmthead->song_speed);
+	fprintf(out,"   .byte $%02x                 ; player freq\n",rmthead->player_freq);
+	fprintf(out,"   .byte $%02x                 ; format version number\n",rmthead->format_version_number);
 	fprintf(out,"   .word (.RMTSTART+$%04x)   ; pointer to instrument pointers\n",(rmthead->pointer_to_instrument_pointers)-memstart);
 	fprintf(out,"   .word (.RMTSTART+$%04x)   ; pointer to track pointers, lo\n",(rmthead->pointer_to_track_pointers_lo)-memstart);
 	fprintf(out,"   .word (.RMTSTART+$%04x)   ; pointer to track pointers, hi\n",(rmthead->pointer_to_track_pointers_hi)-memstart);
@@ -149,7 +161,10 @@ int main (int argc, char **argv)
                 if(i>0)
 			fprintf(out,", ");
 		myupoint=(void *)(rmthead->magic)+t;
-		fprintf(out,"(.RMTSTART+$%04x) ",(myupoint->pointer) - memstart);
+		if((myupoint->pointer)!=0)
+			fprintf(out,"(.RMTSTART+$%04x) ",(myupoint->pointer) - memstart);
+		else
+			fprintf(out,"(     $0000     ) ");
 		i++;
 		if((i==16)&&((t+2)<endrange))
 		{
@@ -166,8 +181,6 @@ int main (int argc, char **argv)
 	endrange=(rmthead->pointer_to_track_pointers_hi)-memstart;
 	for(t=startrange;t<endrange;t++)
 	{
-		uint8_t *lo,*hi;
-		uint16_t val;
 		lo = buffer+rmtstart+t;
 		hi = buffer+rmtstart+t+endrange-startrange;
 
@@ -205,15 +218,15 @@ int main (int argc, char **argv)
 
 	fprintf(out,"\n");
 
-	fprintf(out," ; #### Track+Instrument+Song Data...\n");
+	fprintf(out," ; #### Track+Instrument Data...\n");
 	startrange=endrange+(endrange-startrange); // past the end of the trackpointer table
-	endrange=size-2-rmtstart;
+	endrange=(rmthead->pointer_to_song)-memstart;
 	fprintf(out,"   .byte ");
         i=0;
 	for(t=startrange;t<endrange;t++)
 	{
                 if(i>0)
-			fprintf(out,", ");
+			fprintf(out,",");
 		fprintf(out,"$%02x",buffer[t+rmtstart]);
 		i++;
 		if((i==16)&&((t+2)<endrange))
@@ -224,7 +237,43 @@ int main (int argc, char **argv)
 	}
 	fprintf(out,"\n\n");
 
-	fprintf(out,"   .word (.RMTSTART+$%04x)   ; pointer to song\n",(rmthead->pointer_to_song)-memstart);
+	fprintf(out," ; #### Song Data...\n");
+	// ...
+	startrange=(rmthead->pointer_to_song)-memstart;
+	endrange=size-rmtstart;
+
+	fprintf(out,"   .byte ");
+        i=0;
+	for(t=startrange;t<endrange;t++)
+	{
+		if( (buffer[t+rmtstart]==0xFE) && (buffer[t+1+rmtstart]==0x00))
+		{
+			val = buffer[t+rmtstart+2] + (buffer[t+3+rmtstart] << 8) - memstart;
+			fprintf(out,"\n");
+			fprintf(out,"   .word $00FE,(.RMTSTART+$%04x)\n",val);
+			t=t+3;
+			if(t<(endrange-1))
+			{
+				fprintf(out,"   .byte ");
+				i=0;
+			}
+			continue;
+		}
+                if(i>0)
+			fprintf(out,",");
+		fprintf(out,"$%02x",buffer[t+rmtstart]);
+		i++;
+		if((i==16)&&((t+1)<endrange))
+		{
+			fprintf(out,"\n   .byte ");
+			i=0;
+		}
+	}
+	fprintf(out,"\n\n");
+
+
+	//val = buffer[t+rmtstart] + (buffer[t+1+rmtstart] << 8) - memstart;
+	//fprintf(out,"   .word (.RMTSTART+$%04x) ; song loop pointer\n",val);
 
 	fclose(out);
 }
