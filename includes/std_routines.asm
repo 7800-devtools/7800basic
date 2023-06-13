@@ -96,6 +96,12 @@ TIMEOFFSET         = 10
          jsr servicesong
      endif ; MUSICTRACKER
      ifconst RMT
+         ifnconst RMTOFFSPEED
+             ifconst RMTPALSPEED
+                 lda ntscslowframe
+                 bne skiprasterupdate
+             endif
+         endif
          lda rasterpause
          beq skiprasterupdate
          jsr RASTERMUSICTRACKER+3
@@ -595,17 +601,17 @@ uninterruptableroutines
 
      lda #0
      sta palfastframe
-     lda paldetected
-     beq skippalframeadjusting
-     ; ** PAL console is detected. we increment palframes to accurately count 5 frames,
-     ldx palframes
-     inx
-     cpx #5
+     sta ntscslowframe
+     ldx paldetected ; 0=ntsc 1=pal
+     ldy palframes
+     iny
+     cpy #5
      bne palframeskipdone
-     inc palfastframe
-     ldx #0
+     lda paldetected
+     inc ntscslowframe,x
+     ldy #0
 palframeskipdone
-     stx palframes
+     sty palframes
 skippalframeadjusting
 
      ifconst MUSICTRACKER
@@ -620,14 +626,17 @@ servicesongwasnotmissed
      endif ; MUSICTRACKER
 
      ifconst RMT
-         lda palfastframe
-         beq skiprasterupdate2
-         lda rasterpause
-         beq skiprasterupdate2
-         jsr RASTERMUSICTRACKER+3
+         ifnconst RMTPALSPEED
+             ifnconst RMTOFFSPEED
+                 lda palfastframe
+                 beq skiprasterupdate2
+                 lda rasterpause
+                 beq skiprasterupdate2
+                 jsr RASTERMUSICTRACKER+3
 skiprasterupdate2
+             endif
+         endif
      endif
-
 
      rts
 
