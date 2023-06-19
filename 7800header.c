@@ -12,7 +12,7 @@
 //      7800header - a simple app to generate/interrogate a a78 header.
 //                      Michael Saarna (aka RevEng@AtariAge)
 
-#define HEADER_VERSION_INFO "7800header 0.19"
+#define HEADER_VERSION_INFO "7800header 0.21"
 
 void usage (char *binaryname);
 uint32_t phtole32 (uint32_t value);
@@ -225,7 +225,7 @@ int main (int argc, char **argv)
 	printf ("\n");
 	printf ("Options:  linear supergame souper bankset absolute activision\n");
 	printf ("  rom@4000 bank6@4000 ram@4000 mram@4000 hram@4000 bankram pokey@440 pokey@450\n");
-	printf ("  pokey@800 pokey@4000 ym2151@460 covox@430 irqpokey1 irqpokey2 irqym2151\n");
+	printf ("  pokey@800 pokey@4000 ym2151@460 covox@430 adpcm@420 irqpokey1/2 irqym2151\n");
 	printf ("  7800joy1/2 lightgun1/2 paddle1/2 tball1/2 7800joy1/2 lightgun1/2 paddle1/2\n");
 	printf ("  tball1/2 2600joy1/2 driving1/2 keypad1/2 stmouse1/2 amouse1/2 snes1/2\n");
 	printf ("  mega78001/2 hsc savekey xm tvpal tvntsc composite mregion\n");
@@ -615,9 +615,6 @@ void setunset (char *command)
 		myheader.carttype1 = myheader.carttype1 & (32 ^ 0xff);
 	    if ((!v3only) && (checkset ("bankset", 4)))
 		myheader.mapper_options = myheader.mapper_options & 0x7F;
-
-	    if (gamesize > 131071)
-		setunset ("set supergame");
 	}
     }
 
@@ -870,8 +867,23 @@ void setunset (char *command)
 	}
 	else
 	{
-	    if ((!v4only) && (checkset ("covox@430", 3)))
+	    if ((!v3only) && (checkset ("covox@430", 4)))
 		myheader.audio2 = myheader.audio2 & (16 ^ 0xff);
+	}
+    }
+    else if (strcmp (noun, "adpcm@420") == 0)
+    {
+	if (set)
+	{
+	    if (!v4only)
+		prwarn ("adpcm@420 skipped in v3 header fields. (unsupported)\n");
+	    if (!v3only)
+		myheader.audio2 = myheader.audio2 | 32;
+	}
+	else
+	{
+	    if ((!v3only) && (checkset ("adpcm@420", 4)))
+		myheader.audio2 = myheader.audio2 & (32 ^ 0xff);
 	}
     }
     else if (strcmp (noun, "irqpokey1") == 0)
@@ -1198,6 +1210,8 @@ void syncheader (void)
 	setunset ("set ym2151@460");
     if (checkset ("covox@430", 7))
 	setunset ("set covox@430");
+    if (checkset ("adpcm@420", 7))
+	setunset ("set adpcm@420");
     if (checkset ("irqpokey1", 7))
 	setunset ("set irqpokey1");
     if (checkset ("irqpokey2", 7))
@@ -1371,6 +1385,12 @@ int checkset (char *option, int typemask)
 	    if (myheader.audio2 & 16)
 		return (1);
     }
+    if (!strcmp (option, "adpcm@420"))
+    {
+	if ((!v3only) && (typemask & 4))
+	    if (myheader.audio2 & 32)
+		return (1);
+    }
     if (!strcmp (option, "irqpokey1"))
     {
 	if ((!v4only) && (typemask & 3))
@@ -1521,6 +1541,8 @@ void report (void)
 		printf ("pokey@800 ");
 	    if (checkset ("covox@430", 3))
 		printf ("covox@430 ");
+	    if (checkset ("adpcm@420", 3))
+		printf ("adpcm@420 ");
 	    if (checkset ("irqpokey1", 3))
 		printf ("irqpokey1 ");
 	    if (checkset ("irqpokey2", 3))
@@ -1574,6 +1596,8 @@ void report (void)
 		printf ("pokey@800 ");
 	    if (checkset ("covox@430", 4))
 		printf ("covox@430 ");
+	    if (checkset ("adpcm@420", 4))
+		printf ("adpcm@420 ");
 	    if (checkset ("irqpokey1", 4))
 		printf ("irqpokey1 ");
 	    if (checkset ("irqpokey2", 4))
