@@ -240,24 +240,20 @@ int main (int argc, char **argv)
 		{
 			val = buffer[t+2] + (buffer[t+3] << 8) - memstart;
 			fprintf(out,"\n");
-			fprintf(out,"   .word $%02XFE,(.RMTSTART+$%04x)\n",buffer[t+1],val);
+			fprintf(out,"   .word $%02XFE,(.RMTSTART+$%04x) ; GOTO",buffer[t+1],val);
 			t=t+3;
-			if(t<(endrange-1))
-			{
-				fprintf(out,"   .byte ");
-				i=0;
-			}
+			i==16;
 			continue;
 		}
-                if(i>0)
-			fprintf(out,",");
-		fprintf(out,"$%02x",buffer[t]);
-		i++;
 		if((i==16)&&((t+1)<endrange))
 		{
 			fprintf(out,"\n   .byte ");
 			i=0;
 		}
+                if(i>0)
+			fprintf(out,",");
+		fprintf(out,"$%02x",buffer[t]);
+		i++;
 	}
 	fprintf(out,"\n\n");
 
