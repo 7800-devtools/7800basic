@@ -51,7 +51,7 @@ int main (int argc, char **argv)
 	uint8_t *lo,*hi;
 	uint16_t val;
 
-	fprintf(stderr, "\n%s %s %s\n", HEADER_VERSION_INFO, __DATE__, __TIME__);
+	fprintf(stderr, "%s %s %s\n", HEADER_VERSION_INFO, __DATE__, __TIME__);
 
 	if(argc==1)
 	{
@@ -130,7 +130,7 @@ int main (int argc, char **argv)
 		memstart = rmthead->vect2_start;
 	int i;
 
-	// start outputing the he
+	// The header...
 	fprintf(out,";RMTA - This line is required for 7800basic autodetection. Don't remove.\n");
 	fprintf(out,";#### %s - converted by %s %s %s\n\n", outname, HEADER_VERSION_INFO, __DATE__, __TIME__);
 	fprintf(out,".RMTSTART SET .\n");
@@ -154,28 +154,17 @@ int main (int argc, char **argv)
 	// output the instrument pointers, which are consecutive words...
 	startrange=(rmthead->pointer_to_instrument_pointers)-memstart;
 	endrange=(rmthead->pointer_to_track_pointers_lo)-memstart;
-	fprintf(out,"   .word ");
-        i=0;
 	for(t=startrange;t<endrange;t=t+2)
 	{
-                if(i>0)
-			fprintf(out,", ");
 		myupoint=(void *)(rmthead->magic)+t;
 		if((myupoint->pointer)!=0)
-			fprintf(out,"(.RMTSTART+$%04x) ",(myupoint->pointer) - memstart);
+			fprintf(out,"   .word (.RMTSTART+$%04x)\n",(myupoint->pointer) - memstart);
 		else
-			fprintf(out,"(     $0000     ) ");
-		i++;
-		if((i==16)&&((t+2)<endrange))
-		{
-			fprintf(out,"\n   .word ");
-			i=0;
-		}
+			fprintf(out,"   .word (     $0000     )\n");
 	}
 	fprintf(out,"\n\n");
 
 	// output the track pointers, which are split into 2 separate LO and HI byte tables
-
 	fprintf(out," ; #### Track Pointer Table, Lo...\n");
 	startrange=(rmthead->pointer_to_track_pointers_lo)-memstart;
 	endrange=(rmthead->pointer_to_track_pointers_hi)-memstart;
@@ -239,18 +228,19 @@ int main (int argc, char **argv)
 
 	fprintf(out," ; #### Song Data...\n");
 	// ...
-	startrange=(rmthead->pointer_to_song)-memstart;
-	endrange=size-rmtstart;
+	startrange=(rmthead->pointer_to_song)-memstart+rmtstart;
+	endrange=size-2;
 
 	fprintf(out,"   .byte ");
         i=0;
 	for(t=startrange;t<endrange;t++)
 	{
-		if( (buffer[t+rmtstart]==0xFE) && (buffer[t+1+rmtstart]==0x00))
+		// if the 4 byte command starts with 0xFE it's a GOTO
+		if( (buffer[t]==0xFE) && (!((t-startrange)&3)))
 		{
-			val = buffer[t+rmtstart+2] + (buffer[t+3+rmtstart] << 8) - memstart;
+			val = buffer[t+2] + (buffer[t+3] << 8) - memstart;
 			fprintf(out,"\n");
-			fprintf(out,"   .word $00FE,(.RMTSTART+$%04x)\n",val);
+			fprintf(out,"   .word $%02XFE,(.RMTSTART+$%04x)\n",buffer[t+1],val);
 			t=t+3;
 			if(t<(endrange-1))
 			{
@@ -261,7 +251,7 @@ int main (int argc, char **argv)
 		}
                 if(i>0)
 			fprintf(out,",");
-		fprintf(out,"$%02x",buffer[t+rmtstart]);
+		fprintf(out,"$%02x",buffer[t]);
 		i++;
 		if((i==16)&&((t+1)<endrange))
 		{
@@ -270,10 +260,6 @@ int main (int argc, char **argv)
 		}
 	}
 	fprintf(out,"\n\n");
-
-
-	//val = buffer[t+rmtstart] + (buffer[t+1+rmtstart] << 8) - memstart;
-	//fprintf(out,"   .word (.RMTSTART+$%04x) ; song loop pointer\n",val);
 
 	fclose(out);
 }

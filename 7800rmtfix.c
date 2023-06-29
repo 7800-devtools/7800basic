@@ -143,7 +143,7 @@ int main (int argc, char **argv)
     endfix = size - 3;
     for (t = startfix; t < endfix; t = t + 1)
     {
-        if ((buffer[t]==0xFE)&&(buffer[t+1]==0x00))
+        if ((buffer[t]==0xFE)&&(!((t-startfix)&3)))
         {
 	    lo = buffer + t + 2;
 	    hi = buffer + t + 3;
