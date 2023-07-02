@@ -351,6 +351,12 @@ void keywords (char **cstatement)
 	    stopsong ();
 	else if (!strncmp (statement[1], "playsong\0", 9))
 	    playsong (statement);
+	else if (!strncmp (statement[1], "playrmt\0", 8))
+	    playrmt (statement);
+	else if (!strncmp (statement[1], "stoprmt\0", 7))
+	    stoprmt ();
+	else if (!strncmp (statement[1], "startrmt\0", 8))
+	    startrmt ();
 	else if (!strncmp (statement[1], "speak\0", 6))
 	    speak (statement);
 	else if (!strncmp (statement[1], "data\0", 5))
@@ -501,6 +507,8 @@ void keywords (char **cstatement)
 	    add_graphic (statement, 1);
 	else if (!strncmp (statement[1], "incmapfile\0", 10))
 	    incmapfile (statement);
+	else if (!strncmp (statement[1], "incrmtfile\0", 10))
+	    incrmtfile (statement);
 	else if (!strncmp (statement[1], "newblock\0", 8))
 	    newblock ();
 	else if (!strncmp (statement[1], "voice\0", 5))

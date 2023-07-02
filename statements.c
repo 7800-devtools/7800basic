@@ -6173,6 +6173,116 @@ void playsong (char **statement)
     }
 }
 
+void playrmt (char **statement)
+{
+    assertminimumargs (statement, "playrmt", 1);
+    removeCR (statement[2]);
+    removeCR (statement[3]);
+    printf ("  lda #0\n");
+    printf ("  sta rasterpause\n");
+    printf ("  ldx #<%s\n",statement[2]);
+    printf ("  ldy #>%s\n",statement[2]);
+    printf ("  jsr RASTERMUSICTRACKER+0 ; init: returns instrument speed\n");
+    printf ("  sta rmt_ispeed\n");
+    printf ("  lda #1\n");
+    printf ("  sta rasterpause\n");
+}
+
+void stoprmt ()
+{
+    printf ("  lda #0\n");
+    printf ("  sta rasterpause\n");
+    printf ("  jsr RASTERMUSICTRACKER+9 ; silence\n");
+}
+
+void startrmt ()
+{
+    printf ("  lda #1\n");
+    printf ("  sta rasterpause\n");
+}
+
+void incrmtfile (char **statement)
+{
+    // imports data from an rmt file.
+
+    //     1        2
+    // incrmtfile filename
+
+    char datalabelname[256];
+    int t;
+    long size;
+
+    assertminimumargs (statement, "incrmtfile", 1);
+
+    fixfilename (statement[2]);
+
+    //our label is based on the filename...
+    snprintf (datalabelname, 255, "%s", ourbasename (statement[2]));
+    checkvalidfilename (statement[2]);
+
+    //but remove the extension...
+    for (t = (strlen (datalabelname) - 1); t > 0; t--)
+    {
+        if (datalabelname[t]=='.')
+        {
+	    datalabelname[t] = 0;
+            break;
+        }
+    }
+
+    printf("%s\n",datalabelname);
+
+    // we handle rmta different than rmt, so we need to open the file
+    // first and see which it is.
+
+    char magic[6];
+    FILE *fp = fopen (statement[2], "rb");
+    if(fp==NULL)
+        prerror ("couldn't open %s",statement[2]);
+    fread(magic,1,5,fp); 
+    magic[5]=0;
+    if(!strcmp(magic,";RMTA"))
+    {
+        // this is an RMTA, so we can just do a regular include and be done
+        fclose(fp);
+        printf("  include \"%s\"\n",statement[2]);
+        return;
+    }
+    rewind(fp);
+
+    memset(magic,0,6);
+    int c;
+    while ((c = fgetc(fp)) != EOF) 
+    {
+        magic[0]=magic[1];
+        magic[1]=magic[2];
+        magic[2]=magic[3];
+        magic[3]=c;
+        if (!strncmp(magic,"RMT4",4))
+            break;
+    }
+    if (c == EOF)
+        prerror ("file doesn't appear to contain RMT data");
+    printf("  .byte \"RMT4\"\n");    
+    t=0;
+    size=0;
+    while ((c = fgetc(fp)) != EOF) 
+    {
+        size++;
+        if (t%16>0)
+            printf(",");
+        if (t%16==0)
+            printf("  .byte ");
+        printf("$%02x",c);
+        t++;
+        if (t%16==0)
+            printf("\n");
+    }
+    printf("\n");
+    fprintf(stderr,"RMT %s imported, %ld bytes\n",datalabelname,size);
+    fclose(fp);
+}
+
 void speechdata (char **statement)
 {
     char data[501], word[501], wordphonemes[501];
@@ -10341,6 +10451,14 @@ void set (char **statement)
 	    strcpy (redefined_variables[numredefvars++], "RMTVOLUME = 1");
 	    strcpy (redefined_variables[numredefvars++], "FOURBITFADE = 1");
 	}
+    }
+    else if (!strncmp (statement[2], "rmtspeed", 8))
+    {
+	assertminimumargs (statement, "set rmtspeed", 1);
+	if (!strncmp (statement[3], "pal", 3))
+	    strcpy (redefined_variables[numredefvars++], "RMTPALSPEED = 1");
+	if (!strncmp (statement[3], "off", 3))
+	    strcpy (redefined_variables[numredefvars++], "RMTOFFSPEED = 1");
     }
     else if (!strncmp (statement[2], "tiavolume", 9))
     {

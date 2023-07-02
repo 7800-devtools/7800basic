@@ -1,7 +1,7 @@
 # The bB generic-Unix makefile. Should work with most unixy OSes.
 
 
-all: adventurer/adventurer.bas.a78 banksets/banksets.bas.a78 atarivoxspeech/atarivoxspeech.bas.a78 banner/banner.bas.a78 boxcollision/boxcollision.bas.a78  doublebuffer/doublebuffer.bas.a78 helloworld/helloworld.bas.a78 pokey/pokey.bas.a78 snescontrollers/snescontrollers.bas.a78
+all: adventurer/adventurer.bas.a78 banksets/banksets.bas.a78 atarivoxspeech/atarivoxspeech.bas.a78 banner/banner.bas.a78 boxcollision/boxcollision.bas.a78  doublebuffer/doublebuffer.bas.a78 helloworld/helloworld.bas.a78 pokey/pokey.bas.a78 snescontrollers/snescontrollers.bas.a78 rmtromdemo/rmtromdemo.bas.a78 rmtramdemo/rmtramdemo.bas.a78
 
 test:
 	./make_test.sh
@@ -36,6 +36,14 @@ pokey/pokey.bas.a78:
 
 snescontrollers/snescontrollers.bas.a78: 
 	cd snescontrollers; 7800basic.sh snescontrollers.bas
+	cd ..
+
+rmtromdemo/rmtromdemo.bas.a78: 
+	cd rmtromdemo; 7800basic.sh rmtromdemo.bas
+	cd ..
+
+rmtramdemo/rmtramdemo.bas.a78: 
+	cd rmtramdemo; 7800basic.sh rmtramdemo.bas
 	cd ..
 
 clean:
