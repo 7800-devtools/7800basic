@@ -105,6 +105,7 @@ int fourbitfade_alreadyused = 0;
 
 int deprecatedframeheight = 0;
 int deprecated160bindexes = 0;
+int deprecatedboxcollision = 0;
 
 int dumpgraphics = 0;
 int dumpgraphicsaddr = 0;
@@ -8554,7 +8555,7 @@ void boxcollision (char **statement)
     }
 
     // check if widths and heights are all constants. if so, use quick box collision
-    if (isimmed (statement[8]) && isimmed (statement[10]) && isimmed (statement[16]) && isimmed (statement[18]))
+    if (isimmed (statement[8]) && isimmed (statement[10]) && isimmed (statement[16]) && isimmed (statement[18]) && (!deprecatedboxcollision))
     {
 	printf ("  QBOXCOLLISIONCHECK %s,%s,%s,%s,%s,%s,%s,%s\n",
 		statement[4], statement[6], statement[8], statement[10],
@@ -10022,6 +10023,8 @@ void set (char **statement)
 	    deprecatedframeheight = 1;
 	if (!strncmp (statement[3], "160bindexes", 11))
 	    deprecated160bindexes = 1;
+	if (!strncmp (statement[3], "boxcollision", 12))
+	    deprecatedboxcollision = 1;
     }
     else if (!strncmp (statement[2], "dlmemory\0", 8))
     {
@@ -10526,6 +10529,14 @@ void set (char **statement)
 	    }
 	}
 
+    }
+    else if (!strncmp (statement[2], "pokeysfxsupport", 14))
+    {
+	assertminimumargs (statement, "set pokeysfxsupport", 1);
+	if (!strncmp (statement[3], "on", 2))
+	{
+	    strcpy (redefined_variables[numredefvars++], "pokeysfxsupport = 1");
+	}
     }
     else if (!strncmp (statement[2], "hscsupport", 10))
     {

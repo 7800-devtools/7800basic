@@ -122,7 +122,8 @@ int main (int argc, char *argv[])
     deallocate_mem = statement;
     for (i = 0; i < 200; ++i)
     {
-	statement[i] = (char *) malloc (sizeof (char) * 200);
+	statement[i] = (char *) malloc (sizeof (char) * 201);
+        memset(statement[i],0,201);
     }
 
     while (1)
