@@ -91,6 +91,9 @@ int main (int argc, char *argv[])
     printf (" ;%s %s %s\n", BASIC_VERSION_INFO, __DATE__, __TIME__);
 
     printf ("SPACEOVERFLOW SET 0\n");
+    printf (" ifnconst SPACEOVERFLOWPASS\n");
+    printf ("SPACEOVERFLOWPASS SET 0\n");
+    printf (" endif SPACEOVERFLOWPASS\n");
 
     // these asm files are produced dynamically, so as to allow out-of-order
     // assembly with dasm. Their mere presence will affect the compile process
@@ -268,7 +271,10 @@ int main (int argc, char *argv[])
     printf ("  echo \"######## ERROR: space overflow detected in\",[SPACEOVERFLOW]d,\"areas.\"\n");
     printf ("  echo \"######## look above for areas with negative ROM space left.\"\n");
     printf ("  echo \"######## Aborting assembly.\"\n");
+    printf ("SET SPACEOVERFLOWPASS = (SPACEOVERFLOWPASS + 1)\n");
+    printf (" if SPACEOVERFLOWPASS > 0\n");
     printf ("  ERR\n");
+    printf (" endif\n");
     printf (" endif\n");
 
     printf (" \n\n");
