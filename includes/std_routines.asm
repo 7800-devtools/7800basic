@@ -598,6 +598,28 @@ uninterruptableroutines
      ifconst AVOXVOICE
          jsr serviceatarivoxqueue
      endif
+     ifconst MEGA7800SUPPORT
+         ldx #1
+mega7800polling
+         lda port0control,x
+         cmp #12 ; mega7800
+         bne mega7800handlercheck2
+         jsr mega7800handler
+         jmp mega7800handlerdone
+mega7800handlercheck2
+         cmp #1 ; proline
+         bne mega7800handlerdone
+         lda framecounter
+         eor #7 ; avoid the same frame as the snes2atari probe
+         and #63
+         bne mega7800handlerdone
+         lda #12
+         sta port0control,x
+         jsr mega7800handler
+mega7800handlerdone
+         dex
+         bpl mega7800polling
+     endif ; MEGA7800SUPPORT
 
      lda #0
      sta palfastframe
@@ -675,12 +697,38 @@ avoxsilentdata
          rts
      endif ; AVOXVOICE
 
+prolinebuttonpadhandler
+     ifconst MULTIBUTTON
+         lda framecounter
+         and #63
+         bne jbhandlercont1
+         jsr setonebuttonmode
+         lda #11
+         sta port0control,x
+         jsr snes2atari_signal_go
+         lda port0control,x
+         cmp #1 ; check if it's still a proline 
+         beq jbhandlercont1
+         jmp buttonreadloopreturn
+jbhandlercont1
+     lda #2
+     sta multibuttoncount0,x
+     endif ; MULTIBUTTON
+joybuttonpadhandler
+     lda sSWCHA             ; clear previous dirs for this pad, from
+     ora SWCHA_DIRMASK,x    ; our sSWCHA nibble.
+     sta sSWCHA
+     lda SWCHA              ; load th actual joystick dirs, ensuring
+     ora SWCHA_DIRMASK+1,x  ; we don't change the other nibble.
+     and sSWCHA
+     sta sSWCHA 
 joybuttonhandler
      txa
      asl
      tay
      lda INPT0,y
      lsr
+     ;ora #%00111111
      sta sINPT1,x
      lda INPT1,y
      and #%10000000
@@ -694,17 +742,21 @@ joybuttonhandler
      sta sINPT1,x
 
      lda joybuttonmode
-     and twobuttonmask,x
+     and thisjoy2buttonbit,x
      beq .skip1bjoyfirecheck
      lda joybuttonmode
-     ora twobuttonmask,x
+     ora thisjoy2buttonbit,x
      sta joybuttonmode
      sta SWCHB
 .skip1bjoyfirecheck
+     lda #%00111111
+     ora sINPT1,x
+     sta sINPT1,x ; ensure multibutton bits are hi
      jmp buttonreadloopreturn
 
-twobuttonmask
-     .byte %00000100,%00010000
+SWCHA_DIRMASK
+             ;  p0  p1  p0
+         .byte $F0,$0F,$F0
 
      ifconst SNES2ATARISUPPORT
 
@@ -714,10 +766,6 @@ SNES_CTLSWA_MASK
          .byte $30,$03
 SNES_CTLSWA_SIGNAL
          .byte $C0,$0C
-SWCHA_DIRMASK
-         .byte $F0,$0F
-SWCHA_INVDIRMASK
-         .byte $0F,$F0
 
          ; Probe each port for SNES, and see if autodetection succeeds anywhere.
 SNES_AUTODETECT
@@ -734,6 +782,7 @@ SNES_AUTODETECT
          endif ; HSSUPPORT
 
 SNES_AUTODETECT_LOOP
+     ifnconst MULTIBUTTON ; snesdetect shouldn't be used in multibutton mode
          lda #1 ; proline
          sta port0control,x
          jsr setportforinput
@@ -751,6 +800,7 @@ SNES_AUTODETECT_FOUND
          lda #11 ; formally set the snes controller
          sta port0control,x
          stx snesport
+     endif ; !MULTIBUTTON
          rts
      endif ; SNES2ATARISUPPORT
      
@@ -762,20 +812,6 @@ SNES2ATARI
 
 SNES_READ
          ; x=0 for left port, x=1 for right
-
-         ; Start by checking if any port directions are pressed. 
-         ; Abort the autodetect for this port if so, as snes2atari doesn't ground any 
-         ; direction pins. if directions are pressed and the port is changed to output,
-         ; that means the output is direct-shorted, and nobody seems to know if riot's
-         ; output mode has current protection.
-
-         lda SWCHA
-         ora SWCHA_INVDIRMASK,x
-         eor SWCHA_DIRMASK,x
-         bne SNES_READ_cont1
-         jmp SNES_ABORT
-SNES_READ_cont1
-
          lda port0control,x
          cmp #11 ; snes
          bne snes2atari_signal_go ; if this is a first auto-detection read, go ahead and signal
@@ -785,15 +821,13 @@ snes2atari_signal_go
          jsr SNES2ATARI_SIGNAL
 snes2atari_signal_skip
 
-         ;lda SNES_CTLSWA_MASK,x
-
          lda CTLSWA
-         and SWCHA_INVDIRMASK,x ; preserve othr nibble
+         and SWCHA_DIRMASK+1,x ; preserve other nibble
          ora SNES_CTLSWA_MASK,x
          sta CTLSWA ; enable pins UP/DOWN to work as outputs
 
          lda SWCHA
-         and SWCHA_INVDIRMASK,x ; preserve othr nibble
+         and SWCHA_DIRMASK+1,x ; preserve other nibble
          ora SNES_CTLSWA_MASK,x
 
          sta SWCHA ; latch+clock high
@@ -805,19 +839,19 @@ snes2atari_signal_skip
          nop
          nop
          lda SWCHA
-         and SWCHA_INVDIRMASK,x ; preserve othr nibble
+         and SWCHA_DIRMASK+1,x ; preserve other nibble
          sta SWCHA ; latch and clock low
          ldy #16 ; 16 bits 
 SNES2ATARILOOP
          rol INPT4,x ; sample data into carry
          lda SWCHA 
-         and SWCHA_INVDIRMASK,x ; preserve othr nibble
+         and SWCHA_DIRMASK+1,x ; preserve other nibble
          ora SNES_CLOCK_PORT_BIT,x
          sta SWCHA ; clock low
          rol snes2atari0lo,x
          rol snes2atari0hi,x
          lda SWCHA
-         and SWCHA_INVDIRMASK,x ; preserve othr nibble
+         and SWCHA_DIRMASK+1,x ; preserve other nibble
          sta SWCHA ; latch and clock low
          dey ; next bit
          bne SNES2ATARILOOP
@@ -829,26 +863,51 @@ SNES2ATARILOOP
          beq SNES_STOP_CLOCK ; if snes isn't detected, leave port in default state
          stx snesport ; snesport keeps the index of the latest autodetected controller
          lda SWCHA
-         and SWCHA_INVDIRMASK,x ; preserve othr nibble
+         and SWCHA_DIRMASK+1,x ; preserve other nibble
          ora SNES_CLOCK_PORT_BIT,x
+         jmp SNES_STOP_CLOCK
 SNES_STOP_CLOCK
          sta SWCHA ; clock low
          lda CTLSWA
-         and SWCHA_INVDIRMASK,x ; preserve othr nibble
-         ora SNES_CLOCK_PORT_BIT,x
+         and SWCHA_DIRMASK+1,x ; preserve other nibble
+         ;ora SNES_CLOCK_PORT_BIT,x
          sta CTLSWA ; set port bits to input avoid conflict with other drivers
-         rts
-SNES_ABORT
-         sta snesdetected0,x
+         ifconst MULTIBUTTON
+             lda snesdetected0,x
+             bne snesexit
+             lda #1 ; proline
+             sta port0control,x
+             jmp settwobuttonmode
+snesexit
+             lda #6
+             sta multibuttoncount0,x
+             ; stuff directions into sSWCHA nibble and buttons into sINPT1,x...
+             lda joydirshift,x
+             tay
+             lda snes2atari0hi,x
+snesjoypadloop
+             lsr
+             rol inttemp6
+             dey
+             bpl snesjoypadloop
+             lda sSWCHA
+             ora SWCHA_DIRMASK,x ; turn off the bits for this port
+             sta sSWCHA
+             lda inttemp6    
+             ora SWCHA_DIRMASK+1,x
+             and sSWCHA
+             sta sSWCHA
+             ; TODO: stuff buttons into sINPT1,x
+         endif ; MULTIBUTTON
          rts
 SNES2ATARI_SIGNAL
          ; signal to SNES2ATARI++ that we want SNES mode...
          lda CTLSWA
-         and SWCHA_INVDIRMASK,x ; preserve othr nibble
+         and SWCHA_DIRMASK+1,x ; preserve other nibble
          ora SNES_CTLSWA_SIGNAL,x
          sta CTLSWA 
          lda CTLSWA
-         and SWCHA_INVDIRMASK,x ; preserve othr nibble
+         and SWCHA_DIRMASK+1,x ; preserve other nibble
          sta SWCHA
          ldy #0
 SNES_SIGNAL_LOOP
@@ -858,6 +917,8 @@ SNES_SIGNAL_LOOP
          ora SWCHA_DIRMASK,x
          sta SWCHA
          rts
+joydirshift
+  .byte 7,3
      endif
 
 gunbuttonhandler     ; outside of the conditional, so our button handler LUT is valid
@@ -883,6 +944,142 @@ secondportgunhandler
          jmp buttonreadloopreturn
      endif ; LIGHTGUNSUPPORT
 
+mega7800handler
+     ifconst MEGA7800SUPPORT
+
+     ; ** stuff the joyick directions into the shadow register
+     lda sSWCHA             ; clear previous dirs for this pad, from
+     ora SWCHA_DIRMASK,x    ; our sSWCHA nibble.
+     sta sSWCHA
+     lda SWCHA              ; load the actual joystick dirs, ensuring
+     ora SWCHA_DIRMASK+1,x ; we don't change the other nibble.
+     and sSWCHA
+     sta sSWCHA 
+
+     ; x=0 for left port, x=1 for right
+
+     lda #0
+     sta inttemp5 ; temporary button-state storage
+     sta inttemp6 ; temporary button-state storage
+
+     lda CTLSWA
+     and SWCHA_DIRMASK+1,x ; preserve other port nibble
+     ora MEGA_INIT,x
+     sta CTLSWA ; enable pins UP/DOWN to work as outputs
+
+     ; the controller type bits take a few cycles to get set after we start
+     ; an extended read, so we'll start the first extended read early...
+     lda SWCHA
+     and SWCHA_DIRMASK+1,x ; preserve other port nibble
+     sta SWCHA ; all bits are low, which STARTS the extended read
+     nop 
+     nop 
+
+     ; first read  will be pad state (mega7800 connect and controller type)
+     ; second read will be 3 button support (SACB)
+     ; third read  will be 6 button support (MXYZ)
+     
+     ldy #5 ; read 6x states, with the first 2x being the controller type
+m7readloop
+     lda SWCHA
+     and SWCHA_DIRMASK+1,x ; preserve other port nibble
+     sta SWCHA ; all bits are low, which STARTS the read
+
+     lda SWCHA 
+     cpx #1
+     bne m7skipp1shift
+     asl
+     asl
+     asl
+     asl
+m7skipp1shift
+     asl ; button bit 1 into carry
+     rol inttemp6
+     rol inttemp5
+     asl ; button bit 0 into carry
+     rol inttemp6
+     rol inttemp5
+
+     lda SWCHA
+     and SWCHA_DIRMASK+1,x ; preserve other port nibble
+     ora MEGA_NEXT,x
+     sta SWCHA
+
+     dey
+     bpl m7readloop
+
+     lda CTLSWA
+     and SWCHA_DIRMASK+1,x ; preserve other port nibble
+     sta CTLSWA ; set this port back to input
+
+     ; if mega7800 isn't detected this frame, unpress any buttons...
+     ; to avoid
+     lda inttemp5
+     and #%00000011
+     beq m7skipscuttle
+     lda #$ff
+     sta inttemp6
+     ifconst MULTIBUTTON
+         ; the controller isn't present... revert to proline
+         lda #1 ; proline
+         sta port0control,x
+         rts
+     endif ; MULTIBUTTON
+m7skipscuttle
+     ifconst MULTIBUTTON
+          lda inttemp5
+          lsr
+          lsr
+          and #3
+          tay
+          lda megabuttons,y
+          sta multibuttoncount0,x
+          ; todo : update multibuttoncount0,x
+     endif ; MULTIBUTTON
+
+     lda inttemp5
+     sta mega7800state0,x
+     lda inttemp6
+     sta mega7800data0,x
+
+     ifconst MULTIBUTTON
+         ; now update the genric multi-button bits...
+         ldy #7
+m7shuffleloop
+         lda inttemp6
+         and m7reorder,y
+         clc
+         adc #$FF ; bit value in carry
+         rol inttemp5
+         dey
+         bpl m7shuffleloop
+         lda inttemp5
+         eor #%11000000
+         sta sINPT1,x
+
+     endif ; MULTIBUTTON
+     rts
+
+     ifconst MULTIBUTTON
+megabuttons
+         .byte 6,2,3,2
+m7reorder
+         ;        S          M         Z         Y
+         .byte %00100000,%00000010,%00000100,%00001000
+         ;        X          C         A         B
+         .byte %00000001,%10000000,%00010000,%01000000
+     endif ; MULTIBUTTON
+
+MEGA_INIT
+     .byte %00110000,%00000011
+MEGA_NEXT
+     .byte %00100000,%00000010
+
+;SWCHA_DIRMASK
+;         .byte $F0,$0F,$F0
+
+     endif ; MEGA7800SUPPORT
+
 controlsusing2buttoncode
      .byte 0 ; 00=no controller plugged in
      .byte 1 ; 01=proline joystick
@@ -896,33 +1093,36 @@ controlsusing2buttoncode
      .byte 0 ; 09=amiga mouse
      .byte 1 ; 10=atarivox
      .byte 0 ; 11=snes2atari
+     .byte 0 ; 12=mega7800
 
 buttonhandlerhi
-     .byte 0 ; 00=no controller plugged in
-     .byte >joybuttonhandler ; 01=proline joystick
-     .byte >gunbuttonhandler ; 02=lightgun
-     .byte >paddlebuttonhandler ; 03=paddle
-     .byte >joybuttonhandler ; 04=trakball
-     .byte >joybuttonhandler ; 05=vcs joystick
-     .byte >joybuttonhandler ; 06=driving control
-     .byte 0 ; 07=keypad
-     .byte >mousebuttonhandler ; 08=st mouse
-     .byte >mousebuttonhandler ; 09=amiga mouse
-     .byte >joybuttonhandler ; 10=atarivox
-     .byte >snes2atarihandler ; 11=snes
+     .byte 0                        ; 00=no controller plugged in
+     .byte >prolinebuttonpadhandler ; 01=proline joystick
+     .byte >gunbuttonhandler        ; 02=lightgun
+     .byte >paddlebuttonhandler     ; 03=paddle
+     .byte >joybuttonhandler        ; 04=trakball
+     .byte >joybuttonpadhandler     ; 05=vcs joystick
+     .byte >joybuttonhandler        ; 06=driving control
+     .byte 0                        ; 07=keypad
+     .byte >mousebuttonhandler      ; 08=st mouse
+     .byte >mousebuttonhandler      ; 09=amiga mouse
+     .byte >joybuttonhandler        ; 10=atarivox
+     .byte >snes2atarihandler       ; 11=snes
+     .byte 0                        ; 12=mega7800
 buttonhandlerlo
-     .byte 0 ; 00=no controller plugged in
-     .byte <joybuttonhandler ; 01=proline joystick
-     .byte <gunbuttonhandler ; 02=lightgun 
-     .byte <paddlebuttonhandler ; 03=paddle
-     .byte <joybuttonhandler ; 04=trakball
-     .byte <joybuttonhandler ; 05=vcs joystick
-     .byte <joybuttonhandler ; 06=driving control
-     .byte 0 ; 07=keypad
-     .byte <mousebuttonhandler ; 08=st mouse
-     .byte <mousebuttonhandler ; 09=amiga mouse
-     .byte <joybuttonhandler ; 10=atarivox
-     .byte <snes2atarihandler ; 11=snes
+     .byte 0                        ; 00=no controller plugged in
+     .byte <prolinebuttonpadhandler ; 01=proline joystick
+     .byte <gunbuttonhandler        ; 02=lightgun 
+     .byte <paddlebuttonhandler     ; 03=paddle
+     .byte <joybuttonhandler        ; 04=trakball
+     .byte <joybuttonpadhandler     ; 05=vcs joystick
+     .byte <joybuttonhandler        ; 06=driving control
+     .byte 0                        ; 07=keypad
+     .byte <mousebuttonhandler      ; 08=st mouse
+     .byte <mousebuttonhandler      ; 09=amiga mouse
+     .byte <joybuttonhandler        ; 10=atarivox
+     .byte <snes2atarihandler       ; 11=snes
+     .byte 0                        ; 12=mega7800
 
 drawwait
      bit visibleover ; 255 if screen is being drawn, 0 when not.
@@ -3327,40 +3527,32 @@ skipkeypadcolumnread1
      endif ; KEYPADSUPPORT
      
 setportforinput
-     lda CTLSWAs
-     and allpinsinputlut,x
-     sta CTLSWAs
+     lda CTLSWA
+     and SWCHA_DIRMASK,x
      sta CTLSWA
      rts
-
-allpinsinputlut
-     .byte $0F, $F0
 
 setonebuttonmode
      lda #6 ; in case we're in unlocked-bios mode
      sta VBLANK ; if we were on paddles, the line is grounded out.
      lda #$14
-     sta CTLSWB ; set both 2-button disable bits to writable
-     lda CTLSWBs
-     ora thisjoy2buttonbit,x 
-     sta CTLSWBs
-     sta SWCHB ; turn off the 2-button disable bits
+     sta CTLSWB
+     lda SWCHB
+     ora thisjoy2buttonbit,x ; disable: write 1 to the 2-button bit
+     sta SWCHB
      rts
-
-thisjoy2buttonbit
-     .byte $04, $10
 
 settwobuttonmode
      lda #6 ; in case we're in unlocked-bios mode
      sta VBLANK ; if we were on paddles, the line is grounded out.
      lda #$14
-     sta CTLSWB ; set both 2-button disable bits to writable
-     lda CTLSWBs
-     and thisjoy2buttonmask,x
-     sta CTLSWBs
+     sta CTLSWB
+     lda SWCHB
+     and thisjoy2buttonbit+1,x ; enable: write 0 to the 2-button bit
      sta SWCHB
      rts
      
-thisjoy2buttonmask
-     .byte $fb, $ef
+thisjoy2buttonbit
+          ; p0   p1   p0
+     .byte $04, $10, $04
 

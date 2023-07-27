@@ -100,9 +100,12 @@ SCORESIZE                     = 6
 
                  ;save shadow registers for later return...
                  lda sCTRL
-                 sta ssCTRL
+                 ;sta ssCTRL
+                 pha
                  lda sCHARBASE
-                 sta ssCHARBASE
+                 ;sta ssCHARBASE
+                 pha
+
                  lda #$60
                  sta charactermode
                  jsr drawwait
@@ -712,10 +715,12 @@ skipclearHSCsong
                  lda #0
                  ldy #7
                  jsr blacken320colors
-                 lda ssCTRL
-                 sta sCTRL
-                 lda ssCHARBASE
+                 ;lda ssCHARBASE
+                 pla
                  sta sCHARBASE
+                 ;lda ssCTRL
+                 pla
+                 sta sCTRL
                  rts
 
 setuphsinpt1

@@ -212,46 +212,46 @@ int switchjoy (char *input_source)
     if (!strncmp (input_source, "joy0up\0", 6))
     {
 	printf (" lda #$10\n");
-	printf (" bit SWCHA\n");
+	printf (" bit sSWCHA\n");
 	return 0;
     }
     if (!strncmp (input_source, "softreset\0", 9))
     {
-	printf (" lda SWCHA\n");
+	printf (" lda sSWCHA\n");
 	printf (" and #%%01110000 ;_LDU\n");
 	return 0;
     }
     if (!strncmp (input_source, "softselect\0", 10))
     {
-	printf (" lda SWCHA\n");
+	printf (" lda sSWCHA\n");
 	printf (" and #%%10110000 ;R_DU\n");
 	return 0;
     }
     if (!strncmp (input_source, "softswitches\0", 12))
     {
-	printf (" lda SWCHA\n");
+	printf (" lda sSWCHA\n");
 	printf (" and #%%00110000 ;R_DU\n");
 	return 0;
     }
     if (!strncmp (input_source, "joy0down\0", 8))
     {
 	printf (" lda #$20\n");
-	printf (" bit SWCHA\n");
+	printf (" bit sSWCHA\n");
 	return 0;
     }
     if (!strncmp (input_source, "joy0left\0", 8))
     {
-	printf (" bit SWCHA\n");
+	printf (" bit sSWCHA\n");
 	return 1;
     }
     if (!strncmp (input_source, "joy0right\0", 9))
     {
-	printf (" bit SWCHA\n");
+	printf (" bit sSWCHA\n");
 	return 2;
     }
     if (!strncmp (input_source, "joy0any\0", 7))
     {
-	printf (" lda SWCHA\n");
+	printf (" lda sSWCHA\n");
 	printf (" and #$F0\n");
 	printf (" eor #$F0\n");
 	return 4;
@@ -260,30 +260,30 @@ int switchjoy (char *input_source)
     if (!strncmp (input_source, "joy1up\0", 6))
     {
 	printf (" lda #1\n");
-	printf (" bit SWCHA\n");
+	printf (" bit sSWCHA\n");
 	return 0;
     }
     if (!strncmp (input_source, "joy1down\0", 8))
     {
 	printf (" lda #2\n");
-	printf (" bit SWCHA\n");
+	printf (" bit sSWCHA\n");
 	return 0;
     }
     if (!strncmp (input_source, "joy1left\0", 8))
     {
 	printf (" lda #4\n");
-	printf (" bit SWCHA\n");
+	printf (" bit sSWCHA\n");
 	return 0;
     }
     if (!strncmp (input_source, "joy1right\0", 9))
     {
 	printf (" lda #8\n");
-	printf (" bit SWCHA\n");
+	printf (" bit sSWCHA\n");
 	return 0;
     }
     if (!strncmp (input_source, "joy1any\0", 7))
     {
-	printf (" lda SWCHA\n");
+	printf (" lda sSWCHA\n");
 	printf (" and #$0F\n");
 	printf (" eor #$0F\n");
 	return 4;
@@ -298,6 +298,42 @@ int switchjoy (char *input_source)
 	printf (" bit sINPT1\n");
 	return 3;
     }
+    if (!strncmp (input_source, "joy0fire2\0", 9))
+    {
+	printf (" lda sINPT1\n");
+	printf (" and #%%00100000\n");
+	return 0;
+    }
+    if (!strncmp (input_source, "joy0fire3\0", 9))
+    {
+	printf (" lda sINPT1\n");
+	printf (" and #%%00010000\n");
+	return 0;
+    }
+    if (!strncmp (input_source, "joy0fire4\0", 9))
+    {
+	printf (" lda sINPT1\n");
+	printf (" and #%%00001000\n");
+	return 0;
+    }
+    if (!strncmp (input_source, "joy0fire5\0", 9))
+    {
+	printf (" lda sINPT1\n");
+	printf (" and #%%00000100\n");
+	return 0;
+    }
+    if (!strncmp (input_source, "joy0select\0", 10))
+    {
+	printf (" lda sINPT1\n");
+	printf (" and #%%00000010\n");
+	return 0;
+    }
+    if (!strncmp (input_source, "joy0start\0", 9))
+    {
+	printf (" lda sINPT1\n");
+	printf (" and #%%00000001\n");
+	return 0;
+    }
     if (!strncmp (input_source, "joy1fire0\0", 9))
     {
 	printf (" bit sINPT3\n");
@@ -308,7 +344,42 @@ int switchjoy (char *input_source)
 	printf (" bit sINPT3\n");
 	return 3;
     }
-
+    if (!strncmp (input_source, "joy1fire2\0", 9))
+    {
+	printf (" lda sINPT3\n");
+	printf (" and #%%00100000\n");
+	return 0;
+    }
+    if (!strncmp (input_source, "joy1fire3\0", 9))
+    {
+	printf (" lda sINPT3\n");
+	printf (" and #%%00010000\n");
+	return 0;
+    }
+    if (!strncmp (input_source, "joy1fire4\0", 9))
+    {
+	printf (" lda sINPT3\n");
+	printf (" and #%%00001000\n");
+	return 0;
+    }
+    if (!strncmp (input_source, "joy1fire5\0", 9))
+    {
+	printf (" lda sINPT3\n");
+	printf (" and #%%00000100\n");
+	return 0;
+    }
+    if (!strncmp (input_source, "joy1select\0", 10))
+    {
+	printf (" lda sINPT3\n");
+	printf (" and #%%00000010\n");
+	return 0;
+    }
+    if (!strncmp (input_source, "joy1start\0", 9))
+    {
+	printf (" lda sINPT3\n");
+	printf (" and #%%00000001\n");
+	return 0;
+    }
     if (!strncmp (input_source, "joy0fire\0", 8))
     {
 	printf (" bit sINPT1\n");
@@ -635,6 +706,119 @@ int switchjoy (char *input_source)
 	printf (" ldx snesport\n");
 	printf (" lda snes2atari0hi,x\n");
 	printf (" and #%%00010000\n");
+	return 0;
+    }
+
+    // mega7800data0 button bits: CBSAYZMX
+    if (!strncmp (input_source, "mega0any\0", 8))
+    {
+	printf (" lda mega7800data0\n");
+	printf (" eor #$FF\n");
+	return 4;
+    }
+    if (!strncmp (input_source, "mega0start\0", 10))
+    {
+	printf (" lda mega7800data0\n");
+	printf (" and #%%00100000\n");
+	return 0;
+    }
+    if (!strncmp (input_source, "mega0A\0", 6))
+    {
+	printf (" lda mega7800data0\n");
+	printf (" and #%%00010000\n");
+	return 0;
+    }
+    if (!strncmp (input_source, "mega0C\0", 6))
+    {
+	printf (" lda mega7800data0\n");
+	printf (" and #%%10000000\n");
+	return 0;
+    }
+    if (!strncmp (input_source, "mega0B\0", 6))
+    {
+	printf (" lda mega7800data0\n");
+	printf (" and #%%01000000\n");
+	return 0;
+    }
+    // mega7800data0 button bits: CBSAYZMX
+    if (!strncmp (input_source, "mega0mode\0", 9))
+    {
+	printf (" lda mega7800data0\n");
+	printf (" and #%%00000010\n");
+	return 0;
+    }
+    if (!strncmp (input_source, "mega0X\0", 6))
+    {
+	printf (" lda mega7800data0\n");
+	printf (" and #%%00000001\n");
+	return 0;
+    }
+    if (!strncmp (input_source, "mega0Y\0", 6))
+    {
+	printf (" lda mega7800data0\n");
+	printf (" and #%%00001000\n");
+	return 0;
+    }
+    if (!strncmp (input_source, "mega0Z\0", 6))
+    {
+	printf (" lda mega7800data0\n");
+	printf (" and #%%00000100\n");
+	return 0;
+    }
+    // mega7800data0 button bits: CBSAYZMX
+    if (!strncmp (input_source, "mega1any\0", 8))
+    {
+	printf (" lda mega7800data1\n");
+	printf (" eor #$FF\n");
+	return 4;
+    }
+    if (!strncmp (input_source, "mega1start\0", 10))
+    {
+	printf (" lda mega7800data1\n");
+	printf (" and #%%00100000\n");
+	return 0;
+    }
+    if (!strncmp (input_source, "mega1A\0", 6))
+    {
+	printf (" lda mega7800data1\n");
+	printf (" and #%%00010000\n");
+	return 0;
+    }
+    if (!strncmp (input_source, "mega1C\0", 6))
+    {
+	printf (" lda mega7800data1\n");
+	printf (" and #%%10000000\n");
+	return 0;
+    }
+    if (!strncmp (input_source, "mega1B\0", 6))
+    {
+	printf (" lda mega7800data1\n");
+	printf (" and #%%01000000\n");
+	return 0;
+    }
+    // mega7800data0 button bits: CBSAYZMX
+    if (!strncmp (input_source, "mega1mode\0", 9))
+    {
+	printf (" lda mega7800data1\n");
+	printf (" and #%%00000010\n");
+	return 0;
+    }
+    if (!strncmp (input_source, "mega1X\0", 6))
+    {
+	printf (" lda mega7800data1\n");
+	printf (" and #%%00000001\n");
+	return 0;
+    }
+    if (!strncmp (input_source, "mega1Y\0", 6))
+    {
+	printf (" lda mega7800data1\n");
+	printf (" and #%%00001000\n");
+	return 0;
+    }
+    if (!strncmp (input_source, "mega1Z\0", 6))
+    {
+	printf (" lda mega7800data1\n");
+	printf (" and #%%00000100\n");
 	return 0;
     }
     if (!strncmp (input_source, "keypad", 6))
@@ -2708,6 +2892,22 @@ void changecontrol (char **statement)
 	printf ("  jsr setportforinput\n");
 	printf ("  jsr settwobuttonmode\n");
     }
+    if (!strcmp (statement[3], "none"))
+    {
+	printf ("  lda #0 ; controller=none\n");
+	if (port == 0)
+	{
+	    printf ("  sta port0control\n");
+	    printf ("  ldx #0\n");
+	}
+	else
+	{
+	    printf ("  sta port1control\n");
+	    printf ("  ldx #1\n");
+	}
+	printf ("  jsr setportforinput\n");
+	printf ("  jsr setonebuttonmode\n");
+    }
     if (!strcmp (statement[3], "1buttonjoy"))
     {
 	printf ("  lda #1 ; controller=joystick\n");
@@ -2742,6 +2942,26 @@ void changecontrol (char **statement)
 
 	strcpy (redefined_variables[numredefvars++], "SNES2ATARISUPPORT = 1");
 	sprintf (constants[numconstants++], "SNES2ATARISUPPORT");
+    }
+
+    else if (!strcmp (statement[3], "mega7800"))
+    {
+	printf ("  lda #12 ; controller=mega7800\n");
+	if (port == 0)
+	{
+	    printf ("  sta port0control\n");
+	    printf ("  ldx #0\n");
+	}
+	else
+	{
+	    printf ("  sta port1control\n");
+	    printf ("  ldx #1\n");
+	}
+	printf ("  jsr setportforinput\n");
+	printf ("  jsr settwobuttonmode\n");
+
+	strcpy (redefined_variables[numredefvars++], "MEGA7800SUPPORT = 1");
+	sprintf (constants[numconstants++], "MEGA7800SUPPORT");
     }
 
     else if (!strcmp (statement[3], "lightgun"))
@@ -2866,7 +3086,6 @@ void changecontrol (char **statement)
 	    printf ("  sta port1control\n");
 	    printf ("  ldx #1\n");
 	}
-	/* we don't need to modify CTLSWA/CTLSWAs. the keypad driver does this */
 	printf ("  jsr setonebuttonmode\n");
     }
     else if ((!strcmp (statement[3], "stmouse"))
@@ -4934,12 +5153,16 @@ int checkmul (int value)
     if (!(value % 2))
 	return 1;		// still faster than sub
 
-    if (value < 11)
+    if (value < 14)
 	return 1;		// always optimize these
 
     while (value != 1)
     {
-	if (!(value % 9))
+	if (!(value % 13))
+	    value /= 13;
+	else if (!(value % 11))
+	    value /= 11;
+	else if (!(value % 9))
 	    value /= 9;
 	else if (!(value % 7))
 	    value /= 7;
@@ -4982,7 +5205,7 @@ void mul (char **statement, int bits)
     // this will attempt to output optimized code depending on the multiplicand
     int multiplicand = strictatoi (statement[6]);
     int tempstorage = 0;
-    // we will optimize specifically for 2,3,5,7,9,11
+    // we will optimize specifically for 2,3,5,7,9,11,13
     if (bits == 16)
     {
 	printf ("  ldx #0\n");
@@ -4990,7 +5213,54 @@ void mul (char **statement, int bits)
     }
     while (multiplicand != 1)
     {
-	if (!(multiplicand % 11))
+	if (!(multiplicand % 13))
+	{
+	    if (tempstorage)
+	    {
+		strcpy (statement[4], "temp2");
+		printf ("  sta temp2\n");
+	    }
+	    multiplicand /= 13;
+
+	    printf ("  asl\n");
+	    if (bits == 16)
+		printf ("  rol temp1\n");
+	    printf ("  clc\n");
+	    printf ("  adc ");
+	    printimmed (statement[4]);
+	    printf ("%s\n", statement[4]);
+	    if (bits == 16)
+	    {
+		printf ("  tax\n");
+		printf ("  lda temp1\n");
+		printf ("  adc #0\n");
+		printf ("  sta temp1\n");
+		printf ("  txa\n");
+	    }
+	    printf ("  asl\n");
+	    if (bits == 16)
+		printf ("  rol temp1\n");
+	    printf ("  asl\n");
+	    if (bits == 16)
+            {
+		printf ("  rol temp1\n");
+	        printf ("  clc\n");
+            }
+	    printf ("  adc ");
+	    printimmed (statement[4]);
+	    printf ("%s\n", statement[4]);
+	    if (bits == 16)
+	    {
+		printf ("  tax\n");
+		printf ("  lda temp1\n");
+		printf ("  adc #0\n");
+		printf ("  sta temp1\n");
+		printf ("  txa\n");
+	    }
+
+	    tempstorage = 1;
+	}
+	else if (!(multiplicand % 11))
 	{
 	    if (tempstorage)
 	    {
@@ -7693,6 +7963,8 @@ void doif (char **statement)
 	|| (!strncmp (statement[2], "snes0\0", 5))
 	|| (!strncmp (statement[2], "snes1\0", 5))
 	|| (!strncmp (statement[2], "snes#\0", 5))
+	|| (!strncmp (statement[2], "mega0\0", 5))
+	|| (!strncmp (statement[2], "mega1\0", 5))
 	|| (!strncmp (statement[2], "softswitches\0", 12))
 	|| (!strncmp (statement[2], "softselect\0", 10)) || (!strncmp (statement[2], "softreset\0", 9)))
     {
@@ -10005,6 +10277,19 @@ void set (char **statement)
 	if (!strncmp (statement[3], "on", 2))
 	{
 	    strcpy (redefined_variables[numredefvars++], "EXTRADLMEMORY = 1");
+	}
+    }
+    else if (!strncmp (statement[2], "multibutton\0", 11))
+    {
+	assertminimumargs (statement, "set multibutton", 1);
+	if (!strncmp (statement[3], "on", 2))
+	{
+	    strcpy (redefined_variables[numredefvars++], "MULTIBUTTON = 1");
+	    sprintf (constants[numconstants++], "MULTIBUTTON");
+	    strcpy (redefined_variables[numredefvars++], "MEGA7800SUPPORT = 1");
+	    sprintf (constants[numconstants++], "MEGA7800SUPPORT");
+	    strcpy (redefined_variables[numredefvars++], "SNES2ATARISUPPORT = 1");
+	    sprintf (constants[numconstants++], "SNES2ATARISUPPORT");
 	}
     }
     else if (!strncmp (statement[2], "tallsprite\0", 10))
