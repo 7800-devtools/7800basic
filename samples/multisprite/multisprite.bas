@@ -65,7 +65,7 @@ main
  rem ** to run during the visible screen. issuing a plot command forces 
  rem ** 7800basic to wait for the visible screen to end, to avoid glitches.
  restorescreen
- for z=0 to 22
+ for z=0 to 23
    tempplayerx=playerx[z]+playerdx[z]
    tempplayery=playery[z]+playerdy[z]
    if tempplayerx<2 then playerdx[z]=1
@@ -78,7 +78,7 @@ main
 
  rem ** we could probably get a couple more sprites if we unrolled this loop
  rem ** and used a hardcoded palette value. but this is a bit more realistic.
- for z=0 to 22
+ for z=0 to 23
    tempplayerx=playerx[z]
    tempplayery=playery[z]
    q=(z&3)+1

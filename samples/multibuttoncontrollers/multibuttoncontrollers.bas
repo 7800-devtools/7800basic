@@ -9,9 +9,10 @@
  incgraphic ascii_full.png 320A 0 1
  characterset ascii_full
  alphachars ASCII
- P0C2=$0F:P1C2=$1F:P2C2=$9F:BACKGRND=$0
+ P0C2=$0F:P1C2=$1F:P2C2=$9F:BACKGRND=$00
 
- rem ** if a controller isn't set to "2buttonjoy" it won't be monitored.
+ rem ** If a controller is set to somthing other than "2buttonjoy" it won't 
+ rem ** be scanned. 
  changecontrol 1 none 
 
  clearscreen

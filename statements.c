@@ -82,6 +82,7 @@ int currentbank = 0;
 int doublebufferused = 0;
 int boxcollisionused = 0;
 int tallspritemode = 1;
+int multibutton = 0;
 
 int ongosub = 0;
 int condpart = 0;
@@ -5522,6 +5523,7 @@ void callfunction (char **statement)
 	    printf ("  sta temp%d\n", arguments + 1);
     }
     printf (" jsr %s\n", statement[4]);
+    printf (".calledfunction_%s = 1\n", statement[4]);
 
     strcpy (Areg, "invalid");
 
@@ -9753,9 +9755,15 @@ void let (char **cstatement)
 	    {
 		displayoperation ("*LDY", statement[6], index & 4);
 		if (statement[5][1] == '*')
+                {
 		    printf ("  jsr mul16\n");	// general mul routine
+		    printf (".calledfunction_mul16 = 1\n");	
+                }
 		else
+                {
 		    printf ("  jsr mul8\n");
+		    printf (".calledfunction_mul8 = 1\n");	
+                }
 	    }
 	    else if (statement[5][1] == '*')
 		mul (statement, 16);
@@ -9771,9 +9779,15 @@ void let (char **cstatement)
 	    {
 		displayoperation ("/LDY", statement[6], index & 4);
 		if (statement[5][1] == '/')
+                {
 		    printf ("  jsr div16\n");	// general div routine
+		    printf (".calledfunction_div16 = 1\n");	
+                }
 		else
+                {
 		    printf ("  jsr div8\n");
+		    printf (".calledfunction_div8 = 1\n");	
+                }
 	    }
 	    else if (statement[5][1] == '/')
 		divd (statement, 16);
@@ -10251,6 +10265,16 @@ void set (char **statement)
 	if (!strncmp (statement[3], "on", 2))
 	    strcpy (redefined_variables[numredefvars++], "SNESNPAUSE = 1");
     }
+    else if (!strncmp (statement[2], "multibuttonpause\0", 16))
+    {
+	assertminimumargs (statement, "set multibuttonpause", 1);
+	if (!strncmp (statement[3], "on", 2))
+        {
+            if (!multibutton)
+	        prerror ("\"set multibuttonpause\" requires multibutton support.");
+	    strcpy (redefined_variables[numredefvars++], "MULTIBUTTONPAUSE = 1");
+        }
+    }
     else if (!strncmp (statement[2], "basepath\0", 7))
     {
 	assertminimumargs (statement, "set basepath", 1);
@@ -10284,6 +10308,7 @@ void set (char **statement)
 	assertminimumargs (statement, "set multibutton", 1);
 	if (!strncmp (statement[3], "on", 2))
 	{
+            multibutton = 1;
 	    strcpy (redefined_variables[numredefvars++], "MULTIBUTTON = 1");
 	    sprintf (constants[numconstants++], "MULTIBUTTON");
 	    strcpy (redefined_variables[numredefvars++], "MEGA7800SUPPORT = 1");

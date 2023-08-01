@@ -562,7 +562,7 @@ carryonkeepdisplayinghs
                  ldx hscursorx
                  ldy hsdisplaymode
                  ifnconst .HSup
-                     lda SWCHA
+                     lda sSWCHA
                      cpy #3
                      bne hsskipadjustjoystick1
                      asl
