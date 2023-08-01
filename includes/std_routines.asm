@@ -1792,7 +1792,7 @@ noeor
 
      ; *** bcd conversion routine courtesy Omegamatrix
      ; *** http://atariage.com/forums/blog/563/entry-10832-hex-to-bcd-conversion-0-99/
- ifconst .calledfunction_converttobdc
+ ifconst .calledfunction_converttobcd
 converttobcd
      ;value to convert is in the accumulator
      sta temp1
@@ -1812,7 +1812,7 @@ converttobcd
      adc temp2
      adc temp1 
      rts ; return the result in the accumulator
- endif ; .calledfunction_converttobdc
+ endif ; .calledfunction_converttobcd
 
  ifconst .calledfunction_mul8
      ; Y and A contain multiplicands, result in A
