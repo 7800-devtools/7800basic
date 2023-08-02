@@ -121,19 +121,19 @@ int main (int argc, char *argv[])
     printf ("game\n");		// label for start of game
     init_includes (path);
 
-    statement = (char **) malloc (sizeof (char *) * 200);
+    statement = (char **) malloc (sizeof (char *) * STATEMENTCOUNT);
     deallocate_mem = statement;
-    for (i = 0; i < 200; ++i)
+    for (i = 0; i < STATEMENTCOUNT; ++i)
     {
-	statement[i] = (char *) malloc (sizeof (char) * 201);
-        memset(statement[i],0,201);
+	statement[i] = (char *) malloc (sizeof (char) * (SIZEOFSTATEMENT+1));
+        memset(statement[i],0,(SIZEOFSTATEMENT+1));
     }
 
     while (1)
     {				// clear out statement cache
-	for (i = 0; i < 200; ++i)
+	for (i = 0; i < STATEMENTCOUNT; ++i)
 	{
-	    for (j = 0; j < 200; ++j)
+	    for (j = 0; j < SIZEOFSTATEMENT; ++j)
 	    {
 		statement[i][j] = '\0';
 	    }
@@ -222,7 +222,7 @@ int main (int argc, char *argv[])
 	    else
 	    {
 		multiplespace = 0;
-		if (k < 199)	// avoid overrun when users use REM with long horizontal separators
+		if (k < (SIZEOFSTATEMENT-1))	// avoid overrun when users use REM with long horizontal separators
 		    statement[j][k++] = single;
 	    }
 

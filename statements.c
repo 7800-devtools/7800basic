@@ -53,7 +53,7 @@ int bannerpixelwidth[1000];
 char palettefilenames[1000][100];
 int graphicfilepalettes[1000];
 int graphicfilemodes[1000];
-char Areg[200];
+char Areg[SIZEOFSTATEMENT];
 
 int dmaplain = 0;
 int templabel = 0;
@@ -879,7 +879,7 @@ int findpoint (char *item)	// determine if fixed point var
 void freemem (char **statement)
 {
     int i;
-    for (i = 0; i < 200; ++i)
+    for (i = 0; i < STATEMENTCOUNT; ++i)
 	free (statement[i]);
     free (statement);
 }
@@ -5110,11 +5110,11 @@ int getindex (char *mystatement, char *myindex, int *indirectflag)
 {
     int i, j, index = 0;
     *indirectflag = 0;
-    for (i = 0; i < 200; ++i)
+    for (i = 0; i < SIZEOFSTATEMENT; ++i)
     {
 	if (mystatement[i] == '\0')
 	{
-	    i = 200;
+	    i = SIZEOFSTATEMENT;
 	    break;
 	}
 	if (mystatement[i] == '[')
@@ -5123,9 +5123,9 @@ int getindex (char *mystatement, char *myindex, int *indirectflag)
 	    break;
 	}
     }
-    if ((i < 198) && (mystatement[i] == '[') && (mystatement[i + 1] == '['))
+    if ((i < (SIZEOFSTATEMENT-2)) && (mystatement[i] == '[') && (mystatement[i + 1] == '['))
 	*indirectflag = 1;
-    if (i < 200)
+    if (i < SIZEOFSTATEMENT)
     {
 	if (*indirectflag == 0)
 	{
@@ -5141,7 +5141,7 @@ int getindex (char *mystatement, char *myindex, int *indirectflag)
 	    myindex[strlen (myindex) - 2] = '\0';
 	if (myindex[strlen (myindex) - 1] == ']')
 	    myindex[strlen (myindex) - 1] = '\0';
-	for (j = i; j < 200; ++j)
+	for (j = i; j < SIZEOFSTATEMENT; ++j)
 	    mystatement[j] = '\0';
     }
     return index;
@@ -5489,7 +5489,7 @@ void callfunction (char **statement)
     // does not work as an argument in another function or an if-then... yet.
     int i, index = 0;
     int indirectflag = 0;
-    char getindex0[200];
+    char getindex0[SIZEOFSTATEMENT];
     int arguments = 0;
     int argnum[10];
     for (i = 6; statement[i][0] != ')'; ++i)
@@ -5549,7 +5549,7 @@ int islabel (char **statement)
     // return of 0=label, 1=statement
     int i;
     // find the "then" or a "goto"
-    for (i = 0; i < 198;)
+    for (i = 0; i < (STATEMENTCOUNT-2);)
 	if (!strncmp (statement[i++], "then\0", 4))
 	    break;
     return findlabel (statement, i);
@@ -5560,7 +5560,7 @@ int islabelelse (char **statement)
     // return of 0=label, 1=statement
     int i;
     // find the "else"
-    for (i = 0; i < 198;)
+    for (i = 0; i < (STATEMENTCOUNT-2);)
 	if (!strncmp (statement[i++], "else\0", 4))
 	    break;
     return findlabel (statement, i);
@@ -5568,7 +5568,7 @@ int islabelelse (char **statement)
 
 int findlabel (char **statement, int i)
 {
-    char statementcache[200];
+    char statementcache[SIZEOFSTATEMENT];
     // 0 if label, 1 if not
     if ((statement[i][0] > (unsigned char) 0x2F) && (statement[i][0] < (unsigned char) 0x3B))
 	return 0;
@@ -5699,7 +5699,7 @@ void sread (char **statement)
 void sdata (char **statement)
 {
     // sequential data, works like regular basics and doesn't have the 256 byte restriction
-    char data[200];
+    char data[SIZEOFSTATEMENT];
     int i;
     removeCR (statement[4]);
     sprintf (redefined_variables[numredefvars++], "%s = %s", statement[2], statement[4]);
@@ -5714,7 +5714,7 @@ void sdata (char **statement)
     printf ("%s_begin\n", statement[2]);
     while (1)
     {
-	if (((!fgets (data, 200, stdin))
+	if (((!fgets (data, SIZEOFSTATEMENT, stdin))
 	     || ((data[0] < (unsigned char) 0x3A) && (data[0] > (unsigned char) 0x2F))) && (data[0] != 'e'))
 	{
 	    prerror ("missing \"end\" keyword at end of data");
@@ -5724,14 +5724,14 @@ void sdata (char **statement)
 	if (!strncmp (data, "end\0", 3))
 	    break;
 	remove_trailing_commas (data);
-	for (i = 0; i < 200; ++i)
+	for (i = 0; i < SIZEOFSTATEMENT; ++i)
 	{
 	    if ((int) data[i] > 32)
 		break;
 	    if (((int) data[i] < 14) && ((int) data[i] != 9))
-		i = 200;
+		i = SIZEOFSTATEMENT;
 	}
-	if (i < 200)
+	if (i < SIZEOFSTATEMENT)
 	    printf ("	.byte %s\n", data);
     }
     printf (".skip%s\n", statement[0]);
@@ -5740,7 +5740,7 @@ void sdata (char **statement)
 
 void data (char **statement)
 {
-    char data[200];
+    char data[SIZEOFSTATEMENT];
     char **data_length;
     char **deallocdata_length;
     int i, j;
@@ -5767,7 +5767,7 @@ void data (char **statement)
 
     while (1)
     {
-	if (((!fgets (data, 200, stdin))
+	if (((!fgets (data, SIZEOFSTATEMENT, stdin))
 	     || ((data[0] < (unsigned char) 0x3A) && (data[0] > (unsigned char) 0x2F))) && (data[0] != 'e'))
 	{
 	    prerror ("missing \"end\" keyword at end of data");
@@ -5777,14 +5777,14 @@ void data (char **statement)
 	if (!strncmp (data, "end\0", 3))
 	    break;
 	remove_trailing_commas (data);
-	for (i = 0; i < 200; ++i)
+	for (i = 0; i < SIZEOFSTATEMENT; ++i)
 	{
 	    if ((int) data[i] > 32)
 		break;
 	    if (((int) data[i] < 14) && ((int) data[i] != 9))
-		i = 200;
+		i = SIZEOFSTATEMENT;
 	}
-	if (i < 200)
+	if (i < SIZEOFSTATEMENT)
 	{
 	    if (!thisdatabankset)
 		printf ("  .byte %s\n", data);
@@ -5804,10 +5804,10 @@ void data (char **statement)
     }
     sprintf (constants[numconstants++], "%s_length", statement[2]);
 
-    char consthilo[200];
-    snprintf (consthilo, 200, "%s_lo", statement[2]);
+    char consthilo[SIZEOFSTATEMENT];
+    snprintf (consthilo, SIZEOFSTATEMENT, "%s_lo", statement[2]);
     strcpy (constants[numconstants++], consthilo);	// record to queue
-    snprintf (consthilo, 200, "%s_hi", statement[2]);
+    snprintf (consthilo, SIZEOFSTATEMENT, "%s_hi", statement[2]);
     strcpy (constants[numconstants++], consthilo);	// record to queue
 
     if (!thisdatabankset)
@@ -5881,7 +5881,7 @@ void loadmemory (char **statement)
 	printf ("  ldy #0\n");
 	while ((statement[i][0] != ':') && (statement[i][0] != '\0'))
 	{
-	    for (k = 0; k < 200; ++k)
+	    for (k = 0; k < SIZEOFSTATEMENT; ++k)
 		if ((statement[i][k] == (unsigned char) 0x0A) || (statement[i][k] == (unsigned char) 0x0D))
 		    statement[i][k] = '\0';
 	    if (i > 2)
@@ -5942,7 +5942,7 @@ void savememory (char **statement)
 	printf ("  ldy #0\n");
 	while ((statement[i][0] != ':') && (statement[i][0] != '\0'))
 	{
-	    for (k = 0; k < 200; ++k)
+	    for (k = 0; k < SIZEOFSTATEMENT; ++k)
 		if ((statement[i][k] == (unsigned char) 0x0A) || (statement[i][k] == (unsigned char) 0x0D))
 		    statement[i][k] = '\0';
 	    if (i > 2)
@@ -7286,7 +7286,7 @@ void alphadata (char **statement)
     removeCR (statement[3]);
     removeCR (statement[4]);
 
-    char data[200];
+    char data[SIZEOFSTATEMENT];
     char **data_length;
     char **deallocdata_length;
     char *alphachr, *alphaend;
@@ -7314,7 +7314,7 @@ void alphadata (char **statement)
 
     while (1)
     {
-	if (((!fgets (data, 200, stdin))
+	if (((!fgets (data, SIZEOFSTATEMENT, stdin))
 	     || ((data[0] < (unsigned char) 0x3A) && (data[0] > (unsigned char) 0x2F))) && (data[0] != 'e'))
 	{
 	    prerror ("missing \"end\" keyword at end of alphadata");
@@ -7404,16 +7404,16 @@ int lookupcharacter (char mychar)
 void shiftdata (char **statement, int num)
 {
     int i, j;
-    for (i = 199; i > num; i--)
-	for (j = 0; j < 200; ++j)
+    for (i = STATEMENTCOUNT-1; i > num; i--)
+	for (j = 0; j < SIZEOFSTATEMENT; ++j)
 	    statement[i][j] = statement[i - 1][j];
 }
 
 void compressdata (char **statement, int num1, int num2)
 {
     int i, j;
-    for (i = num1; i < 200 - num2; i++)
-	for (j = 0; j < 200; ++j)
+    for (i = num1; i < STATEMENTCOUNT - num2; i++)
+	for (j = 0; j < SIZEOFSTATEMENT; ++j)
 	    statement[i][j] = statement[i + num2][j];
 }
 
@@ -7442,7 +7442,7 @@ void ongoto (char **statement)
     printf (".%sjumptablehi\n", statement[0]);
     while ((statement[i][0] != ':') && (statement[i][0] != '\0'))
     {
-	for (k = 0; k < 200; ++k)
+	for (k = 0; k < SIZEOFSTATEMENT; ++k)
 	    if ((statement[i][k] == (unsigned char) 0x0A) || (statement[i][k] == (unsigned char) 0x0D))
 		statement[i][k] = '\0';
 	printf ("  .byte >(.%s-1)\n", statement[i++]);
@@ -7451,7 +7451,7 @@ void ongoto (char **statement)
     i = 4;
     while ((statement[i][0] != ':') && (statement[i][0] != '\0'))
     {
-	for (k = 0; k < 200; ++k)
+	for (k = 0; k < SIZEOFSTATEMENT; ++k)
 	    if ((statement[i][k] == (unsigned char) 0x0A) || (statement[i][k] == (unsigned char) 0x0D))
 		statement[i][k] = '\0';
 	printf ("  .byte <(.%s-1)\n", statement[i++]);
@@ -7669,7 +7669,7 @@ void doreturn (char **statement)
 
     int index = 0;
     int indirectflag = 0;
-    char getindex0[200];
+    char getindex0[SIZEOFSTATEMENT];
     int bankedreturn = 0;
     // 0=no special action
     // 1=return thisbank
@@ -7748,10 +7748,10 @@ void doreturn (char **statement)
 
 void doasm ()
 {
-    char data[200];
+    char data[SIZEOFSTATEMENT];
     while (1)
     {
-	if (((!fgets (data, 200, stdin))
+	if (((!fgets (data, SIZEOFSTATEMENT, stdin))
 	     || ((data[0] < (unsigned char) 0x3A) && (data[0] > (unsigned char) 0x2F))) && (data[0] != 'e'))
 	{
 	    prerror ("missing \"end\" keyword at end of inline asm");
@@ -7773,7 +7773,7 @@ void domacro (char **statement)
 
     while ((statement[i][0] != ':') && (statement[i][0] != '\0'))
     {
-	for (k = 0; k < 200; ++k)
+	for (k = 0; k < SIZEOFSTATEMENT; ++k)
 	    if ((statement[i][k] == (unsigned char) 0x0A) || (statement[i][k] == (unsigned char) 0x0D))
 		statement[i][k] = '\0';
 	if (!strncmp (statement[i], "const\0", 5))
@@ -7792,7 +7792,7 @@ void callmacro (char **statement)
 
     while ((statement[i][0] != ':') && (statement[i][0] != '\0'))
     {
-	for (k = 0; k < 200; ++k)
+	for (k = 0; k < SIZEOFSTATEMENT; ++k)
 	    if ((statement[i][k] == (unsigned char) 0x0A) || (statement[i][k] == (unsigned char) 0x0D))
 		statement[i][k] = '\0';
 	if (isimmed (statement[i]))
@@ -7875,8 +7875,8 @@ void doif (char **statement)
 {
     int index = 0;
     int situation = 0;
-    char getindex0[200];
-    char getindex1[200];
+    char getindex0[SIZEOFSTATEMENT];
+    char getindex1[SIZEOFSTATEMENT];
     int indirectflag0, indirectflag1;
     int not = 0;
     int complex_boolean = 0;
@@ -7885,23 +7885,23 @@ void doif (char **statement)
     int push2 = 0;
     int bit = 0;
     int Aregmatch = 0;
-    char Aregcopy[200];
+    char Aregcopy[SIZEOFSTATEMENT];
     char **cstatement;		//conditional statement
     char **dealloccstatement;	//for deallocation
 
     strcpy (Aregcopy, "index-invalid");
 
-    cstatement = (char **) malloc (sizeof (char *) * 200);
-    for (k = 0; k < 200; ++k)
-	cstatement[k] = (char *) malloc (sizeof (char) * 200);
+    cstatement = (char **) malloc (sizeof (char *) * STATEMENTCOUNT);
+    for (k = 0; k < STATEMENTCOUNT; ++k)
+	cstatement[k] = (char *) malloc (sizeof (char) * SIZEOFSTATEMENT);
     dealloccstatement = cstatement;
-    for (k = 0; k < 200; ++k)
-	for (j = 0; j < 200; ++j)
+    for (k = 0; k < SIZEOFSTATEMENT; ++k)
+	for (j = 0; j < STATEMENTCOUNT; ++j)
 	    cstatement[j][k] = '\0';
     if ((statement[2][0] == '!') && (statement[2][1] != '\0'))
     {
 	not = 1;
-	for (i = 0; i < 199; ++i)
+	for (i = 0; i < (SIZEOFSTATEMENT-1); ++i)
 	{
 	    statement[2][i] = statement[2][i + 1];
 	}
@@ -7916,7 +7916,7 @@ void doif (char **statement)
     {
 	j = 0;
 	k = 0;
-	for (i = 2; i < 199; ++i)
+	for (i = 2; i < (SIZEOFSTATEMENT-1); ++i)
 	{
 	    if (statement[i][0] == '(')
 		j++;
@@ -7936,16 +7936,16 @@ void doif (char **statement)
 		break;
 	    }			//prerror("complex boolean not yet supported");exit(1);}
 	}
-	if (i == 199 && k)
+	if (i == (STATEMENTCOUNT-1) && k)
 	    j = k;
 	if (j)
 	{
 	    compressdata (statement, 2, 1);	//remove first parenthesis
-	    for (i = 2; i < 199; ++i)
+	    for (i = 2; i < (STATEMENTCOUNT-1); ++i)
 		if ((!strncmp (statement[i], "then\0", 4)) ||
 		    (!strncmp (statement[i], "&&\0", 2)) || (!strncmp (statement[i], "||\0", 2)))
 		    break;
-	    if (i != 199)
+	    if (i != (STATEMENTCOUNT-1))
 	    {
 		if (statement[i - 1][0] != ')')
 		{
@@ -8081,9 +8081,9 @@ void doif (char **statement)
 
 	    printf (".skip%s\n", statement[0]);
 	    // separate statement
-	    for (i = 3; i < 200; ++i)
+	    for (i = 3; i < STATEMENTCOUNT; ++i)
 	    {
-		for (k = 0; k < 200; ++k)
+		for (k = 0; k < SIZEOFSTATEMENT; ++k)
 		{
 		    cstatement[i - 3][k] = statement[i][k];
 		}
@@ -8134,9 +8134,9 @@ void doif (char **statement)
 
 	    printf (".skip%s\n", statement[0]);
 	    // separate statement
-	    for (i = 3; i < 200; ++i)
+	    for (i = 3; i < STATEMENTCOUNT; ++i)
 	    {
-		for (k = 0; k < 200; ++k)
+		for (k = 0; k < SIZEOFSTATEMENT; ++k)
 		{
 		    cstatement[i - 3][k] = statement[i][k];
 		}
@@ -8174,9 +8174,9 @@ void doif (char **statement)
 		printf ("  bcc ");
 	    printf (".skip%s\n", statement[0]);
 	    // separate statement
-	    for (i = 20; i < 200; ++i)
+	    for (i = 20; i < STATEMENTCOUNT; ++i)
 	    {
-		for (k = 0; k < 200; ++k)
+		for (k = 0; k < SIZEOFSTATEMENT; ++k)
 		{
 		    cstatement[i - 20][k] = statement[i][k];
 		}
@@ -8209,9 +8209,9 @@ void doif (char **statement)
 		printf ("  bcc ");
 	    printf (".skip%s\n", statement[0]);
 	    // separate statement
-	    for (i = 3; i < 200; ++i)
+	    for (i = 3; i < STATEMENTCOUNT; ++i)
 	    {
-		for (k = 0; k < 200; ++k)
+		for (k = 0; k < SIZEOFSTATEMENT; ++k)
 		{
 		    cstatement[i - 3][k] = statement[i][k];
 		}
@@ -8226,17 +8226,17 @@ void doif (char **statement)
 
 
     // check for array, e.g. x{1} to get bit 1 of x
-    for (i = 3; i < 200; ++i)
+    for (i = 3; i < SIZEOFSTATEMENT; ++i)
     {
 	if (statement[2][i] == '\0')
 	{
-	    i = 200;
+	    i = SIZEOFSTATEMENT;
 	    break;
 	}
 	if (statement[2][i] == '}')
 	    break;
     }
-    if (i < 200)		// found array
+    if (i < SIZEOFSTATEMENT)		// found array
     {
 	// extract expression in parentheses - for now just whole numbers allowed
 	bit = (int) statement[2][i - 1] - '0';
@@ -8247,7 +8247,7 @@ void doif (char **statement)
 	if ((bit == 7) || (bit == 6))	// if bit 6 or 7, we can use BIT and save 2 bytes
 	{
 	    printf ("  bit ");
-	    for (i = 0; i < 200; ++i)
+	    for (i = 0; i < SIZEOFSTATEMENT; ++i)
 	    {
 		if (statement[2][i] == '{')
 		    break;
@@ -8292,9 +8292,9 @@ void doif (char **statement)
 
 		printf (".skip%s\n", statement[0]);
 		// separate statement
-		for (i = 3; i < 200; ++i)
+		for (i = 3; i < STATEMENTCOUNT; ++i)
 		{
-		    for (k = 0; k < 200; ++k)
+		    for (k = 0; k < SIZEOFSTATEMENT; ++k)
 		    {
 			cstatement[i - 3][k] = statement[i][k];
 		    }
@@ -8311,7 +8311,7 @@ void doif (char **statement)
 	{
 	    Aregmatch = 0;
 	    printf ("  lda ");
-	    for (i = 0; i < 200; ++i)
+	    for (i = 0; i < SIZEOFSTATEMENT; ++i)
 	    {
 		if (statement[2][i] == '{')
 		    break;
@@ -8360,9 +8360,9 @@ void doif (char **statement)
 
 		printf (".skip%s\n", statement[0]);
 		// separate statement
-		for (i = 3; i < 200; ++i)
+		for (i = 3; i < STATEMENTCOUNT; ++i)
 		{
-		    for (k = 0; k < 200; ++k)
+		    for (k = 0; k < SIZEOFSTATEMENT; ++k)
 		    {
 			cstatement[i - 3][k] = statement[i][k];
 		    }
@@ -8385,7 +8385,7 @@ void doif (char **statement)
     if (!strcmp (statement[2], Areg))
 	Aregmatch = 1;		// do we already have the correct value in A?
 
-    for (i = 3; i < 200; ++i)
+    for (i = 3; i < STATEMENTCOUNT; ++i)
 	if ((!strncmp (statement[i], "then\0", 4)) ||
 	    (!strncmp (statement[i], "&&\0", 2)) || (!strncmp (statement[i], "||\0", 2)))
 	    break;
@@ -8429,9 +8429,9 @@ void doif (char **statement)
 	}
 	printf (".skip%s\n", statement[0]);
 	// separate statement
-	for (i = j; i < 200; ++i)
+	for (i = j; i < STATEMENTCOUNT; ++i)
 	{
-	    for (k = 0; k < 200; ++k)
+	    for (k = 0; k < SIZEOFSTATEMENT; ++k)
 	    {
 		cstatement[i - j][k] = statement[i][k];
 	    }
@@ -8504,7 +8504,7 @@ void doif (char **statement)
 	    strcpy (cstatement[3], "=\0");
 	    for (j = 2; j < k; ++j)
 	    {
-		for (h = 0; h < 200; ++h)
+		for (h = 0; h < SIZEOFSTATEMENT; ++h)
 		{
 		    cstatement[j + 2][h] = statement[j][h];
 		}
@@ -8516,7 +8516,7 @@ void doif (char **statement)
 	    strcpy (cstatement[3], "=\0");
 	    for (j = k + 1; j < i; ++j)
 	    {
-		for (h = 0; h < 200; ++h)
+		for (h = 0; h < SIZEOFSTATEMENT; ++h)
 		{
 		    cstatement[j - k + 3][h] = statement[j][h];
 		}
@@ -8532,7 +8532,7 @@ void doif (char **statement)
 	    strcpy (cstatement[3], "=\0");
 	    for (j = k + 1; j < i; ++j)
 	    {
-		for (h = 0; h < 200; ++h)
+		for (h = 0; h < SIZEOFSTATEMENT; ++h)
 		{
 		    cstatement[j - k + 3][h] = statement[j][h];
 		}
@@ -8545,7 +8545,7 @@ void doif (char **statement)
 	    strcpy (cstatement[3], "=\0");
 	    for (j = 2; j < k; ++j)
 	    {
-		for (h = 0; h < 200; ++h)
+		for (h = 0; h < SIZEOFSTATEMENT; ++h)
 		{
 		    cstatement[j + 2][h] = statement[j][h];
 		}
@@ -8568,7 +8568,7 @@ void doif (char **statement)
 	    strcpy (cstatement[3], "=\0");
 	    for (j = 2; j < k; ++j)
 	    {
-		for (h = 0; h < 200; ++h)
+		for (h = 0; h < SIZEOFSTATEMENT; ++h)
 		{
 		    cstatement[j + 2][h] = statement[j][h];
 		}
@@ -8585,7 +8585,7 @@ void doif (char **statement)
 	    strcpy (cstatement[3], "=\0");
 	    for (j = 2; j < k; ++j)
 	    {
-		for (h = 0; h < 200; ++h)
+		for (h = 0; h < SIZEOFSTATEMENT; ++h)
 		{
 		    cstatement[j + 2][h] = statement[j][h];
 		}
@@ -8614,7 +8614,7 @@ void doif (char **statement)
 	    strcpy (cstatement[3], "=\0");
 	    for (j = k + 1; j < i; ++j)
 	    {
-		for (h = 0; h < 200; ++h)
+		for (h = 0; h < SIZEOFSTATEMENT; ++h)
 		{
 		    cstatement[j - k + 3][h] = statement[j][h];
 		}
@@ -8630,7 +8630,7 @@ void doif (char **statement)
 	    strcpy (cstatement[3], "=\0");
 	    for (j = k + 1; j < i; ++j)
 	    {
-		for (h = 0; h < 200; ++h)
+		for (h = 0; h < SIZEOFSTATEMENT; ++h)
 		{
 		    cstatement[j - k + 3][h] = statement[j][h];
 		}
@@ -8796,9 +8796,9 @@ void doif (char **statement)
 	// separate statement
 
 	// separate statement
-	for (i = j; i < 200; ++i)
+	for (i = j; i < STATEMENTCOUNT; ++i)
 	{
-	    for (k = 0; k < 200; ++k)
+	    for (k = 0; k < SIZEOFSTATEMENT; ++k)
 	    {
 		cstatement[i - j][k] = statement[i][k];
 	    }
@@ -9084,34 +9084,34 @@ void let (char **cstatement)
 {
     int i, j = 0, bit = 0, k;
     int index = 0;
-    char getindex0[200];
-    char getindex1[200];
-    char getindex2[200];
+    char getindex0[SIZEOFSTATEMENT];
+    char getindex1[SIZEOFSTATEMENT];
+    char getindex2[SIZEOFSTATEMENT];
     int indirectflag0, indirectflag1, indirectflag2;
     int score[6] = { 0, 0, 0, 0, 0, 0 };
     char **statement;
     char *getbitvar;
     int Aregmatch = 0;
-    char Aregcopy[200];
-    char operandcopy[200];
+    char Aregcopy[SIZEOFSTATEMENT];
+    char operandcopy[SIZEOFSTATEMENT];
     int fixpoint1;
     int fixpoint2;
     int fixpoint3 = 0;
     char **deallocstatement;
     char **rpn_statement;	// expression in rpn
-    char rpn_stack[200][200];	// prolly doesn't need to be this big
+    char rpn_stack[STATEMENTCOUNT][SIZEOFSTATEMENT];	// prolly doesn't need to be this big
     int sp = 0;			// stack pointer for converting to rpn
     int numrpn = 0;
     char **atomic_statement;	// singular statements to recurse back to here
-    char tempstatement1[200], tempstatement2[200];
+    char tempstatement1[SIZEOFSTATEMENT], tempstatement2[SIZEOFSTATEMENT];
 
     strcpy (Aregcopy, "index-invalid");
 
-    statement = (char **) malloc (sizeof (char *) * 200);
+    statement = (char **) malloc (sizeof (char *) * STATEMENTCOUNT);
     deallocstatement = statement;
     if (!strncmp (cstatement[2], "=\0", 1))
     {
-	for (i = 198; i > 0; --i)
+	for (i = STATEMENTCOUNT-2; i > 0; --i)
 	{
 	    statement[i + 1] = cstatement[i];
 	}
@@ -9142,19 +9142,19 @@ void let (char **cstatement)
 	// complex statement here, hopefully.
 	// convert equation to reverse-polish notation so we can express it in terms of
 	// atomic equations and stack pushes/pulls
-	rpn_statement = (char **) malloc (sizeof (char *) * 200);
-	for (i = 0; i < 200; ++i)
+	rpn_statement = (char **) malloc (sizeof (char *) * STATEMENTCOUNT);
+	for (i = 0; i < STATEMENTCOUNT; ++i)
 	{
-	    rpn_statement[i] = (char *) malloc (sizeof (char) * 200);
-	    for (k = 0; k < 200; ++k)
+	    rpn_statement[i] = (char *) malloc (sizeof (char) * SIZEOFSTATEMENT);
+	    for (k = 0; k < SIZEOFSTATEMENT; ++k)
 		rpn_statement[i][k] = '\0';
 	}
 
 	atomic_statement = (char **) malloc (sizeof (char *) * 10);
 	for (i = 0; i < 10; ++i)
 	{
-	    atomic_statement[i] = (char *) malloc (sizeof (char) * 200);
-	    for (k = 0; k < 200; ++k)
+	    atomic_statement[i] = (char *) malloc (sizeof (char) * SIZEOFSTATEMENT);
+	    for (k = 0; k < STATEMENTCOUNT; ++k)
 		atomic_statement[i][k] = '\0';
 	}
 
@@ -9204,7 +9204,7 @@ void let (char **cstatement)
 	{
 	    // clear atomic statement cache
 	    for (i = 0; i < 10; ++i)
-		for (k = 0; k < 200; ++k)
+		for (k = 0; k < SIZEOFSTATEMENT; ++k)
 		    atomic_statement[i][k] = '\0';
 	    if (isoperator (rpn_statement[sp][0]))
 	    {
@@ -9257,7 +9257,7 @@ void let (char **cstatement)
 	}
 	// done, now assign A-reg to original value
 	for (i = 0; i < 10; ++i)
-	    for (k = 0; k < 200; ++k)
+	    for (k = 0; k < SIZEOFSTATEMENT; ++k)
 		atomic_statement[i][k] = '\0';
 	strcpy (atomic_statement[2], statement[2]);
 	strcpy (atomic_statement[3], "=");
@@ -9265,7 +9265,7 @@ void let (char **cstatement)
 	let (atomic_statement);
 
 	//free up our mallocs...
-	for (i = 0; i < 200; ++i)
+	for (i = 0; i < STATEMENTCOUNT; ++i)
 	    free (rpn_statement[i]);
 	for (i = 0; i < 10; ++i)
 	    free (atomic_statement[i]);
@@ -9289,17 +9289,17 @@ void let (char **cstatement)
 
 
     // check for array, e.g. x(1) to access bit 1 of x
-    for (i = 3; i < 200; ++i)
+    for (i = 3; i < SIZEOFSTATEMENT; ++i)
     {
 	if (statement[2][i] == '\0')
 	{
-	    i = 200;
+	    i = SIZEOFSTATEMENT;
 	    break;
 	}
 	if (statement[2][i] == '}')
 	    break;
     }
-    if (i < 200)		// found bit
+    if (i < SIZEOFSTATEMENT)		// found bit
     {
 	strcpy (Areg, "invalid");
 	// extract expression in parentheses - for now just whole numbers allowed
@@ -9316,7 +9316,7 @@ void let (char **cstatement)
 	if (statement[4][0] == '0')
 	{
 	    printf ("  lda ");
-	    for (i = 0; i < 200; ++i)
+	    for (i = 0; i < SIZEOFSTATEMENT; ++i)
 	    {
 		if (statement[2][i] == '{')
 		    break;
@@ -9328,7 +9328,7 @@ void let (char **cstatement)
 	else if (statement[4][0] == '1')
 	{
 	    printf ("  lda ");
-	    for (i = 0; i < 200; ++i)
+	    for (i = 0; i < SIZEOFSTATEMENT; ++i)
 	    {
 		if (statement[2][i] == '{')
 		    break;
@@ -9346,7 +9346,7 @@ void let (char **cstatement)
 	    printf ("  and #%d\n", (1 << ((int) statement[4][strlen (getbitvar) + 1] - '0')));
 	    printf ("  php\n");
 	    printf ("  lda ");
-	    for (i = 0; i < 200; ++i)
+	    for (i = 0; i < SIZEOFSTATEMENT; ++i)
 	    {
 		if (statement[2][i] == '{')
 		    break;
@@ -9367,7 +9367,7 @@ void let (char **cstatement)
 	    prerror ("can only assign 0, 1 or another bit to a bit");
 	}
 	printf ("  sta ");
-	for (i = 0; i < 200; ++i)
+	for (i = 0; i < SIZEOFSTATEMENT; ++i)
 	{
 	    if (statement[2][i] == '{')
 		break;
@@ -10264,6 +10264,42 @@ void set (char **statement)
 	assertminimumargs (statement, "set snes#pause", 1);
 	if (!strncmp (statement[3], "on", 2))
 	    strcpy (redefined_variables[numredefvars++], "SNESNPAUSE = 1");
+    }
+    else if (!strncmp (statement[2], "mega7800menuoff\0", 15))
+    {
+	assertminimumargs (statement, "set mega7800menuoff", 1);
+	if (!strncmp (statement[3], "0", 1))
+	    append_a78info ("set mega78001");
+	if (!strncmp (statement[3], "1", 1))
+	    append_a78info ("set mega78002");
+	if (!strncmp (statement[3], "all", 3))
+        {
+	    append_a78info ("set mega78001");
+	    append_a78info ("set mega78002");
+        }
+    }
+    else if (!strncmp (statement[2], "7800header\0", 10))
+    {
+	assertminimumargs (statement, "set 7800header", 1);
+        char *settingstr=statement[3];
+        int t;
+        if(settingstr[0]=='\'')
+        {
+            settingstr++; // skip the initial quote
+            for(t=0;t<SIZEOFSTATEMENT;t++)
+            {
+                if (settingstr[t]==0)
+                    break;
+                if (settingstr[t]=='^')
+                    settingstr[t]=' ';
+                if (settingstr[t]=='\'')
+                {
+                    settingstr[t]=0;
+                    break;
+                }
+            }
+        }
+	append_a78info (settingstr);
     }
     else if (!strncmp (statement[2], "multibuttonpause\0", 16))
     {
