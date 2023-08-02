@@ -10265,7 +10265,7 @@ void set (char **statement)
 	if (!strncmp (statement[3], "on", 2))
 	    strcpy (redefined_variables[numredefvars++], "SNESNPAUSE = 1");
     }
-    else if (!strncmp (statement[2], "mega7800menuoff\0", 15))
+    else if (!strncmp (statement[2], "7800GDmenuoff\0", 13))
     {
 	assertminimumargs (statement, "set mega7800menuoff", 1);
 	if (!strncmp (statement[3], "0", 1))
