@@ -10267,7 +10267,7 @@ void set (char **statement)
     }
     else if (!strncmp (statement[2], "7800GDmenuoff\0", 13))
     {
-	assertminimumargs (statement, "set mega7800menuoff", 1);
+	assertminimumargs (statement, "set 7800GDmenuoff", 1);
 	if (!strncmp (statement[3], "0", 1))
 	    append_a78info ("set mega78001");
 	if (!strncmp (statement[3], "1", 1))
