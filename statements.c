@@ -1686,8 +1686,6 @@ int inlinealphadata (char **statement)
 	    quotelen++;
 	    charoffset = charoffset * 2;
 	}
-	if (quotelen > 32)
-	    prerror ("greater than 32 characters used in plotchars statement");
 	gfxprintf (" .byte (<%s + $%02x)\n", currentcharset, charoffset);
 	if (strncmp (statement[6], "extrawide", 9) == 0)
 	{
@@ -1716,7 +1714,8 @@ void plotchars (char **statement)
     // temp5 = y
 
     int paletteval;
-    int widthval;
+    int widthval = 0;
+    int overflowval = 0;
     int autotextwidth = 0;
 
     assertminimumargs (statement, "plotchars", 4);
@@ -1726,33 +1725,14 @@ void plotchars (char **statement)
 	autotextwidth = inlinealphadata (statement);
     }
 
-    printf ("    lda #<%s\n", statement[2]);
-    printf ("    sta temp1\n\n");
-
-    printf ("    lda #>%s\n", statement[2]);
-    printf ("    sta temp2\n\n");
-
     removeCR (statement[6]);
 
     //check if width is a decimal constant. If so, we can avoid opcodes and cycles.
     if (autotextwidth > 0)
-    {
 	widthval = autotextwidth;
-	widthval = ((0 - widthval) & 31);
-	printf ("    lda #%d ; width in two's complement\n", widthval);
-    }
     else if (((statement[6][0] >= '0') && (statement[6][0] <= '9'))
 	     || (statement[6][0] == '$') || (statement[6][0] == '%'))
-    {
 	widthval = strictatoi (statement[6]);
-	if ((widthval > 32) || (widthval == 0))
-	{
-	    prerror ("width value must range from 1 to 32, and '%s' was used", statement[6]);
-	}
-
-	widthval = ((0 - widthval) & 31);
-	printf ("    lda #%d ; width in two's complement\n", widthval);
-    }
     else
     {
 	//width
@@ -1762,8 +1742,19 @@ void plotchars (char **statement)
 	printimmed (statement[6]);
 	printf ("%s\n", statement[6]);
 	printf ("    and #%%00011111\n");
+        widthval=-1;
     }
-
+    if (widthval==0)
+	    prerror ("width value can not be 0");
+    else if (widthval>0)
+    {
+        if(widthval>32)
+        {
+            overflowval = widthval-32;
+            widthval=32;
+        }
+	printf ("    lda #%d ; width in two's complement\n", ((0 - widthval) & 31));
+    }
 
     //check if palette is  a decimal constant. If so, we can avoid opcodes and cycles.
     if (((statement[3][0] >= '0') && (statement[3][0] <= '9')) || (statement[3][0] == '$') || (statement[3][0] == '%'))
@@ -1779,7 +1770,7 @@ void plotchars (char **statement)
     }
     else
     {
-	//palette
+	//palette as a variable
 	printf ("    sta temp3\n");
 	printf ("    lda ");
 	printimmed (statement[3]);
@@ -1793,6 +1784,12 @@ void plotchars (char **statement)
 	printf ("    sta temp3\n");
     }
 
+    printf ("    lda #<%s\n", statement[2]);
+    printf ("    sta temp1\n\n");
+
+    printf ("    lda #>%s\n", statement[2]);
+    printf ("    sta temp2\n\n");
+
     printf ("    lda ");
     printimmed (statement[4]);
     printf ("%s\n", statement[4]);
@@ -1805,6 +1802,32 @@ void plotchars (char **statement)
 
     jsr ("plotcharacters");
 
+    if (overflowval)
+    {
+	printf ("    ; more than 32 chars were plotted, so plot the rest\n");
+	printf ("    lda temp3\n");
+	printf ("    eor #($%02x) ; fix width\n", ((0 - overflowval) & 31)^((0 - widthval) & 31));
+	printf ("    sta temp3\n\n");
+
+        printf ("    lda #<(%s+32) ; fix string offset\n", statement[2]);
+        printf ("    sta temp1\n\n");
+
+        printf ("    lda #>(%s+32) ; fix string offset\n", statement[2]);
+        printf ("    sta temp2\n\n");
+
+	if ((doublewide == 1) && (strncmp (statement[6], "singlewide", 10) != 0))
+            printf ("    lda #%d ; fix X\n",32*4); 
+	else if (strncmp (statement[6], "extrawide", 9) == 0)
+            printf ("    lda #%d ; fix X\n",32*4*2); 
+        else
+            printf ("    lda #%d ; fix X\n",32*4*(doublewide+1)); 
+
+        printf ("    clc\n");
+        printf ("    adc temp4\n");
+        printf ("    sta temp4\n\n");
+
+        jsr ("plotcharacters");
+    }
 
 }
 
