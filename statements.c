@@ -7890,7 +7890,7 @@ void incbin (char **statement)
     removeCR (statement[2]);
     if ((statement[2] == 0) || (statement[2][0] == 0))
 	prerror ("missing argument in incbin statement");
-    printf ("  incbin %s\n", statement[2]);
+    printf ("  incbin \"%s\"\n", statement[2]);
 }
 
 
