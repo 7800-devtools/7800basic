@@ -22,6 +22,6 @@ tar -xvzf "$TAR" && rm $TAR
 cd *
 make
 
-cp src/dasm ../../../../dasm.Windows.x86.exe
+cp src/dasm*exe ../../../../dasm.Windows.x86.exe
 cd ../..
 rm -fr dasm*
