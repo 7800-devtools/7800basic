@@ -45,7 +45,7 @@ main
  if !joy0any then movedebounce=0
  if movedebounce>0 then movedebounce=movedebounce-1:goto skipupdown
  if joy0up && songindex>0 then songindex=songindex-1:movedebounce=30
- if joy0down && songindex<3 then songindex=songindex+1:movedebounce=30
+ if joy0down && songindex<2 then songindex=songindex+1:movedebounce=30
  gosub displaysong
 skipupdown
  if !joy0fire then firedebounce=0
