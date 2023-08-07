@@ -2300,6 +2300,7 @@ void plotmap (char **statement)
 	printimmed (statement[10]);
 	printf ("%s\n", statement[10]);
 	printf ("    jsr mul16\n");
+	printf (".calledfunction_mul16 = 1\n");	
 	printf ("    ;result is in A, temp1 contains overflow\n");
 	printf ("    sta temp2\n");
 
