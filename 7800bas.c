@@ -188,7 +188,8 @@ int main (int argc, char *argv[])
 			break;
 		    for (j = 0; j < 500; ++j)
 			finalcode[j] = '\0';
-		    strncpy (finalcode, mycode, strlen (mycode) - strlen (codeadd));
+		    strncpy (finalcode, mycode, 500);
+                    finalcode[(strlen (mycode) - strlen (codeadd))]=0;
 		    strcat (finalcode, defr[i]);
 		    strcat (finalcode, codeadd + strlen (def[i]));
 		    strcpy (mycode, finalcode);
