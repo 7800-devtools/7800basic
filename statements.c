@@ -1816,11 +1816,11 @@ void plotchars (char **statement)
         printf ("    sta temp2\n\n");
 
 	if ((doublewide == 1) && (strncmp (statement[6], "singlewide", 10) != 0))
-            printf ("    lda #%d ; fix X\n",32*4); 
+	    prerror ("plotchars can't plot more than 32 doublewide characters.");
 	else if (strncmp (statement[6], "extrawide", 9) == 0)
-            printf ("    lda #%d ; fix X\n",32*4*2); 
+	    prerror ("plotchars can't plot more than 32 extrawide characters.");
         else
-            printf ("    lda #%d ; fix X\n",32*4*(doublewide+1)); 
+            printf ("    lda #%d ; fix X\n",32*4); 
 
         printf ("    clc\n");
         printf ("    adc temp4\n");
