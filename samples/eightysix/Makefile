@@ -1,4 +1,4 @@
-export PROJECT=sixtynine
+export PROJECT=eightysix
 export COMPILER=7800basic.sh
 
 main: 	${PROJECT}.bas.bin
