@@ -3769,7 +3769,7 @@ void add_graphic (char **statement, int incbanner)
 
 	height = getgraphicheight (statement[2]);
 	if ((height < zoneheight) || (height > 224))
-	    prerror ("image height out of spec for incbanner");
+	    prerror ("image height %d out of spec for incbanner",height);
 
 
 	//our label is based on the filename...
