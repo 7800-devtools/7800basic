@@ -47,4 +47,4 @@ rmtramdemo/rmtramdemo.bas.a78:
 	cd ..
 
 clean:
-	rm -fr */*.bas.* */*.list.txt */*.symbol.txt */banksetrom.asm */7800.asm */7800basic_variable_redefs.h */a78info.cfg */includes.7800 */cfg
+	rm -fr */*.bas.* */*.list.txt */*.symbol.txt */banksetrom.asm */7800.asm */7800basic_variable_redefs.h */a78info.cfg */includes.7800 */cfg */banksetrom.bin
