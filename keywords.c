@@ -343,6 +343,8 @@ void keywords (char **cstatement)
 	}
 	else if (!strncmp (statement[1], "goto\0", 5))
 	    dogoto (statement);
+	else if (!strncmp (statement[1], "backup\0", 7))
+	    backup(statement);
 	else if (!strncmp (statement[1], "hiscoreload", 11))
 	    hiscoreload (statement);
 	else if (!strncmp (statement[1], "hiscoreclear", 12))

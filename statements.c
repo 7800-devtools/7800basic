@@ -11,6 +11,7 @@
 #include "statements.h"
 #include "keywords.h"
 #include "atarivox.h"
+#include "minitar.h"
 
 #ifndef TRUE
 #define TRUE (1==1)
@@ -21,6 +22,7 @@
 
 extern char stdoutfilename[256];
 extern FILE *stdoutfilepointer;
+extern char backupname[256];
 char redefined_variables[80000][100];
 
 char includespath[500];
@@ -101,6 +103,8 @@ int tallspritecount = 0;
 
 int fourbitfade_alreadyused = 0;
 
+int backupflag = FALSE;
+
 #define BANKSETASM "banksetrom.asm"
 #define BANKSETSTRINGSASM "banksetstrings.asm"
 
@@ -113,6 +117,7 @@ int dumpgraphicsaddr = 0;
 
 #define PNG_DEBUG 3
 #include <png.h>
+
 
 void currdir_foundmsg (char *foundfile)
 {
@@ -153,6 +158,37 @@ void checkvalidfilename (char *filename)
 	if ((!isalpha (filename[t])) && (!isdigit (filename[t])) && (filename[t] != '.') && (filename[t] != '_'))
 	    prerror ("'%s' filename must only contain letters and digits", filename);
     }
+}
+
+void backupthisfile(char *filename)
+{
+    if(!backupflag)
+        return;
+    removeCR (filename);
+    if(AddToArchive(filename,TRUE)==FALSE)
+	prerror ("unable to backup '%s'",filename);
+}
+
+
+void backup(char **statement)
+{
+    assertminimumargs (statement, "backup", 1);
+    removeCR (statement[2]);
+    char *backupstr=statement[2];
+    if (*backupstr == '\'')
+        backupstr++;
+    int t;
+    for(t=0;t<SIZEOFSTATEMENT;t++)
+    {
+        if(backupstr[t]==0)
+            break;
+        if(backupstr[t]=='^')
+            backupstr[t]=' ';
+    }
+    if(backupstr[t-1]=='\'')
+        backupstr[t-1]=0;
+
+    backupthisfile(backupstr);
 }
 
 
@@ -3358,6 +3394,8 @@ void incmapfile (char **statement)
     for (t = 0; t < 256; t++)
 	sprintf (datavalues[t], " .byte 0\n");
 
+    backupthisfile(statement[2]);
+
     //open file...
     FILE *fp = fopen (statement[2], "rb");
     if (!fp)
@@ -3544,6 +3582,8 @@ void add_graphic (char **statement, int incbanner)
     }
 
     fixfilename (statement[2]);
+
+    backupthisfile(statement[2]);
 
     fileextension = strrchr (statement[2], '.');
     if (fileextension == NULL)
@@ -4015,6 +4055,7 @@ void incgraphic (char *file_name, int offset)
     //******* read file
 
     unsigned char header[8];	// 8 is the maximum size that can be checked
+
 
     /* open file and test for it being a png */
     FILE *fp = fopen (file_name, "rb");
@@ -6531,6 +6572,8 @@ void incrmtfile (char **statement)
 
     // we handle rmta different than rmt, so we need to open the file
     // first and see which it is.
+
+    backupthisfile(statement[2]);
 
     char magic[6];
     FILE *fp = fopen (statement[2], "rb");
@@ -11033,6 +11076,35 @@ void set (char **statement)
 	    strcpy (redefined_variables[numredefvars++], "DRIVINGBOOST = 1");
 	}
     }
+    else if (!strncmp (statement[2], "backupstyle", 11))
+    {
+	assertminimumargs (statement, "set backupstyle", 1);
+	if (!strncmp (statement[3], "single", 6))
+            SetBackupStyle(BACKUPSTYLE_SINGLE);
+    }
+    else if (!strncmp (statement[2], "backupfile", 10))
+    {
+	assertminimumargs (statement, "set backupfile", 1);
+        // set backupname to statement[3]
+        removeCR (statement[3]);
+	char *backupstr=statement[3];
+        if (*backupstr == '\'')
+            backupstr++;
+        int t;
+        for(t=0;t<SIZEOFSTATEMENT;t++)
+        {
+            if(backupstr[t]==0)
+                break;
+            if(backupstr[t]=='^')
+                backupstr[t]=' ';
+        }
+        if(backupstr[t-1]=='\'')
+                backupstr[t-1]=0;
+        if(OpenArchive(backupstr)==FALSE)
+	    prerror ("set backupfile failed - couldn't write to '%s'",backupstr);
+        backupflag = TRUE;
+        backupthisfile(backupname);
+    }
     else if (!strncmp (statement[2], "screenheight", 12))
     {
 	assertminimumargs (statement, "set screenheight", 1);
@@ -11505,4 +11577,10 @@ void header_write (FILE * header, char *filename)
     }
     fclose (header);
 
+}
+
+void lastrights()
+{
+    if(backupflag)
+        CloseArchive();
 }
