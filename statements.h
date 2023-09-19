@@ -132,7 +132,7 @@ void characterset (char **statement);
 void savescreen (void);
 void restorescreen (void);
 void barf_graphic_file (void);
-void lastrights(void);
+void lastrites(void);
 void gfxprintf (char *format, ...);
 void orgprintf (char *format, ...);
 void barfmultiplicationtables (void);

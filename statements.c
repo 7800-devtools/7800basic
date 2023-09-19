@@ -104,6 +104,7 @@ int tallspritecount = 0;
 int fourbitfade_alreadyused = 0;
 
 int backupflag = FALSE;
+int backupcount = 0;
 
 #define BANKSETASM "banksetrom.asm"
 #define BANKSETSTRINGSASM "banksetstrings.asm"
@@ -167,6 +168,7 @@ void backupthisfile(char *filename)
     removeCR (filename);
     if(AddToArchive(filename,TRUE)==FALSE)
 	prerror ("unable to backup '%s'",filename);
+    backupcount++;
 }
 
 
@@ -11579,8 +11581,11 @@ void header_write (FILE * header, char *filename)
 
 }
 
-void lastrights()
+void lastrites()
 {
     if(backupflag)
+    {
         CloseArchive();
+        fprintf(stderr,"Backed up %d project files.\n",backupcount);
+    }
 }

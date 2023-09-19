@@ -290,6 +290,6 @@ int main (int argc, char *argv[])
     create_includes (includes_file);
     fprintf (stderr, "7800basic compilation complete.\n");
     freemem (deallocate_mem);
-    lastrights(); 
+    lastrites(); 
     return 0;
 }
