@@ -195,11 +195,11 @@ skipy
      playerx[z]=tempplayerx
      playery[z]=tempplayery
 
-     palette=(palette+32)&127
+     palette=(palette+32)&127 ; PLOTSPRITE needs palette index *32
      tempanim=(tempanim+1)&3 ; un-sync all of the ring animations
- asm
-     PLOTSPRITE4VP ring1,palette,tempplayerx,tempplayery,tempanim 
-end
+
+     PLOTSPRITE4 ring1 palette tempplayerx tempplayery tempanim 
+
  next
 
  doublebuffer flip

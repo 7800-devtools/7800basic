@@ -1393,7 +1393,7 @@ int gettallspriteindex (char *needle)
 }
 
 
-void plotsprite (char **statement)
+void plotsprite (char **statement, int fourbytesprite)
 {
     //    1          2         3    4 5   6        7
     //plotsprite spritename palette x y [frame] [tallheight]
@@ -1404,7 +1404,15 @@ void plotsprite (char **statement)
     // temp4 = x
     // temp5 = y
 
+    static int firstfourbyte = 1;
+
     assertminimumargs (statement, "plotsprite", 4);
+
+    if(fourbytesprite && firstfourbyte)
+    {
+	strcpy (redefined_variables[numredefvars++], "PLOTSP4 = 1");
+	sprintf (constants[numconstants++], "PLOTSP4");
+    }
 
     int tsi = gettallspriteindex (statement[2]);
 
@@ -1477,10 +1485,14 @@ void plotsprite (char **statement)
     printf ("%s\n", statement[5]);	//Y
     printf ("    sta temp5\n\n");
 
-    printf ("    lda #(%s_mode|%%01000000)\n", statement[2]);
-    printf ("    sta temp6\n\n");
-
-    jsr ("plotsprite");
+    if(!fourbytesprite)
+    {
+        printf ("    lda #(%s_mode|%%01000000)\n", statement[2]);
+        printf ("    sta temp6\n\n");
+        jsr ("plotsprite");
+    }
+    else
+        jsr ("plotsprite4");
 
     if ((statement[6][0] != 0) && (statement[6][0] != ':') && (statement[7][0] != 0) && (statement[7][0] != ':'))
     {
@@ -1497,7 +1509,10 @@ void plotsprite (char **statement)
 	    printf ("    lda temp5\n");
 	    printf ("    adc #WZONEHEIGHT\n");
 	    printf ("    sta temp5\n");
-	    printf ("    jsr plotsprite\n");
+            if(!fourbytesprite)
+	        printf ("    jsr plotsprite\n");
+            else
+	        printf ("    jsr plotsprite4\n");
 	}
     }
     else if ((tsi >= 0) && (tallspritemode != 2))
@@ -1516,8 +1531,32 @@ void plotsprite (char **statement)
 	    printf ("    jsr plotsprite\n");
 	}
     }
-
 }
+
+void PLOTSPRITE (char **statement, int fourbytesprite)
+{
+    //    1          2         3    4 5    6    
+    //plotsprite spritename palette x y [frame]
+
+    //a wrapper to the PLOTSPRITE* family of macros
+    assertminimumargs (statement, "PLOTSPRITE", 4);
+
+    if(fourbytesprite)
+    {
+        if (isimmed (statement[3])) // palette is a constant
+            printf (" PLOTSPRITE4 %s,%s,%s,%s,%s\n",statement[2],statement[3],statement[4],statement[5],statement[6]);
+        else // palette is a variable
+            printf (" PLOTSPRITE4VP %s,%s,%s,%s,%s\n",statement[2],statement[3],statement[4],statement[5],statement[6]);
+    }
+    else //!fourbytesprite
+    {
+        if (isimmed (statement[3])) // palette is a constant
+            printf (" PLOTSPRITE %s,%s,%s,%s,%s\n",statement[2],statement[3],statement[4],statement[5],statement[6]);
+        else // palette is a variable
+            printf (" PLOTSPRITEVP %s,%s,%s,%s,%s\n",statement[2],statement[3],statement[4],statement[5],statement[6]);
+    }
+}
+
 
 void plotbanner (char **statement)
 {
