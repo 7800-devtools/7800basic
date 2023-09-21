@@ -9,6 +9,7 @@ ${PROJECT}.bas.bin: ${PROJECT}.bas
 clean:
 	/bin/rm -f ${PROJECT}.bas.bin ${PROJECT}.bas.asm ${PROJECT}.bas.a78 ${PROJECT}.bas.list.txt ${PROJECT}.bas.symbol.txt
 	/bin/rm -f a78info.cfg includes.7800 7800.asm 7800gfx.asm 7800basic_variable_redefs.h 
+	/bin/rm -fr cfg
 
 run:
 	a7800 a7800 -cart ${PROJECT}.bas.a78
