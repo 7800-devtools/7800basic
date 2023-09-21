@@ -1413,6 +1413,11 @@ void plotsprite (char **statement, int fourbytesprite)
 	strcpy (redefined_variables[numredefvars++], "PLOTSP4 = 1");
 	sprintf (constants[numconstants++], "PLOTSP4");
     }
+    if(fourbytesprite)
+    {
+        printf(" if %s_width = 32\n echo \"*** ERROR: plotsprite4 encountered sprite 32 bytes wide (%s)\"\n",statement[2],statement[2]); 
+        printf(" echo \"*** plotsprite4 is limited to sprites 31 bytes wide or less.\"\n ERR\n endif\n");
+    }
 
     int tsi = gettallspriteindex (statement[2]);
 
@@ -1540,6 +1545,8 @@ void PLOTSPRITE (char **statement, int fourbytesprite)
 
     //a wrapper to the PLOTSPRITE* family of macros
     assertminimumargs (statement, "PLOTSPRITE", 4);
+    printf(" if %s_width > 16\n echo \"*** ERROR: PLOTSPRITE encountered sprite wider than 16 bytes. (%s)\"\n",statement[2],statement[2]); 
+    printf(" echo \"*** PLOTSPRITE/PLOTSPRITE4 is limited to sprites 16 bytes wide or less.\"\n ERR\n endif\n");
 
     if(fourbytesprite)
     {
