@@ -999,8 +999,11 @@ zerosfx
 schedulesfx
      ; called with sfxinstrumentlo=<data sfxinstrumenthi=>data sfxpitchoffset=pitch-offset sfxnoteindex=note index
      ldy #0
-     lda (sfxinstrumentlo),y
      ifconst pokeysupport
+         lda sfxinstrumentlo
+         ora sfxinstrumenthi
+         beq scheduletiasfx   ; drums have undefined instrument
+         lda (sfxinstrumentlo),y
          cmp #$20 ; POKEY?
          bne scheduletiasfx
          jmp schedulepokeysfx
@@ -1017,10 +1020,14 @@ continuescheduletiasfx
          lda sfx2pointlo
          ora sfx2pointhi
          beq schedulesfx2 ;if channel 2 is idle, use it
+         lda sfxinstrumentlo
+         ora sfxinstrumenthi
+         beq skipscheduledrums
          ; Both channels are scheduled. 
          ldy #1
          lda (sfxinstrumentlo),y
          bne interruptsfx
+skipscheduledrums
          rts ; the new sound has 0 priority and both channels are busy. Skip playing it.
 interruptsfx
          ;Compare which active sound has a lower priority. We'll interrupt the lower one.

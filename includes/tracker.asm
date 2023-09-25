@@ -130,7 +130,7 @@ handlenotedata
 	sta sfxpitchoffset
 
 	jsr schedulesfx
-
+skipnoteschedule
         jmp advancethesongpointer1byte ; advance to the next data byte and exit
 
 handlechannelrest
