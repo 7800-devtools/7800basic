@@ -10492,7 +10492,7 @@ void set (char **statement)
 	assertminimumargs (statement + 1, "set dlmemory", 2);	//+1 to skip "dlmemory"
 	removeCR (statement[4]);	//remove CR if present
 	if (banksetrom)
-	    prerror ("\"set dlmemory\" isn't compatibl with banksets.");
+	    prerror ("\"set dlmemory\" isn't compatible with banksets.");
 	else
 	{
 	    printf ("DLMEMSTART = %s\n", statement[3]);
