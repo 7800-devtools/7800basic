@@ -70,7 +70,7 @@ processsongdata
         sta songdatalo
         lda songchannel1layer1hi,y
         sta songdatahi
-        ora songdatalo
+        ;ora songdatalo
 	bne channelhasdata
 	    ;channel data is pointing at $0000
 	    lda #$7F
