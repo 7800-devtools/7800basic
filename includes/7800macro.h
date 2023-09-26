@@ -179,12 +179,21 @@ MedianOrderLUTend
 	bcs .PLOTSPRITEnext
 	; carry is clear
 	
-	lda DLPOINTL,x ; setup DL pointer for this zone
+        ifconst VSCROLL
+		ldy Xx3,x
+		lda DLLMEM+11,y
+        else  ; !VSCROLL
+		lda DLPOINTL,x ; Get pointer to DL that this sprite starts in
+        endif
 	ifconst DOUBLEBUFFER
 		adc doublebufferdloffset
 	endif ; DOUBLEBUFFER
 	sta dlpnt
-	lda DLPOINTH,x ; setup DL pointer for this zone
+	ifconst VSCROLL
+		lda DLLMEM+10,y
+	else  ; !VSCROLL
+		lda DLPOINTH,x
+	endif ; !VSCROLL
 	ifconst DOUBLEBUFFER
 		adc #0
 	endif ; DOUBLEBUFFER
@@ -335,12 +344,21 @@ MedianOrderLUTend
 	bcs .PLOTSPRITEend 
 	; carry is clear
 
-	lda DLPOINTL,x ; setup DL pointer for this zone
+	ifconst VSCROLL
+		ldy Xx3,x
+		lda DLLMEM+11,y
+	else  ; !VSCROLL
+		lda DLPOINTL,x ;Get pointer to DL that this sprite starts in
+	endif ; !VSCROLL
 	ifconst DOUBLEBUFFER
 		adc doublebufferdloffset
 	endif ; DOUBLEBUFFER
 	sta dlpnt
-	lda DLPOINTH,x ; setup DL pointer for this zone
+	ifconst VSCROLL
+		lda DLLMEM+10,y
+	else  ; !VSCROLL
+		lda DLPOINTH,x
+	endif ; !VSCROLL
 	ifconst DOUBLEBUFFER
 		adc #0
 	endif ; DOUBLEBUFFER
@@ -507,12 +525,21 @@ MedianOrderLUTend
 	bcs .PLOTSPRITEnext
 	; carry is clear
 	
-	lda DLPOINTL,x ; setup DL pointer for this zone
+	ifconst VSCROLL
+		ldy Xx3,x
+		lda DLLMEM+11,y
+	else  ; !VSCROLL
+		lda DLPOINTL,x ;Get pointer to DL that this sprite starts in
+	endif ; !VSCROLL
 	ifconst DOUBLEBUFFER
 		adc doublebufferdloffset
 	endif ; DOUBLEBUFFER
 	sta dlpnt
-	lda DLPOINTH,x ; setup DL pointer for this zone
+	ifconst VSCROLL
+		lda DLLMEM+10,y
+	else  ; !VSCROLL
+		lda DLPOINTH,x
+	endif ; !VSCROLL
 	ifconst DOUBLEBUFFER
 		adc #0
 	endif ; DOUBLEBUFFER
@@ -664,12 +691,21 @@ MedianOrderLUTend
 	bcs .PLOTSPRITEend 
 	; carry is clear
 
-	lda DLPOINTL,x ; setup DL pointer for this zone
+	ifconst VSCROLL
+		ldy Xx3,x
+		lda DLLMEM+11,y
+	else  ; !VSCROLL
+		lda DLPOINTL,x ;Get pointer to DL that this sprite starts in
+	endif ; !VSCROLL
 	ifconst DOUBLEBUFFER
 		adc doublebufferdloffset
 	endif ; DOUBLEBUFFER
 	sta dlpnt
-	lda DLPOINTH,x ; setup DL pointer for this zone
+	ifconst VSCROLL
+		lda DLLMEM+10,y
+	else  ; !VSCROLL
+		lda DLPOINTH,x
+	endif ; !VSCROLL
 	ifconst DOUBLEBUFFER
 		adc #0
 	endif ; DOUBLEBUFFER
@@ -837,13 +873,21 @@ MedianOrderLUTend
         cpx #WZONECOUNT
 	bcs .PLOTSPRITEnext
 	; carry is clear
-	
-	lda DLPOINTL,x ; setup DL pointer for this zone
+	ifconst VSCROLL
+		ldy Xx3,x
+		lda DLLMEM+11,y
+	else  ; !VSCROLL
+		lda DLPOINTL,x ;Get pointer to DL that this sprite starts in
+	endif ; !VSCROLL
 	ifconst DOUBLEBUFFER
 		adc doublebufferdloffset
 	endif ; DOUBLEBUFFER
 	sta dlpnt
-	lda DLPOINTH,x ; setup DL pointer for this zone
+	ifconst VSCROLL
+		lda DLLMEM+10,y
+	else  ; !VSCROLL
+		lda DLPOINTH,x
+	endif ; !VSCROLL
 	ifconst DOUBLEBUFFER
 		adc #0
 	endif ; DOUBLEBUFFER
@@ -986,13 +1030,21 @@ MedianOrderLUTend
         cpx #WZONECOUNT
 	bcs .PLOTSPRITEend 
 	; carry is clear
-
-	lda DLPOINTL,x ; setup DL pointer for this zone
+	ifconst VSCROLL
+		ldy Xx3,x
+		lda DLLMEM+11,y
+	else  ; !VSCROLL
+		lda DLPOINTL,x ;Get pointer to DL that this sprite starts in
+	endif ; !VSCROLL
 	ifconst DOUBLEBUFFER
 		adc doublebufferdloffset
 	endif ; DOUBLEBUFFER
 	sta dlpnt
-	lda DLPOINTH,x ; setup DL pointer for this zone
+	ifconst VSCROLL
+		lda DLLMEM+10,y
+	else  ; !VSCROLL
+		lda DLPOINTH,x
+	endif ; !VSCROLL
 	ifconst DOUBLEBUFFER
 		adc #0
 	endif ; DOUBLEBUFFER
@@ -1150,13 +1202,21 @@ MedianOrderLUTend
         cpx #WZONECOUNT
 	bcs .PLOTSPRITEnext
 	; carry is clear
-	
-	lda DLPOINTL,x ; setup DL pointer for this zone
+	ifconst VSCROLL
+		ldy Xx3,x
+		lda DLLMEM+11,y
+	else  ; !VSCROLL
+		lda DLPOINTL,x ;Get pointer to DL that this sprite starts in
+	endif ; !VSCROLL
 	ifconst DOUBLEBUFFER
 		adc doublebufferdloffset
 	endif ; DOUBLEBUFFER
 	sta dlpnt
-	lda DLPOINTH,x ; setup DL pointer for this zone
+	ifconst VSCROLL
+		lda DLLMEM+10,y
+	else  ; !VSCROLL
+		lda DLPOINTH,x
+	endif ; !VSCROLL
 	ifconst DOUBLEBUFFER
 		adc #0
 	endif ; DOUBLEBUFFER
@@ -1298,13 +1358,21 @@ MedianOrderLUTend
         cpx #WZONECOUNT
 	bcs .PLOTSPRITEend 
 	; carry is clear
-
-	lda DLPOINTL,x ; setup DL pointer for this zone
+	ifconst VSCROLL
+		ldy Xx3,x
+		lda DLLMEM+11,y
+	else  ; !VSCROLL
+		lda DLPOINTL,x ;Get pointer to DL that this sprite starts in
+	endif ; !VSCROLL
 	ifconst DOUBLEBUFFER
 		adc doublebufferdloffset
 	endif ; DOUBLEBUFFER
 	sta dlpnt
-	lda DLPOINTH,x ; setup DL pointer for this zone
+	ifconst VSCROLL
+		lda DLLMEM+10,y
+	else  ; !VSCROLL
+		lda DLPOINTH,x
+	endif ; !VSCROLL
 	ifconst DOUBLEBUFFER
 		adc #0
 	endif ; DOUBLEBUFFER

@@ -16,9 +16,17 @@ WZONEHEIGHT         = ZONEHEIGHT
      endif
 
      ifnconst ZONECOUNT
+         ifconst VSCROLL
+WZONECOUNT         = ((WSCREENHEIGHT/WZONEHEIGHT)+1)
+         else  ; !VSCROLL
 WZONECOUNT         = (WSCREENHEIGHT/WZONEHEIGHT)
+         endif ; !VSCROLL
      else
+         ifconst VSCROLL
+WZONECOUNT         = (ZONECOUNT+1)
+         else  ; !VSCROLL
 WZONECOUNT         = ZONECOUNT
+         endif ; !VSCROLL
      endif
 
      ; top of the frame, non-visible lines. this is based on NTSC,
