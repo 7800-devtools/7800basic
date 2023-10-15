@@ -547,13 +547,22 @@ terminatedisplaybuffer
      ;add DL end entry on each DL
      ldx #(WZONECOUNT-1)
 dlendloop
-     lda DLPOINTL,x
+     ifconst VSCROLL
+         ldy Xx3,x
+         lda DLLMEM+11,y
+     else  ; !VSCROLL
+         lda DLPOINTL,x ;Get pointer to DL that this sprite starts in
+     endif ; !VSCROLL
      ifconst DOUBLEBUFFER
          clc
          adc doublebufferdloffset
      endif ; DOUBLEBUFFER
      sta dlpnt
-     lda DLPOINTH,x
+     ifconst VSCROLL
+         lda DLLMEM+10,y
+     else  ; !VSCROLL
+         lda DLPOINTH,x
+     endif ; !VSCROLL
      ifconst DOUBLEBUFFER
          adc #0
      endif ; DOUBLEBUFFER
@@ -1313,6 +1322,15 @@ Xx3
          .byte  0,3,6,9,12,15,18,21,24,27
          .byte 30,33,36,39,42,45,48,51,54,57
          .byte 60,63,66,69,72,75,78,81,84,87
+maskscrollsprite
+         .byte $00,%11000000,($D0+WZONEHEIGHT),0,160  ; 5*2 + 32*3 = 106 cycles
+         .byte $00,1,($D0+WZONEHEIGHT),160            ; 4*2 + 31*3 = 101 cycles 
+         .byte $00,1,($D0+WZONEHEIGHT),160            ; 4*2 + 31*3 = 101 cycles 
+         .byte $00,1,($D0+WZONEHEIGHT),160            ; 4*2 + 31*3 = 101 cycles 
+         .byte $00,%01000000,($D0+WZONEHEIGHT),16,160 ; 5*2 + 16*3 =  58 cycles
+	                                         ; MAX  ============ 467 cycles
+	                                         ; MIN  ============  59 cycles
+maskscrollspriteend
      endif ; VSCROLL
 
 lockzonex
@@ -1459,13 +1477,22 @@ plotcharactersskipentry
 
      tax
      
-     lda DLPOINTL,x ;Get pointer to DL that the characters are in
+    ifconst VSCROLL
+         ldy Xx3,x
+         lda DLLMEM+11,y
+     else  ; !VSCROLL
+         lda DLPOINTL,x ;Get pointer to DL that the characters are in
+     endif ; !VSCROLL
      ifconst DOUBLEBUFFER
          clc
          adc doublebufferdloffset
      endif ; DOUBLEBUFFER
      sta dlpnt
-     lda DLPOINTH,x
+     ifconst VSCROLL
+         lda DLLMEM+10,y
+     else  ; !VSCROLL
+         lda DLPOINTH,x
+     endif ; !VSCROLL
      ifconst DOUBLEBUFFER
          adc #0
      endif ; DOUBLEBUFFER
@@ -1520,13 +1547,23 @@ plotcharacterslive
          lda temp5 ;Y position
 
          tax
-         lda DLPOINTL,x ;Get pointer to DL that the characters are in
+
+         ifconst VSCROLL
+             ldy Xx3,x
+             lda DLLMEM+11,y
+         else  ; !VSCROLL
+             lda DLPOINTL,x ;Get pointer to DL that the characters are in
+         endif ; !VSCROLL
          ifconst DOUBLEBUFFER
              clc
              adc doublebufferdloffset
          endif ; DOUBLEBUFFER
          sta dlpnt
-         lda DLPOINTH,x
+         ifconst VSCROLL
+             lda DLLMEM+10,y
+         else  ; !VSCROLL
+             lda DLPOINTH,x
+         endif ; !VSCROLL
          ifconst DOUBLEBUFFER
              adc #0
          endif ; DOUBLEBUFFER

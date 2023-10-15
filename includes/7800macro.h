@@ -1505,10 +1505,100 @@ MedianOrderLUTend
 .PLOTSPRITEend
  ENDM
 
+ MAC SCROLLSETUP
+
+        ; If vertical scrolling is enabled...
+        ;   * Fills the DLs with hidden masking sprites.
+	; Adds blank sprites to the DLs to fill the screen.
+	; If horizontal scrolling is enabled...
+	;   * Adds another blank DL off-screen
+
+	; {1} - constant - the first dl of the scrolling area
+	; {2} - symbol   - blank tile label
+
+	; *** clear the saved dl ending for scrolling zones...
+	ldx #{1}
+	lda #0
+.scrollcleardls	
+	sta dlend,x
+	inx
+	cpx #WZONECOUNT
+	bne .scrollcleardls
+
+ ifconst VSCROLL
+	; *** adjust the ending for our mask dl to allow for mask objects...
+	dex
+	lda #(maskscrollspriteend-maskscrollsprite)
+	sta dlend,x
+
+	; *** Add 4x dma masking objects to last zone...
+	ldx #(maskscrollspriteend-maskscrollsprite-1)
+.scrollpopulateloop1
+	lda maskscrollsprite,x
+	sta LASTZONEADDRESS+0,x
+	ifconst DOUBLEBUFFER
+		sta LASTZONEADDRESS+0+DOUBLEBUFFEROFFSET,x
+	endif ; DOUBLEBUFFER
+	dex
+	bpl .scrollpopulateloop1
+	inx ; x=0
+	stx finescrolly
+ endif ; VSCROLL
+
+	; *** Add blank sprite-tile objects to the scrolling zones...
+PLOTSP4 = 1 ; ensure we use 4 byte sprites
+
+	; convert byte width of the sprit to coordinate width...
+ if {2}_mode = 0  ; ### 160A, 320A, 320D
+.scrollXWIDTH SET ({2}_width * 4) ; 4x 160-mode pixels per byte
+ else             ; ### 160B, 320B, 320C
+.scrollXWIDTH SET ({2}_width * 2) ; 2x 160-mode pixels per byte
+ endif
+
+        ; figure out how many sprites we need to fill a screen width...
+.scrollSPRITECOuNT SET ((160+.scrollXWIDTH-1)/.scrollXWIDTH)
+ ifconst HSCROLL
+.scrollSPRITECOuNT SET (.scrollSPRITECOuNT+1) 
+ endif ; HSCROLL
+
+	; setup plotsprite4 parameters...
+	lda #<{2}
+	sta temp1
+	lda #>{2}
+	sta temp2
+	lda #{2}_width_twoscompliment
+	sta temp3 ; width
+
+	lda #{1}
+	asl
+	asl
+	asl
+ if WZONEHEIGHT
+	asl
+ endif
+	sta temp5 ; Y
+.scrollpopulateloop2
+	lda #0
+	sta temp4 ; X
+.scrollpopulateloop3
+	jsr skipplotsprite4wait
+	lda temp4 ; X
+	clc
+	adc #.scrollXWIDTH
+	sta temp4 ; X
+	cmp #(.scrollSPRITECOuNT*.scrollXWIDTH)
+	bne .scrollpopulateloop3
+	lda temp5 ; Y
+	clc
+	adc #WZONEHEIGHT
+	sta temp5 ; Y
+	cmp #((WZONECOUNT*WZONEHEIGHT)+WZONEHEIGHT)
+	bne .scrollpopulateloop2
+ ENDM ; SCROLLSETUP
 
  MAC SIZEOF
 
-	; echo's the size difference between the current address and the
+	; echoes the size difference between the current address and the
 	; a label that was passed as an argument. This is a quick way to
 	; determine the size of a structure.
 

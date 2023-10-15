@@ -59,10 +59,9 @@ skipplotsprite4wait
          jmp continueplotsprite42
 exitplotsprite41
          rts
-
-continueplotsprite41
      endif
 
+continueplotsprite41
 
      ifconst VSCROLL
          ldy Xx3,x

@@ -55,7 +55,14 @@ WDLMEMEND = DLMEMEND
     endif
 
 
-WMEMSIZE  = (WDLMEMEND-WDLMEMSTART+1)
+WMEMSIZE SET (WDLMEMEND-WDLMEMSTART+1)
+
+ ifconst VSCROLL
+ ifnconst DOUBLEBUFFER
+ ; give the last zone extra ram for the dma mask objects...
+WMEMSIZE SET (WMEMSIZE-(maskscrollspriteend-maskscrollsprite))
+ endif ; DOUBLEBUFFER
+ endif ; VSCROLL
 
       ifnconst DOUBLEBUFFER
 DLLASTOBJ = ((((WMEMSIZE/WZONECOUNT)-2)/5)*5) ; -2 to always ensure we have 1x double-byte terminator
@@ -130,6 +137,7 @@ TMPMEMADDRESS SET (TMPMEMADDRESS + $300)
   endif ; EXTRADLMEMORY
 
 ZONE,DLINDEX,"ADDRESS" = TMPMEMADDRESS
+LASTZONEADDRESS SET TMPMEMADDRESS
 
 DLINDEX SET DLINDEX + 1
   REPEND
