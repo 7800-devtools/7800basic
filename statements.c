@@ -10461,6 +10461,14 @@ void set (char **statement)
 	    strcpy (redefined_variables[numredefvars++], "AVOXVOICE = 1");
 	}
     }
+    else if (!strncmp (statement[2], "pausesilence\0", 12))
+    {
+	assertminimumargs (statement, "set pausesilence", 1);
+	if (!strncmp (statement[3], "on", 2))
+	{
+	    strcpy (redefined_variables[numredefvars++], "PAUSESILENT = 1");
+	}
+    }
     else if (!strncmp (statement[2], "plotvaluepage\0", 13))
     {
 	assertminimumargs (statement + 1, "set plotvaluepage", 1);	//+1 to skip "dlmemory"

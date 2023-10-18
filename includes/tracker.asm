@@ -11,6 +11,10 @@ trackerstart
 servicesongover
 	rts
 servicesong
+ ifconst PAUSESILENT
+        lda pausestate
+        bne servicesongover 
+ endif
 	lda songtempo
 	beq servicesongover ; ** if song is off/paused then return
 servicesongcontinue

@@ -104,6 +104,10 @@ TIMEOFFSET         = 10
          endif
          lda rasterpause
          beq skiprasterupdate
+ ifconst PAUSESILENT
+         lda pausestate 
+         bne skiprasterupdate
+ endif
          jsr RASTERMUSICTRACKER+3
 skiprasterupdate
 RMT_Iend
@@ -659,6 +663,10 @@ servicesongwasnotmissed
      ifconst RMT
          ifnconst RMTPALSPEED
              ifnconst RMTOFFSPEED
+ ifconst PAUSESILENT
+         lda pausestate 
+         bne skiprasterupdate2
+ endif
                  lda palfastframe
                  beq skiprasterupdate2
                  lda rasterpause
@@ -862,6 +870,12 @@ servicesfxchannelsdone
          jmp checkpokeyplaying
      endif
 servicesfxchannels
+ ifconst PAUSESILENT
+     lda pausestate
+     beq servicesfxchannels_1
+     rts
+servicesfxchannels_1
+ endif
      ldx #255
 servicesfxchannelsloop
      inx
