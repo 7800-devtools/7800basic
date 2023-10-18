@@ -27,11 +27,11 @@
   incgraphic gfx/heroup2.png
   incgraphic gfx/heroright1.png
   incgraphic gfx/heroright2.png
-  incbanner gfx/logobanner.png
 
   P0C1=heroright2_color1
   P0C2=heroright2_color2
   P0C3=heroright2_color3
+
 
  rem ** setup Palette 1
   P1C1=$12
@@ -48,6 +48,8 @@
   P3C2=logobanner_color2
   P3C3=logobanner_color3
 
+  incbanner gfx/logobanner.png
+
   rem ** activate the graphics area with our tiles...
   characterset tileset_blanks
 
@@ -57,6 +59,7 @@
   rem ** this way we don't setup the background over and over again.
 
   plotmap screen1map 1 0 0 20 12
+
 
   plotbanner logobanner 3 60 64
 
@@ -114,3 +117,4 @@ doneherowalk
  'hi              dehi'
  'fgfgfg        fgfgfg'
 end
+

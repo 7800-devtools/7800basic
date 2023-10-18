@@ -94,7 +94,8 @@ main
      q=(z&7)+1
      if q>7 then q=7
   
-     plotsprite herodown1 q tempplayerx tempplayery
+     rem ** use plotsprite4 to save some memory and render time...
+     plotsprite4 herodown1 q tempplayerx tempplayery
  next
 
  doublebuffer flip

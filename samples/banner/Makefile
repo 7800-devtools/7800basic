@@ -1,5 +1,4 @@
-export PROJECT=adventurer
-export PROJECTDIR=`pwd`
+export PROJECT=banner
 export COMPILER=7800basic.sh
 
 main: 	${PROJECT}.bas.bin
