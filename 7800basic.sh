@@ -52,8 +52,8 @@ fi
 echo
   
 echo "Starting build of $1"
- #7800preprocess$EXT<"$1" | valgrind --tool=memcheck --leak-check=yes 7800basic$EXT -i "$bas7800dir" -b "$1"
  7800preprocess$EXT <"$1" >"$1.pre"
+ #valgrind --tool=memcheck --leak-check=yes 7800basic$EXT -i "$bas7800dir" -b "$1" -p "$1.pre"
  7800basic$EXT -i "$bas7800dir" -b "$1" -p "$1.pre"
 
 if [ "$?" -ne "0" ]
@@ -61,6 +61,7 @@ if [ "$?" -ne "0" ]
   echo "Compilation failed."
   exit
 fi
+   rm -f "$1.pre"
 if [ "$2" = "-O" ]
   then
    7800postprocess$EXT -i "$bas7800dir" | 7800optimize$EXT > "$1.asm"
@@ -79,7 +80,9 @@ dasm$DASMEXT $1.asm -I"$bas7800dir/includes" -f3 -l"$1.list.txt" -p20 -s"$1.symb
 
 if [ -r banksetrom.asm ] ; then
     cat "banksetrom.bin" >> "$1.bin"
+    rm -f banksetrom.bin banksetrom.asm
 fi
+
   
 7800header$EXT -o -f a78info.cfg "$1.bin"
 7800makecc2$EXT "$1.bin"
