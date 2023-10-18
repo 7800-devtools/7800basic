@@ -22,7 +22,14 @@
 
 extern char stdoutfilename[256];
 extern FILE *stdoutfilepointer;
+extern FILE *preprocessedfd;
 extern char backupname[256];
+extern int maxpasses;
+
+FILE *stderrfilepointer = NULL;
+
+int passes;
+
 char redefined_variables[80000][100];
 
 char includespath[500];
@@ -47,7 +54,7 @@ char currentcharset[256];
 int graphicsdatawidth[16];
 char charactersetchars[257];
 
-char constants[MAXCONSTANTS][100];
+char constants[MAXCONSTANTS][CONSTANTLEN];
 char bannerfilenames[1000][100];
 int bannerheights[1000];
 int bannerwidths[1000];
@@ -96,10 +103,15 @@ int extra = 0;
 int extralabel = 0;
 int extraactive = 0;
 int macroactive = 0;
+int dumpgraphics_index = 0;
 
-char tallspritelabel[2048][1024];
-int tallspriteheight[2048];
-int tallspritecount = 0;
+int firstfourbyte = 1;
+int romsize_already_set = 0;
+
+#define TALLSPRITEMAX 2048
+char tallspritelabel[TALLSPRITEMAX][1024];
+int tallspriteheight[TALLSPRITEMAX];
+int tallspritecount;
 
 int fourbitfade_alreadyused = 0;
 
@@ -163,7 +175,7 @@ void checkvalidfilename (char *filename)
 
 void backupthisfile(char *filename)
 {
-    if(!backupflag)
+    if((!backupflag)||(passes>0))
         return;
     removeCR (filename);
     if(AddToArchive(filename,TRUE)==FALSE)
@@ -960,7 +972,6 @@ int isfixpoint (char *item)
 
 void set_romsize (char *size)
 {
-    static int romsize_already_set = 0;
     if (romsize_already_set)
 	prerror ("rom size was specified more than once.");
     romsize_already_set = 1;
@@ -1153,25 +1164,27 @@ void shakescreen (char **statement)
     //  1          2
     // shakescreen lo|med|hi|off
 
-    int shakeamount = 15;
+    int shakeamount = (zoneheight-1);
 
     assertminimumargs (statement, "shakescreen", 1);
 
     removeCR (statement[2]);
     if (statement[2][0] == 'l')
-	shakeamount = 3;
+	shakeamount = shakeamount/4;
     else if (statement[2][0] == 'm')
-	shakeamount = 7;
+	shakeamount = shakeamount/2;
     else if (statement[2][0] == 'h')
-	shakeamount = 15;
+	shakeamount = shakeamount;
     else if (statement[2][0] == 'o')
     {
-	printf ("    lda #%%01001111\n");
-	printf ("    sta DLLMEM+3\n");
+	printf ("    lda DLLMEM+9\n");
+	printf ("    and #%%11110000\n");
+	printf ("    ora #%d\n",zoneheight-1);
+	printf ("    sta DLLMEM+9\n");
 	printf ("  ifconst DOUBLEBUFFER\n");
 	printf ("    ldy doublebufferstate\n");
 	printf ("    beq [.+5]\n");
-	printf ("    sta.w DLLMEM+DBOFFSET+3\n");
+	printf ("    sta.w DLLMEM+DBOFFSET+9\n");
 	printf ("  endif ; DOUBLEBUFFER\n");
 
 	return;
@@ -1181,12 +1194,12 @@ void shakescreen (char **statement)
 
     printf ("    jsr randomize\n");
     printf ("    and #%d\n", shakeamount);
-    printf ("    eor #%%01001111\n");
-    printf ("    sta DLLMEM+3\n");
+    printf ("    eor DLLMEM+9\n");
+    printf ("    sta DLLMEM+9\n");
     printf ("  ifconst DOUBLEBUFFER\n");
     printf ("    ldy doublebufferstate\n");
     printf ("    beq [.+5]\n");
-    printf ("    sta.w DLLMEM+DBOFFSET+3\n");
+    printf ("    sta.w DLLMEM+DBOFFSET+9\n");
     printf ("  endif ; DOUBLEBUFFER\n");
 
 
@@ -1382,7 +1395,7 @@ int gettallspriteindex (char *needle)
 
     if (tallspritemode == 0)
 	return (-1);
-    for (t = 0; t < tallspritecount; t++)
+    for (t = 0; t < TALLSPRITEMAX ; t++)
     {
 	if (strcmp (tallspritelabel[t], needle) == 0)
 	{
@@ -1404,7 +1417,6 @@ void plotsprite (char **statement, int fourbytesprite)
     // temp4 = x
     // temp5 = y
 
-    static int firstfourbyte = 1;
 
     assertminimumargs (statement, "plotsprite", 4);
 
@@ -1591,8 +1603,12 @@ void plotbanner (char **statement)
     {
 	if ((q == 999) || (bannerfilenames[q][0] == 0))
 	{
-	    prerror ("plotbanner didn't find a banner height for %s", statement[2]);
+	    if (passes==0)
+                return;
+	    else
+	        prerror ("plotbanner didn't find a banner height for %s", statement[2]);
 	}
+
 	if (strcmp (bannerfilenames[q], statement[2]) == 0)
 	    break;
     }
@@ -2139,7 +2155,10 @@ void plotmapfile (char **statement)
 	    {
 		if ((q == 999) || (palettefilenames[q][0] == 0))
 		{
-		    prerror ("plotmapfile didn't find a palette for %s", datavalues[gid]);
+                    if (passes==0)
+                        return;
+                    else
+		        prerror ("plotmapfile didn't find a palette for %s", datavalues[gid]);
 		}
 		if (strcmp (palettefilenames[q], datavalues[gid]) == 0)
 		    break;
@@ -2948,7 +2967,7 @@ void psound (char **statement)
 void snesdetect ()
 {
     printf (" jsr SNES_AUTODETECT\n");
-    if (!isimmed ("SNES2ATARISUPPORT"))
+    if (!isconstantdefined ("SNES2ATARISUPPORT"))
     {
 	strcpy (redefined_variables[numredefvars++], "SNES2ATARISUPPORT = 1");
 	sprintf (constants[numconstants++], "SNES2ATARISUPPORT");
@@ -3092,27 +3111,27 @@ void changecontrol (char **statement)
 
     if (!strcmp (statement[3], "paddle"))
     {
-	if (!isimmed ("PADDLESUPPORT"))
+	if (!isconstantdefined ("PADDLESUPPORT"))
 	{
 	    strcpy (redefined_variables[numredefvars++], "PADDLESUPPORT = 1");
 	    sprintf (constants[numconstants++], "PADDLESUPPORT");
 	}
-	if ((port == 0) && (!isimmed ("PADDLE0SUPPORT")))
+	if ((port == 0) && (!isconstantdefined ("PADDLE0SUPPORT")))
 	{
 	    strcpy (redefined_variables[numredefvars++], "PADDLE0SUPPORT = 1");
 	    sprintf (constants[numconstants++], "PADDLE0SUPPORT");
 	}
-	if ((port == 1) && (!isimmed ("PADDLE1SUPPORT")))
+	if ((port == 1) && (!isconstantdefined ("PADDLE1SUPPORT")))
 	{
 	    strcpy (redefined_variables[numredefvars++], "PADDLE1SUPPORT = 1");
 	    sprintf (constants[numconstants++], "PADDLE1SUPPORT");
 	}
-	if ((isimmed ("PADDLE1SUPPORT")) && (isimmed ("PADDLE1SUPPORT")) && (!isimmed ("FOURPADDLESUPPORT")))
+	if ((isimmed ("PADDLE1SUPPORT")) && (isimmed ("PADDLE1SUPPORT")) && (!isconstantdefined ("FOURPADDLESUPPORT")))
 	{
 	    strcpy (redefined_variables[numredefvars++], "FOURPADDLESUPPORT = 1");	// if so, enable four paddle reads
 	    sprintf (constants[numconstants++], "FOURPADDLESUPPORT");
 	}
-	if (!isimmed ("LONGCONTROLLERREAD"))
+	if (!isconstantdefined ("LONGCONTROLLERREAD"))
 	{
 	    strcpy (redefined_variables[numredefvars++], "LONGCONTROLLERREAD = 1");
 	    sprintf (constants[numconstants++], "LONGCONTROLLERREAD");
@@ -3132,7 +3151,7 @@ void changecontrol (char **statement)
     }
     else if (!strcmp (statement[3], "trakball"))
     {
-	if (!isimmed ("TRAKBALLSUPPORT"))
+	if (!isconstantdefined ("TRAKBALLSUPPORT"))
 	{
 	    strcpy (redefined_variables[numredefvars++], "TRAKBALLSUPPORT = 1");
 	    sprintf (constants[numconstants++], "TRAKBALLSUPPORT");
@@ -3148,7 +3167,7 @@ void changecontrol (char **statement)
 	    printf ("  sta port0resolution\n");
 	    printf ("  ldx #0\n");
 
-	    if (!isimmed ("TRAKBALL0SUPPORT"))
+	    if (!isconstantdefined ("TRAKBALL0SUPPORT"))
 	    {
 		strcpy (redefined_variables[numredefvars++], "TRAKBALL0SUPPORT = 1");
 		sprintf (constants[numconstants++], "TRAKBALL0SUPPORT");
@@ -3163,7 +3182,7 @@ void changecontrol (char **statement)
 	    printf ("  lda #2\n");
 	    printf ("  sta port1resolution\n");
 	    printf ("  ldx #1\n");
-	    if (!isimmed ("TRAKBALL1SUPPORT"))
+	    if (!isconstantdefined ("TRAKBALL1SUPPORT"))
 	    {
 		strcpy (redefined_variables[numredefvars++], "TRAKBALL1SUPPORT = 1");
 		sprintf (constants[numconstants++], "TRAKBALL1SUPPORT");
@@ -3171,7 +3190,7 @@ void changecontrol (char **statement)
 	}
 	printf ("  jsr setportforinput\n");
 	printf ("  jsr settwobuttonmode\n");
-	if (!isimmed ("LONGCONTROLLERREAD"))
+	if (!isconstantdefined ("LONGCONTROLLERREAD"))
 	{
 	    strcpy (redefined_variables[numredefvars++], "LONGCONTROLLERREAD = 1");
 	    sprintf (constants[numconstants++], "LONGCONTROLLERREAD");
@@ -3179,7 +3198,7 @@ void changecontrol (char **statement)
     }
     else if (!strcmp (statement[3], "keypad"))
     {
-	if (!isimmed ("KEYPADSUPPORT"))
+	if (!isconstantdefined ("KEYPADSUPPORT"))
 	{
 	    strcpy (redefined_variables[numredefvars++], "KEYPADSUPPORT = 1");
 	    sprintf (constants[numconstants++], "KEYPADSUPPORT");
@@ -3200,22 +3219,22 @@ void changecontrol (char **statement)
     else if ((!strcmp (statement[3], "stmouse"))
 	     || (!strcmp (statement[3], "amigamouse")) || (!strcmp (statement[3], "driving")))
     {
-	if (!isimmed ("MOUSESUPPORT"))
+	if (!isconstantdefined ("MOUSESUPPORT"))
 	{
 	    strcpy (redefined_variables[numredefvars++], "MOUSESUPPORT = 1");
 	    sprintf (constants[numconstants++], "MOUSESUPPORT");
 	}
-	if ((port == 0) && (!isimmed ("MOUSE0SUPPORT")))
+	if ((port == 0) && (!isconstantdefined ("MOUSE0SUPPORT")))
 	{
 	    strcpy (redefined_variables[numredefvars++], "MOUSE0SUPPORT = 1");
 	    sprintf (constants[numconstants++], "MOUSE0SUPPORT");
 	}
-	if ((port == 1) && (!isimmed ("MOUSE1SUPPORT")))
+	if ((port == 1) && (!isconstantdefined ("MOUSE1SUPPORT")))
 	{
 	    strcpy (redefined_variables[numredefvars++], "MOUSE1SUPPORT = 1");
 	    sprintf (constants[numconstants++], "MOUSE1SUPPORT");
 	}
-	if (!isimmed ("LONGCONTROLLERREAD"))
+	if (!isconstantdefined ("LONGCONTROLLERREAD"))
 	{
 	    strcpy (redefined_variables[numredefvars++], "LONGCONTROLLERREAD = 1");
 	    sprintf (constants[numconstants++], "LONGCONTROLLERREAD");
@@ -3785,7 +3804,7 @@ void add_graphic (char **statement, int incbanner)
 	//save the label
 	strcpy (graphicslabels[dmaplain][graphicsdatawidth[dmaplain]], generalname);
 
-	if (istallsprite)
+	if ((istallsprite)&&(passes==0))
 	{
 	    //remember sprite height
 	    strcpy (tallspritelabel[tallspritecount], generalname);
@@ -3818,6 +3837,8 @@ void add_graphic (char **statement, int incbanner)
 		{
 		    if (palettefilenames[s][0] == 0)
 			break;
+	            if (strcmp (palettefilenames[s], graphicslabels[dmaplain][graphicsdatawidth[dmaplain]]) == 0)
+	                break;
 		}
 		if (s > 998)
 		    prerror ("ran out of default graphic palette entries");
@@ -3870,14 +3891,15 @@ void add_graphic (char **statement, int incbanner)
 	    if (strcasecmp (generalname + t, ".png") == 0)
 		generalname[t] = 0;
 
-	//remember the bannerheight value for this banner name, so plotbanner can use it...
 	for (s = 0; s < 1000; s++)
 	{
 	    if (bannerfilenames[s][0] == 0)
-		break;
-	}
-	if (s > 998)
-	    prerror ("ran out of banner height entries");
+	        break;
+	    if (strcmp (bannerfilenames[s], generalname) == 0)
+	        break;
+	    if (s > 998)
+	        prerror ("ran out of banner height entries");
+        }
 	strcpy (bannerfilenames[s], generalname);
 	bannerheights[s] = height / zoneheight;
 	bannerwidths[s] = (width - 1) / 32;
@@ -4689,7 +4711,6 @@ void init_includes (char *path)
 
 void barf_graphic_file (void)
 {
-    static int dumpgraphics_index = 0;
     FILE *dumpgraphics_fileout;
     char dumpgraphics_filename[256];
     int s, t, currentplain;
@@ -4874,7 +4895,7 @@ void barf_graphic_file (void)
 		    ABADDRBASE = REALSTART + (currentbank * 0x4000) + 0x2000 - ((dmaplain - currentplain) * DMASIZE);
 
 	    }
-	    fprintf (stderr, "\n");
+	    prout ("\n");
 	    if (bankcount == 0)
 	    {
 		prinfo ("GFX Block #%d starts @ $%04X", currentplain, ADDRBASE);
@@ -4892,7 +4913,7 @@ void barf_graphic_file (void)
 		    prerror ("couldn't open file for dumping graphics block");
 	    }
 	    linewidth = 0;
-	    fprintf (stderr, "       ");
+	    prout ("       ");
 
 	    char dumpgraphics_data[256];
 
@@ -4921,9 +4942,9 @@ void barf_graphic_file (void)
 			    if ((linewidth + strlen (graphicslabels[currentplain][t])) > 60)
 			    {
 				linewidth = 0;
-				fprintf (stderr, "\n       ");
+				prout ("\n       ");
 			    }
-			    fprintf (stderr, " %s", graphicslabels[currentplain][t]);
+			    prout (" %s", graphicslabels[currentplain][t]);
 			    linewidth = linewidth + strlen (graphicslabels[currentplain][t]);
 			}
 			else
@@ -4943,7 +4964,7 @@ void barf_graphic_file (void)
 		if (bankcount > 0)
 		    ABADDRBASE = ABADDRBASE + 256;
 	    }
-	    fprintf (stderr, "\n");
+	    prout ("\n");
 	    if (bankcount == 0)
 		prinfo ("GFX block #%d has %d bytes left (%d x %d bytes)\n",
 			currentplain,
@@ -4978,7 +4999,7 @@ void barf_graphic_file (void)
 			    ((dmaplain - currentplain) * DMASIZE) + (DMASIZE / 2);
 
 		}
-		fprintf (stderr, "\n");
+		prout ("\n");
 		if (bankcount == 0)
 		    prinfo ("DMA hole #%d starts @ $%04X", currentplain, ADDRBASE);
 		else
@@ -4999,7 +5020,7 @@ void barf_graphic_file (void)
 		holefilepointer = fopen (holefilename, "r");
 		if (holefilepointer != NULL)
 		{
-		    fprintf (stderr, "        DMA hole code found and imported\n");
+		    prout ("        DMA hole code found and imported\n");
 		    int c;
 		    while ((c = getc (holefilepointer)) != EOF)
 			putchar (c);
@@ -5008,7 +5029,7 @@ void barf_graphic_file (void)
 		}
 		else
 		{
-		    fprintf (stderr, "        no code defined for DMA hole\n");
+		    prout ("        no code defined for DMA hole\n");
 		}
 
 		if (bankcount == 0)
@@ -5094,7 +5115,7 @@ void barf_graphic_file (void)
 	    dmaplain = 0;
 	}
 
-	fprintf (stderr, "\n");
+	prout ("\n");
     }
 }
 
@@ -5827,7 +5848,7 @@ void sdata (char **statement)
     printf ("%s_begin\n", statement[2]);
     while (1)
     {
-	if (((!fgets (data, SIZEOFSTATEMENT, stdin))
+	if (((!fgets (data, SIZEOFSTATEMENT, preprocessedfd))
 	     || ((data[0] < (unsigned char) 0x3A) && (data[0] > (unsigned char) 0x2F))) && (data[0] != 'e'))
 	{
 	    prerror ("missing \"end\" keyword at end of data");
@@ -5880,7 +5901,7 @@ void data (char **statement)
 
     while (1)
     {
-	if (((!fgets (data, SIZEOFSTATEMENT, stdin))
+	if (((!fgets (data, SIZEOFSTATEMENT, preprocessedfd))
 	     || ((data[0] < (unsigned char) 0x3A) && (data[0] > (unsigned char) 0x2F))) && (data[0] != 'e'))
 	{
 	    prerror ("missing \"end\" keyword at end of data");
@@ -6273,7 +6294,7 @@ void songdata (char **statement)
     while (1)
     {
 	memset (data, 0, 1001);
-	if (!fgets (data, 1000, stdin))
+	if (!fgets (data, 1000, preprocessedfd))
 	{
 	    prerror ("missing \"end\" keyword at end of data");
 	    exit (1);
@@ -6667,7 +6688,7 @@ void incrmtfile (char **statement)
             printf("\n");
     }
     printf("\n");
-    fprintf(stderr,"RMT %s imported, %ld bytes\n",datalabelname,size);
+    prout ("RMT %s imported, %ld bytes\n",datalabelname,size);
     fclose(fp);
 }
 
@@ -6691,7 +6712,7 @@ void speechdata (char **statement)
     while (1)
     {
 	memset (data, 0, 501);
-	if (((!fgets (data, 500, stdin))
+	if (((!fgets (data, 500, preprocessedfd))
 	     || ((data[0] < (unsigned char) 0x3A) && (data[0] > (unsigned char) 0x2F))) && (data[0] != 'e'))
 	{
 	    prerror ("missing \"end\" keyword at end of data");
@@ -7429,7 +7450,7 @@ void alphadata (char **statement)
 
     while (1)
     {
-	if (((!fgets (data, SIZEOFSTATEMENT, stdin))
+	if (((!fgets (data, SIZEOFSTATEMENT, preprocessedfd))
 	     || ((data[0] < (unsigned char) 0x3A) && (data[0] > (unsigned char) 0x2F))) && (data[0] != 'e'))
 	{
 	    prerror ("missing \"end\" keyword at end of alphadata");
@@ -7866,7 +7887,7 @@ void doasm ()
     char data[SIZEOFSTATEMENT];
     while (1)
     {
-	if (((!fgets (data, SIZEOFSTATEMENT, stdin))
+	if (((!fgets (data, SIZEOFSTATEMENT, preprocessedfd))
 	     || ((data[0] < (unsigned char) 0x3A) && (data[0] > (unsigned char) 0x2F))) && (data[0] != 'e'))
 	{
 	    prerror ("missing \"end\" keyword at end of inline asm");
@@ -10486,6 +10507,8 @@ void set (char **statement)
 	    deprecated160bindexes = 1;
 	if (!strncmp (statement[3], "boxcollision", 12))
 	    deprecatedboxcollision = 1;
+	if (!strncmp (statement[3], "onepass", 7))
+	    maxpasses = 1;
     }
     else if (!strncmp (statement[2], "dlmemory\0", 8))
     {
@@ -11503,36 +11526,58 @@ void gfxprintf (char *format, ...)
     fclose (banksetout);
 }
 
+void prinit()
+{
+    if(stderrfilepointer)
+        return;
+    stderrfilepointer = fopen ("message.log","wb");
+    if (!stderrfilepointer)
+        prerror("unable to open 'message.log'");
+}
 
+void prout (char *format, ...)
+{
+    char buffer[1024];
+    prinit();
+    va_list args;
+    va_start (args, format);
+    vsnprintf (buffer, 1023, format, args);
+    fprintf (stderrfilepointer, "%s", buffer);
+    va_end (args);
+}
 
 void prinfo (char *format, ...)
 {
     char buffer[1024];
+    prinit();
     va_list args;
     va_start (args, format);
     vsnprintf (buffer, 1023, format, args);
-    fprintf (stderr, "*** (): INFO, %s\n", buffer);
+    fprintf (stderrfilepointer, "*** (): INFO, %s\n", buffer);
     va_end (args);
 }
 
 void prwarn (char *format, ...)
 {
     char buffer[1024];
+    prinit();
     va_list args;
     va_start (args, format);
     vsnprintf (buffer, 1023, format, args);
-    fprintf (stderr, "*** (%d): WARNING, %s\n", line, buffer);
+    fprintf (stderrfilepointer, "*** (%d): WARNING, %s\n", line, buffer);
     va_end (args);
 }
 
 void prerror (char *format, ...)
 {
     char buffer[1024];
+    prinit();
     va_list args;
     va_start (args, format);
     vsnprintf (buffer, 1023, format, args);
-    fprintf (stderr, "*** (%d): ERROR, %s\n", line, buffer);
+    fprintf (stderrfilepointer, "*** (%d): ERROR, %s\n", line, buffer);
     va_end (args);
+    lastrites();
     exit (1);
 }
 
@@ -11546,7 +11591,31 @@ int printimmed (char *value)
 
 int isimmed (char *value)
 {
-    // search queue of constants
+    // search queue of constants defined in any pass
+    int i;
+    //removeCR(value);
+
+    for (i = 0; i < MAXCONSTANTS; ++i)
+    {
+        if(constants[i][0]==0)
+            break;
+	if (!strcmp (value, constants[i]))
+	{
+	    // a constant should be treated as an immediate
+	    return 1;
+	}
+    }
+    if ((value[0] == '$') || (value[0] == '%') || (value[0] < (unsigned char) 0x3A))
+    {
+	return 1;
+    }
+    else
+	return 0;
+}
+
+int isconstantdefined (char *value)
+{
+    // search queue of constants defined in this pass
     int i;
     //removeCR(value);
 
@@ -11557,13 +11626,6 @@ int isimmed (char *value)
 	    // a constant should be treated as an immediate
 	    return 1;
 	}
-    }
-    if (!strcmp (value + (strlen (value) > 7 ? strlen (value) - 7 : 0), "_length"))
-    {
-	// Warning about use of data_length before data statement
-	prwarn
-	    ("possible use of data statement length before data statement is defined\n      workaround: forward declaration may be done by const %s=%s at beginning of code",
-	     value, value);
     }
     if ((value[0] == '$') || (value[0] == '%') || (value[0] < (unsigned char) 0x3A))
     {
@@ -11577,6 +11639,7 @@ int number (unsigned char value)
 {
     return ((int) value) - '0';
 }
+
 
 void removeCR (char *linenumber)	// remove trailing CR from string
 {
@@ -11632,6 +11695,21 @@ void lastrites()
     if(backupflag)
     {
         CloseArchive();
-        fprintf(stderr,"Backed up %d project files.\n",backupcount);
+        prout ("Backed up %d project files.\n",backupcount);
     }
+    prinit();
+    fclose(stderrfilepointer);
+    stderrfilepointer = fopen ("message.log","rb");
+    int logchar;
+    logchar = fgetc (stderrfilepointer);
+    while (logchar != EOF)
+    {
+        fputc(logchar,stderr);
+        logchar = fgetc (stderrfilepointer);
+    }
+    fclose(stderrfilepointer);
+    remove("message.log");
+    remove("7800hole.0.asm");
+    remove("7800hole.1.asm");
+    remove("7800hole.2.asm");
 }

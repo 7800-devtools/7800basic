@@ -53,7 +53,8 @@ echo
   
 echo "Starting build of $1"
  #7800preprocess$EXT<"$1" | valgrind --tool=memcheck --leak-check=yes 7800basic$EXT -i "$bas7800dir" -b "$1"
- 7800preprocess$EXT<"$1" | 7800basic$EXT -i "$bas7800dir" -b "$1"
+ 7800preprocess$EXT <"$1" >"$1.pre"
+ 7800basic$EXT -i "$bas7800dir" -b "$1" -p "$1.pre"
 
 if [ "$?" -ne "0" ]
  then
