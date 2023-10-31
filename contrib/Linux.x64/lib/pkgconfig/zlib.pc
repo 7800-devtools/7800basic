@@ -1,4 +1,4 @@
-prefix=/data/fun/Atari/7800basic.0.6/contrib/src/../Linux.x64
+prefix=/data/fun/Atari/7800basic-git/7800basic/contrib/src/../Linux.x64
 exec_prefix=${prefix}
 libdir=${exec_prefix}/lib
 sharedlibdir=${libdir}

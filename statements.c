@@ -13,6 +13,10 @@
 #include "atarivox.h"
 #include "minitar.h"
 
+// liblzsa headers...
+#include <shrink_inmem.h>
+#include <lib.h>
+
 #ifndef TRUE
 #define TRUE (1==1)
 #endif
@@ -106,7 +110,10 @@ int macroactive = 0;
 int dumpgraphics_index = 0;
 
 int firstfourbyte = 1;
+int firstcompress = 1;
+
 int romsize_already_set = 0;
+
 
 #define TALLSPRITEMAX 2048
 char tallspritelabel[TALLSPRITEMAX][1024];
@@ -1424,6 +1431,7 @@ void plotsprite (char **statement, int fourbytesprite)
     {
 	strcpy (redefined_variables[numredefvars++], "PLOTSP4 = 1");
 	sprintf (constants[numconstants++], "PLOTSP4");
+        firstfourbyte = 0;
     }
     if(fourbytesprite)
     {
@@ -6681,7 +6689,7 @@ void incrmtfile (char **statement)
         if (t%16>0)
             printf(",");
         if (t%16==0)
-            printf("  .byte ");
+            printf("\n  .byte ");
         printf("$%02x",c);
         t++;
         if (t%16==0)
@@ -6691,6 +6699,143 @@ void incrmtfile (char **statement)
     prout ("RMT %s imported, %ld bytes\n",datalabelname,size);
     fclose(fp);
 }
+
+void decompress (char **statement)
+{
+    //   1          2      3
+    // decompress data destination
+
+    assertminimumargs (statement, "decompress", 2);
+    removeCR (statement[3]);
+
+    if(firstcompress)
+    {
+	strcpy (redefined_variables[numredefvars++], "lzsa1support = 1");
+        firstcompress = 0;
+    }
+
+    printf ("    lda #<%s\n", statement[2]);
+    printf ("    sta LZSA_SRC_LO\n");
+    printf ("    lda #>%s\n", statement[2]);
+    printf ("    sta LZSA_SRC_HI\n");
+    printf ("    lda #<%s\n", statement[3]);
+    printf ("    sta LZSA_DST_LO\n");
+    printf ("    lda #>%s\n", statement[3]);
+    printf ("    sta LZSA_DST_HI\n");
+    printf ("    jsr lzsa1_unpack\n");
+}
+
+
+void inccompress (char **statement)
+{
+    // creates compresses data from a data file.
+    // this shares a lot of code with incrmt, because it's supposed to work
+    // with rmt files too. It will advance the stream position to the RMT4
+    // signature, if the signature exists.
+
+    //     1         2
+    // inccompress filename
+
+    char datalabelname[256];
+    int t;
+
+    unsigned char *lzsa_buf_uncomp, *lzsa_buf_comp;
+    long uncompsize, compsize, position;
+
+    assertminimumargs (statement, "inccompress", 1);
+
+    if(firstcompress)
+    {
+	strcpy (redefined_variables[numredefvars++], "lzsa1support = 1");
+        firstcompress = 0;
+    }
+
+    fixfilename (statement[2]);
+
+    //our label is based on the filename...
+    snprintf (datalabelname, 255, "%s", ourbasename (statement[2]));
+    checkvalidfilename (statement[2]);
+
+    //but remove the extension...
+    for (t = (strlen (datalabelname) - 1); t > 0; t--)
+    {
+        if (datalabelname[t]=='.')
+        {
+	    datalabelname[t] = 0;
+            break;
+        }
+    }
+
+    printf("%s\n",datalabelname);
+
+    backupthisfile(statement[2]);
+
+    char magic[6];
+    FILE *fp = fopen (statement[2], "rb");
+    if(fp==NULL)
+        prerror ("couldn't open %s",statement[2]);
+
+    // setup and scan for the 'RMT4' signature in the file
+    memset(magic,0,6);
+    int c;
+    while ((c = fgetc(fp)) != EOF) 
+    {
+        magic[0]=magic[1];
+        magic[1]=magic[2];
+        magic[2]=magic[3];
+        magic[3]=c;
+        if (!strncmp(magic,"RMT4",4))
+            break;
+    }
+    if (c == EOF)              // it's not an RMT4, so rewind to the start.
+        rewind(fp);
+    else
+        fseek(fp,-4,SEEK_CUR); // rewind to the start of the RMT4 header.
+
+    // Get the size of the file, excluding any bytes we skipped to reach
+    // the RMT4 header...
+    position=ftell(fp);
+    fseek(fp,0,SEEK_END);
+    uncompsize=ftell(fp)-position;
+    fseek(fp,position,SEEK_SET); // and then restore the stream position
+
+    lzsa_buf_uncomp = malloc(uncompsize);
+    if(lzsa_buf_uncomp==NULL)
+        prerror ("couldn't allocate memory to read %s",statement[2]);
+    if(fread(lzsa_buf_uncomp,1,uncompsize,fp)!=uncompsize)
+        prerror ("couldn't read %s into memory",statement[2]);
+    fclose(fp);
+
+    // allocate the destination buffer
+    lzsa_buf_comp = malloc(uncompsize*2); 
+    if(lzsa_buf_comp==NULL)
+        prerror ("couldn't allocate memory to compress %s",statement[2]);
+
+    // call the lzsa library in-memory compression routine
+    // see libs.h for argument details
+    compsize=lzsa_compress_inmem(lzsa_buf_uncomp,lzsa_buf_comp,uncompsize,uncompsize*2,(LZSA_FLAG_RAW_BLOCK|LZSA_FLAG_FAVOR_RATIO),3,1);
+
+    if (compsize<1)
+        prerror ("liblzsa couldn't compress %s",statement[2]);
+
+    if (compsize>uncompsize)
+        prwarn ("compressing %s wastes more rom than the uncompressed file",statement[2]);
+
+    for(t=0;t<compsize;t++)
+    {
+        if (t%16>0)
+            printf(",");
+        if (t%16==0)
+            printf("\n  .byte ");
+        printf("$%02x",lzsa_buf_comp[t]);
+    }
+
+    printf("\n");
+    prout ("   %s compressed, %ld->%ld bytes, %02.2f ratio\n",statement[2],uncompsize,compsize,((float)uncompsize/(float)compsize));
+    free(lzsa_buf_uncomp);
+    free(lzsa_buf_comp);
+}
+
 
 void speechdata (char **statement)
 {

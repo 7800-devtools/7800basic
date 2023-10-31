@@ -1,19 +1,17 @@
 #!/bin/sh
-# rebuild zlib static library for Win32 x64
+# /data/fun/Atari/7800basic.0.1/contrib/lib/linux
+# rebuild zlib static library for linux x86 64-bit
 
-TARGETDIR="$PWD/../Win32.x64"
+TARGETDIR="$PWD/../Linux.x64"
 
 rm -fr "$TARGETDIR"
 mkdir "$TARGETDIR" 2>/dev/null
-
-export PATH=/usr/x86_64-w64-mingw32/bin:$PATH
-export CC=x86_64-w64-mingw32-gcc-win32
 
 #zlib.....................
 rm -fr zlib-1.2.8
 tar -xvzf zlib-1.2.8.tar.gz
 cd zlib-1.2.8
-export CFLAGS="-O2 -m64"
+export CFLAGS="-m64" 
 ./configure --static --prefix="$TARGETDIR"
 make
 make install
@@ -25,25 +23,24 @@ rm -fr libpng-1.5.17
 tar -xvzf libpng-1.5.17.tar.gz
 cd libpng-1.5.17/
 export LDFLAGS="-L$TARGETDIR/lib"
-export CFLAGS="-I$TARGETDIR/include -m64"
-./configure --enable-static --disable-shared  --prefix="$TARGETDIR" --host=i586-mingw32msvc
+export CFLAGS="-m64  -I$TARGETDIR/include"
+./configure --enable-static --disable-shared  --prefix="$TARGETDIR"
 make
 make install
 cd ..
 rm -fr libpng-1.5.17
 
 #liblzsa.................
-export EXTCFLAGS="-m64 "
-export EXTLDFLAGS="-m64 "
 rm -fr lzsa
 tar -xvzf lzsa-1.4.1.tar.gz
 cd lzsa
 make
-/usr/bin/ar -ros liblzsa.a obj/src/shrink_inmem.o obj/src/shrink_context.o obj/src/shrink_block_v1.o obj/src/shrink_block_v2.o obj/src/frame.o obj/src/matchfinder.o obj/src/libdivsufsort/lib/divsufsort.o obj/src/libdivsufsort/lib/divsufsort_utils.o obj/src/libdivsufsort/lib/sssort.o obj/src/libdivsufsort/lib/trsort.o
+ar -ros liblzsa.a obj/src/shrink_inmem.o obj/src/shrink_context.o obj/src/shrink_block_v1.o obj/src/shrink_block_v2.o obj/src/frame.o obj/src/matchfinder.o obj/src/libdivsufsort/lib/divsufsort.o obj/src/libdivsufsort/lib/divsufsort_utils.o obj/src/libdivsufsort/lib/sssort.o obj/src/libdivsufsort/lib/trsort.o
+
 cp liblzsa.a "$TARGETDIR/lib"
 cp includelib/* "$TARGETDIR/include"
 # copy the binary out, in case someone needs it outside of 7800basic...
-cp lzsa.exe ../../../lzsa.Windows.x64.exe
+cp lzsa ../../../lzsa.Linux.x64
 cd ..
 rm -fr lzsa
 cat << EOF > ../../lzsa.LICENSE.txt
@@ -58,4 +55,3 @@ For more information, check out the LZSA github:
 
 EOF
 unix2dos ../../lzsa.LICENSE.txt
-

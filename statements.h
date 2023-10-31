@@ -27,6 +27,8 @@ void dopop ();
 void doreboot ();
 void incmapfile (char **statement);
 void incrmtfile (char **statement);
+void decompress (char **statement);
+void inccompress (char **statement);
 void domacro (char **statement);
 void callmacro (char **statement);
 void doextra (char *extrano);
