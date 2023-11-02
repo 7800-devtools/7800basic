@@ -188,7 +188,7 @@ lzsa1_unpack
      bne .cp_byte        ; 3/2
                          ; ~17 cycles each iteration
      tya                 ; 2
-     beq .cp_fixpointer  ; 2 rare adjustment, if we just copied a full page
+     beq .cp_fixpointer  ; 2 unlikely branch - only if we just copied a full page
      adc lzsa_srcptr+0   ; 3
      sta lzsa_srcptr+0   ; 3
      bcs .cp_fixsrc1     ; 2 (typical)
