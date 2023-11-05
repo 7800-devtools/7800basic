@@ -1,9 +1,8 @@
 @echo off
 if X"%bas7800dir%" == X goto nobasic
 :tryanyway
-rem 7800preprocess <"%~f1" | 7800basic.exe -i "%bas7800dir%" -b "%1"
-7800preprocess.exe <"%~f1" >"%~f1.pre"
-7800basic.exe -i "%bas7800dir%" -b "%1" -p "%1.pre"
+7800preprocess.exe <"%~f1" >"%~1.pre"
+7800basic.exe -i "%bas7800dir%" -b "%~1" -p "%~1.pre"
 if errorlevel 1 goto basicerror
 del "%1.pre" 
 if X%2 == X-O goto optimize
