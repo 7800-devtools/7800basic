@@ -4,7 +4,7 @@ if X"%bas7800dir%" == X goto nobasic
 7800preprocess.exe <"%~f1" >"%~1.pre"
 7800basic.exe -i "%bas7800dir%" -b "%~1" -p "%~1.pre"
 if errorlevel 1 goto basicerror
-del "%1.pre" 
+del "%~1.pre" 
 if X%2 == X-O goto optimize
 7800postprocess -i "%bas7800dir%" > "%~f1.asm"
 goto nooptimize
