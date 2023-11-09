@@ -108,6 +108,7 @@ char *ourbasename (char *);
 void add_graphic (char **, int bannergraphic);
 void boxcollision (char **);
 void dash2underscore (char *mystring);
+int optionalargused(char *statement);
 void plotbanner (char **statement);
 void plotsprite (char **statement, int fourbytesprite);
 void PLOTSPRITE (char **statement, int fourbytesprite);

@@ -1571,19 +1571,53 @@ void PLOTSPRITE (char **statement, int fourbytesprite)
     if(fourbytesprite)
     {
         if (isimmed (statement[3])) // palette is a constant
-            printf (" PLOTSPRITE4 %s,%s,%s,%s,%s\n",statement[2],statement[3],statement[4],statement[5],statement[6]);
+            printf ("MACARG2CONST SET 1\n");
         else // palette is a variable
-            printf (" PLOTSPRITE4VP %s,%s,%s,%s,%s\n",statement[2],statement[3],statement[4],statement[5],statement[6]);
+            printf ("MACARG2CONST SET 0\n");
+        if (isimmed (statement[4])) // x is a constant
+            printf ("MACARG3CONST SET 1\n");
+        else // x is a variable
+            printf ("MACARG3CONST SET 0\n");
+        if (isimmed (statement[5])) // y is a constant
+            printf ("MACARG4CONST SET 1\n");
+        else // y is a variable
+            printf ("MACARG4CONST SET 0\n");
+	if (optionalargused(statement[6]) && !isimmed (statement[6])) // const
+            printf ("MACARG5CONST SET 0\n");
+        else // frame is a variable
+            printf ("MACARG5CONST SET 1\n");
+
+        printf (" PLOTSPRITE4 %s,%s,%s,%s,%s\n",statement[2],statement[3],statement[4],statement[5],statement[6]);
+
     }
     else //!fourbytesprite
     {
         if (isimmed (statement[3])) // palette is a constant
-            printf (" PLOTSPRITE %s,%s,%s,%s,%s\n",statement[2],statement[3],statement[4],statement[5],statement[6]);
+            printf ("MACARG2CONST SET 1\n");
         else // palette is a variable
-            printf (" PLOTSPRITEVP %s,%s,%s,%s,%s\n",statement[2],statement[3],statement[4],statement[5],statement[6]);
+            printf ("MACARG2CONST SET 0\n");
+        if (isimmed (statement[4])) // x is a constant
+            printf ("MACARG3CONST SET 1\n");
+        else // x is a variable
+            printf ("MACARG3CONST SET 0\n");
+        if (isimmed (statement[5])) // y is a constant
+            printf ("MACARG4CONST SET 1\n");
+        else // y is a variable
+            printf ("MACARG4CONST SET 0\n");
+	if (optionalargused(statement[6]) && !isimmed (statement[6])) // const
+            printf ("MACARG5CONST SET 0\n");
+        else // frame is a variable
+            printf ("MACARG5CONST SET 1\n");
+
+        printf (" PLOTSPRITE %s,%s,%s,%s,%s\n",statement[2],statement[3],statement[4],statement[5],statement[6]);
     }
 }
 
+int optionalargused(char *statement)
+{
+    removeCR (statement);
+    return ((statement[0] != 0) && (statement[0] != ':'));
+}
 
 void plotbanner (char **statement)
 {
