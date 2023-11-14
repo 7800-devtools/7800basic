@@ -29,6 +29,7 @@ int linenumber=1;
 %x incgraphic
 %x incbanner
 %x incmapfile
+%x inccompress
 %x plotmapfile
 %x set
 %x setquotestart
@@ -141,6 +142,11 @@ int linenumber=1;
 "incmapfile" {printf("%s",yytext);BEGIN(incmapfile);}
 <incmapfile>^\n* printf("%s",yytext);
 <incmapfile>\n {linenumber++;printf("\n");BEGIN(INITIAL);}
+
+"inccompress" {printf("%s",yytext);BEGIN(inccompress);}
+<inccompress>^\n* printf("%s",yytext);
+<inccompress>\n {linenumber++;printf("\n");BEGIN(INITIAL);}
+
 
 "plotmapfile" {printf("%s",yytext);BEGIN(plotmapfile);}
 <plotmapfile>^\n* printf("%s",yytext);
