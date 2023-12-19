@@ -100,15 +100,14 @@ SCORESIZE                     = 6
 
                  ;save shadow registers for later return...
                  lda sCTRL
-                 ;sta ssCTRL
                  pha
                  lda sCHARBASE
-                 ;sta ssCHARBASE
                  pha
 
+                 jsr drawoverwait
+                 jsr drawwait
                  lda #$60
                  sta charactermode
-                 jsr drawwait
                  jsr blacken320colors
                  jsr clearscreen
 
@@ -126,17 +125,17 @@ SCORESIZE                     = 6
                  lda #0
                  sta hscursorx
                  sta framecounter
+
                  ifnconst HSCOLORCHASESTART
                      lda #$8D ; default is blue. why not?
                  else
                      lda #HSCOLORCHASESTART
                  endif
                  sta hscolorchaseindex
-
                  lda #$0F
                  sta P0C2 ; base text is white
-
                  jsr hschasecolors
+
                  ; ** plot all of the initials
                  lda #<HSRAMInitials
                  sta temp1 ; charmaplo
