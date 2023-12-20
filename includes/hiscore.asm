@@ -47,6 +47,12 @@ checkhscinit
              bpl checkhscinit
              cmp #$ff
              bne hscisalreadyinit
+checkhscinit2
+             ora $1000,y
+             dey
+             bpl checkhscinit2
+             cmp #0
+             bne hscisalreadyinit
              ; if we're here, we need to do a minimal HSC init...
              ldy #$28
 hscinitloop1
@@ -104,12 +110,14 @@ SCORESIZE                     = 6
                  lda sCHARBASE
                  pha
 
+                 jsr blacken320colors
                  jsr drawoverwait
                  jsr drawwait
+                 jsr hiscorecleardlmem
+                 jsr clearscreen
+
                  lda #$60
                  sta charactermode
-                 jsr blacken320colors
-                 jsr clearscreen
 
                  ;set the character base to the HSC font
                  lda #>hiscorefont
@@ -1037,6 +1045,16 @@ loaddifficultytableScores
              iny
              cpx #15
              bne loaddifficultytableScores
+             ldx #14
+             lda #$ff
+validatescoresloop
+             and HSRAMScores,x
+             dex
+             bpl validatescoresloop
+             cmp #$ff
+             bne exitloaddifficultytableScores
+             jmp cleardifficultytablemem
+exitloaddifficultytableScores
              rts
 
 decodeHSCInitials
@@ -1224,6 +1242,23 @@ cleardifficultytablememloop
              bpl cleardifficultytablememloop
              rts
 hiscoremoduleend
+
+hiscorecleardlmem
+ ldx #(WZONECOUNT-1)
+hiscorecleardlmemloop1
+ lda DLPOINTL,x
+ sta dlpnt
+ lda DLPOINTH,x
+ sta dlpnt+1
+ lda #0
+ ldy #17
+hiscorecleardlmemloop2
+ sta (dlpnt),y
+ dey
+ bpl hiscorecleardlmemloop2
+ dex
+ bpl hiscorecleardlmemloop1
+ rts 
 
              ifconst DOUBLEWIDE
 plotvaluedw
