@@ -2140,7 +2140,7 @@ void plotmapfile (char **statement)
     //our default data label...
     for (t = 0; t < 256; t++)
 	sprintf (datavalues[t], "palette0");
-
+//datavalues
     for (;;)
     {
 	char line[1024];
@@ -2202,6 +2202,7 @@ void plotmapfile (char **statement)
                     else
 		        prerror ("plotmapfile didn't find a palette for %s", datavalues[gid]);
 		}
+
 		if (strcmp (palettefilenames[q], datavalues[gid]) == 0)
 		    break;
 	    }
@@ -3886,7 +3887,6 @@ void add_graphic (char **statement, int incbanner)
 		    prerror ("ran out of default graphic palette entries");
 		strcpy (palettefilenames[s], graphicslabels[dmaplain][graphicsdatawidth[dmaplain]]);
 		graphicfilepalettes[s] = strictatoi (statement[palettestatement]);
-		palettefilenames[s + 1][0] = 0;
 		graphicfilemodes[s] = graphiccolormode;
 	    }
 	}
@@ -5950,6 +5950,12 @@ void data (char **statement)
 	    exit (1);
 	}
 	line++;
+	data[SIZEOFSTATEMENT-1]=0;
+	if (strlen(data)==(SIZEOFSTATEMENT-1))
+	{
+	    prerror ("line length exceeded in data statelement.");
+	    exit (1);
+	}
 	if (!strncmp (data, "end\0", 3))
 	    break;
 	remove_trailing_commas (data);
