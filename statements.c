@@ -1456,9 +1456,9 @@ void plotsprite (char **statement, int fourbytesprite)
 	}
 	else
 	    printf ("    ldy #%s_width\n", statement[2]);
-	printf ("    clc\n");
 	printf ("    beq plotspritewidthskip%d\n", templabel);
 	printf ("plotspritewidthloop%d\n", templabel);
+	printf ("      clc\n");
 	printf ("      adc ");
 	printimmed (statement[6]);
 	printf ("%s\n", statement[6]);
