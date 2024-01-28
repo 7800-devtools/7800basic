@@ -7934,6 +7934,58 @@ void next (char **statement)
 	printf (".%s\n", failsafelabel);
 }
 
+void autodim (char **statement)
+{
+    static int inititialized = 0;
+    static char start_addr[80];
+    static char end_addr[80];
+    static int current_index;
+
+    int memsize,t;
+    int objsize, objcount;
+
+    // when arg2=init...
+    //         1           2         3         4
+    //     autodim       init   start addr  end addr
+
+    // when arg2=byte, 8.8, or 4.4...
+    //         1           2         3         4
+    //     autodim       type      name      count
+
+    assertminimumargs (statement, "autodim", 3);
+    removeCR (statement[4]);
+
+    if (strncmp(statement[2],"init",5)==0)
+    {
+        inititialized = 1;
+        current_index=0;
+	strncpy(start_addr,statement[3],79);
+	strncpy(end_addr,statement[4],79);
+        return;
+    }
+
+    if(!inititialized)
+        prerror ("autodim used without initializing.");
+
+    if (strncmp(statement[2],"byte",5)==0)
+    {
+        objsize=1;
+        snprintf (redefined_variables[numredefvars], 100, "%s = (%s + %d)",statement[3],start_addr,current_index);
+        numredefvars++;
+
+        // advance the autodim index past this recent allocation...
+        objcount = strictatoi (statement[4]);
+        if (objcount<1)
+            prerror ("autodim invalid object count used.");
+        current_index = current_index + objcount;
+
+        // check that the allocation didn't go past the end value
+        printf(" if ((%s + %d) > %s)\n echo \"\"\n echo \"######## ERROR: autodim of variable '%s' exceeded allocated memory\"\n  ERR\n endif\n",start_addr,current_index-1, end_addr, statement[3]);
+    }
+    else
+	    prerror ("unknown autodim type:%s",statement[2]);
+}
+
 void dim (char **statement)
 {
     // just take the statement and pass it right to a header file

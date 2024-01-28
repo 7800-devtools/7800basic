@@ -78,6 +78,7 @@ void psound (char **);
 void playsfx (char **);
 void mutesfx (char **);
 void doconst (char **);
+void autodim (char **);
 void dim (char **);
 void dofor (char **);
 void mul (char **, int);
