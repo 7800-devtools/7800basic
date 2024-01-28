@@ -1843,6 +1843,30 @@ int inlinealphadata (char **statement)
     return (quotelen);
 }
 
+void dostrcpy(char **statement)
+{
+    //           1        2             3
+    //        strcpy   destination 'string literal'
+
+
+    int autotextwidth = 0;
+
+    assertminimumargs (statement, "strcpy", 2);
+
+    if (statement[3][0] == '\'')
+	autotextwidth = inlinealphadata (statement+1);
+    else
+	prerror ("strcpy requires a string literal");
+
+    printf(" ldy #%d\n",autotextwidth);
+    printf ("copystr%d\n", templabel);
+    printf(" lda [%s-1],y\n",statement[3]);
+    printf(" sta [%s-1],y\n",statement[2]);
+    printf(" dey\n");
+    printf (" bne copystr%d\n", templabel++);
+}
+
+
 void plotchars (char **statement)
 {
     //            1        2          3        4     5                   6

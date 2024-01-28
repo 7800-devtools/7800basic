@@ -88,6 +88,7 @@ void adjustvisible (char **);
 void gosub (char **);
 void doif (char **);
 void domemcpy (char **);
+void dostrcpy (char **);
 void pokechar (char **);
 void setfade (char **statement);
 void let (char **);

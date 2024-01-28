@@ -19,6 +19,7 @@ int linenumber=1;
 %x speechquotestart
 %x songdata
 %x songquotestart
+%x strcpy 
 %x plotchars
 %x plotquotestart
 %x player
@@ -125,6 +126,12 @@ int linenumber=1;
 <plotquotestart>[ \t] putchar('^');
 <plotquotestart>['] {printf("%s",yytext);BEGIN(INITIAL);}
 <plotquotestart>^\n* printf("%s",yytext);
+
+"strcpy" {printf("%s",yytext);BEGIN(strcpy);}
+<strcpy>['] {printf("%s",yytext);BEGIN(plotquotestart);}
+<strcpy>[ \t]+ putchar(' ');
+<strcpy>[ \t\r]+$
+<strcpy>\n {linenumber++;printf("\n");BEGIN(INITIAL);}
 
 "_include"            printf("%s", yytext);  
 "include" {printf("%s",yytext);BEGIN(includes);}

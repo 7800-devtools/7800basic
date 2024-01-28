@@ -443,6 +443,8 @@ void keywords (char **cstatement)
 	    playsfx (statement);
 	else if (!strncmp (statement[1], "mutesfx", 8))
 	    mutesfx (statement);
+	else if (!strncmp (statement[1], "strcpy", 6))
+	    dostrcpy (statement);
 	else if (!strncmp (statement[1], "memcpy", 6))
 	    domemcpy (statement);
 	else if (!strncmp (statement[1], "memset", 6))
