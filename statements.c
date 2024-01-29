@@ -1800,7 +1800,7 @@ int inlinealphadata (char **statement)
     int quotelen = 0;
 
     if (currentcharset[0] == '\0')
-	prerror ("the characterset statement needs to precede plotchars with an inline string");
+	prerror ("the characterset statement needs to precede a command with an inline string");
 
 
     for (t = 0; statement[2][t] != '\0'; t++)
@@ -7960,11 +7960,16 @@ void next (char **statement)
 
 void autodim (char **statement)
 {
+    #define AD_BYTE 0
+    #define AD_44  1
+    #define AD_88  2
+
     static int inititialized = 0;
     static char start_addr[80];
     static char end_addr[80];
     static int current_index;
 
+    int variable_type;
     int memsize,t;
     int objsize, objcount;
 
@@ -7976,11 +7981,13 @@ void autodim (char **statement)
     //         1           2         3         4
     //     autodim       type      name      count
 
-    assertminimumargs (statement, "autodim", 3);
+    assertminimumargs (statement, "autodim", 2);
+    removeCR (statement[3]);
     removeCR (statement[4]);
 
     if (strncmp(statement[2],"init",5)==0)
     {
+        assertminimumargs (statement, "autodim (init)", 3);
         inititialized = 1;
         current_index=0;
 	strncpy(start_addr,statement[3],79);
@@ -7991,23 +7998,68 @@ void autodim (char **statement)
     if(!inititialized)
         prerror ("autodim used without initializing.");
 
+    variable_type = -1;
     if (strncmp(statement[2],"byte",5)==0)
     {
-        objsize=1;
-        snprintf (redefined_variables[numredefvars], 100, "%s = (%s + %d)",statement[3],start_addr,current_index);
-        numredefvars++;
+        variable_type = AD_BYTE;
+        objsize = 1;
+    }
+    else if (strncmp(statement[2],"4.4",5)==0)
+    {
+        variable_type = AD_44;
+        objsize = 1;
+    }
+    else if (strncmp(statement[2],"8.8",5)==0)
+    {
+        variable_type = AD_88;
+        objsize = 2;
+    }
 
-        // advance the autodim index past this recent allocation...
+    if(variable_type == -1)
+        prerror ("autodim type not recognized.");
+
+    if ((statement[4][0] == 0) || (statement[4][0] == ':'))
+        objcount=1;
+    else
+    {
+        // retrieve and validate how many bytes/objects are needed
         objcount = strictatoi (statement[4]);
         if (objcount<1)
             prerror ("autodim invalid object count used.");
-        current_index = current_index + objcount;
-
-        // check that the allocation didn't go past the end value
-        printf(" if ((%s + %d) > %s)\n echo \"\"\n echo \"######## ERROR: autodim of variable '%s' exceeded allocated memory\"\n  ERR\n endif\n",start_addr,current_index-1, end_addr, statement[3]);
     }
-    else
-	    prerror ("unknown autodim type:%s",statement[2]);
+
+    // register the base variable name
+    snprintf (redefined_variables[numredefvars], 100, "%s = (%s + %d)",statement[3],start_addr,current_index);
+    numredefvars++;
+
+    if ( variable_type == AD_44 )
+    {
+        snprintf (redefined_variables[numredefvars], 100, "%sb44 = (%s + %d)",statement[3],start_addr,current_index);
+        numredefvars++;
+        snprintf (fixpoint44[0][numfixpoint44], 46, "%s",statement[3]);
+        snprintf (fixpoint44[1][numfixpoint44], 46, "%sb44",statement[3]);
+        numfixpoint44++;
+    }
+
+    if ( variable_type == AD_88 )
+    {
+        snprintf (redefined_variables[numredefvars], 100, "%s_hi = (%s + %d)",statement[3],start_addr,current_index);
+        numredefvars++;
+        snprintf (redefined_variables[numredefvars], 100, "%s_lo = (%s + %d)",statement[3],start_addr,current_index+objcount);
+        numredefvars++;
+        snprintf (fixpoint88[0][numfixpoint88], 46, "%s",statement[3]);
+        snprintf (fixpoint88[1][numfixpoint88], 46, "%s_lo",statement[3]);
+        numfixpoint88++;
+
+    }
+
+    // advance the autodim index past this recent allocation...
+    current_index = current_index + (objcount * objsize);
+
+    // Add an assembly check that the allocation didn't go past the end value
+    // This needs to be at the asm level, because we allow the program to 
+    // use symbols for the start and end address.
+    printf(" if ((%s + %d) > %s)\n echo \"\"\n echo \"######## ERROR: autodim of variable '%s' exceeded range end. (%s)\"\n  ERR\n endif\n",start_addr,current_index-1, end_addr, statement[3],end_addr);
 }
 
 void dim (char **statement)
