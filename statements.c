@@ -7673,8 +7673,28 @@ void alphadata (char **statement)
 	alphaend = strrchr (data, '\'');
 	if ((alphaend == NULL) || (alphachr == alphaend) || (alphachr == (alphaend - 1)))
 	{
-	    prerror ("malformed alphadata line");
-	    exit (1);
+	    int t, hasnum;
+	    hasnum=0;
+	    for(t=0;((t<SIZEOFSTATEMENT)&&(data[t]!=0));t++)
+	    {
+	        if ((data[t]>='0')&&(data[t]<='9'))
+		{
+	            hasnum=1; 
+	            break;
+		}
+	    }
+	    if (!hasnum)
+            {
+	        prerror ("malformed alphadata line");
+	        exit (1);
+            }
+	    // We see a digit in there. We'll take it on faith that there's
+	    // valid data listed. Validity checking here could be better.
+	    if (!thisdatabankset)
+		printf ("  .byte %s\n", data);
+            else
+		gfxprintf ("  .byte %s\n", data);
+	    continue;
 	}
 	alphachr = alphachr + 1;
 	*alphaend = '\0';
