@@ -114,6 +114,7 @@ int firstcompress = 1;
 
 int romsize_already_set = 0;
 
+int DMAHOLEBORDER = 0;
 
 #define TALLSPRITEMAX 2048
 char tallspritelabel[TALLSPRITEMAX][1024];
@@ -4938,8 +4939,8 @@ void barf_graphic_file (void)
 
     if ((graphicsdatawidth[dmaplain] > 0) || (dmaplain > 0))	//only process if the incgraphic command was encountered.
     {
-	if (((bankcount > 0) && (zoneheight == 16) && (dmaplain > 1)) ||
-	    ((bankcount > 0) && (zoneheight == 8) && (dmaplain > 3)))
+	if (((bankcount > 0) && (zoneheight == 16) && (dmaplain > 1) && (!DMAHOLEBORDER)) ||
+	    ((bankcount > 0) && (zoneheight == 8) && (dmaplain > 3) && (!DMAHOLEBORDER)))
 	{
 	    prerror ("graphics overrun in bank %d", currentbank);
 	}
@@ -4947,20 +4948,70 @@ void barf_graphic_file (void)
 	orgprintf ("     .byte 0\n");
 	orgprintf (" endif\n");
 	orgprintf ("START_OF_ROM SET 0 ; scuttle so we always fail subsequent banks\n");
+
+
+	int graphics_addr[256];
+	int graphics_addr_absolute[256];
+	int tightpacked[256];
+	int dmaholeindex = 0;
+
+	// In 7800basic, the graphics blocks are used up from back to front of the rom/bank.
+	// 
+	// We need to allow tight packing of graphics (no dma holes) below some game-selected
+	// threshold address.
+	// 
+	// Dasm requires that rom data gets laid out front to back.
+	// 
+	// To adhere to all of these requirements, we need to:
+
+	// 1. Setup the initial addresses for the back-to-front loop.
+	ADDRBASE = BANKSTART;
+	if (bankcount == 0)
+	{
+	    ABADDRBASE = ADDRBASE;
+	}
+	else
+	{
+	    if (romat4k == 1)
+	        ABADDRBASE = REALSTART + ((currentbank - 1) * 0x4000) + 0x2000;
+	    else
+	        ABADDRBASE = REALSTART + (currentbank * 0x4000) + 0x2000;
+	}
+
+	// 1a. adjust if we can start in what would normally be a dma hole...
+	if (ADDRBASE + (DMASIZE/2) <= DMAHOLEBORDER)
+	{
+	    ADDRBASE = ADDRBASE + (DMASIZE/2);
+	    ABADDRBASE = ABADDRBASE + (DMASIZE/2);
+	}
+
+	// 2. Loop back-to-front, updating and storing the graphics addresses for later.
+	for (currentplain = dmaplain ; currentplain >= 0; currentplain--)
+	{
+	    graphics_addr[currentplain] = ADDRBASE;
+	    graphics_addr_absolute[currentplain] = ABADDRBASE;
+	    if (ADDRBASE > DMAHOLEBORDER)
+	    {
+	        ADDRBASE = ADDRBASE - DMASIZE;
+	        ABADDRBASE = ABADDRBASE - DMASIZE;
+	        if (currentplain>0)
+	            tightpacked[currentplain-1]=0;
+	    }
+	    else // (ADDRBASE <= DMAHOLEBORDER)
+	    {
+	        ADDRBASE = ADDRBASE - (DMASIZE/2);
+	        ABADDRBASE = ABADDRBASE - (DMASIZE/2);
+	        if (currentplain>0)
+	            tightpacked[currentplain-1]=1;
+	    }
+	}
+
+	// 3. Loop front to back, to store the actual graphics data in the rom/bank.
 	for (currentplain = 0; currentplain <= dmaplain; currentplain++)
 	{
-	    if (bankcount == 0)
-		ADDRBASE = BANKSTART - ((dmaplain - currentplain) * DMASIZE);
-	    else
-	    {
-		ADDRBASE = BANKSTART - ((dmaplain - currentplain) * DMASIZE);
-		if (romat4k == 1)
-		    ABADDRBASE =
-			REALSTART + ((currentbank - 1) * 0x4000) + 0x2000 - ((dmaplain - currentplain) * DMASIZE);
-		else
-		    ABADDRBASE = REALSTART + (currentbank * 0x4000) + 0x2000 - ((dmaplain - currentplain) * DMASIZE);
+	    ADDRBASE = graphics_addr[currentplain];
+	    ABADDRBASE = graphics_addr_absolute[currentplain];
 
-	    }
 	    prout ("\n");
 	    if (bankcount == 0)
 	    {
@@ -5047,29 +5098,17 @@ void barf_graphic_file (void)
 		fclose (dumpgraphics_fileout);
 
 	    // if we're in a DMA hole, report on it and barf any code that was saved for it...
-	    if ((currentplain < dmaplain)
-		|| ((currentplain == dmaplain) && (bankcount > 0) && (currentbank + 1 < bankcount)))
+	    if ((tightpacked[currentplain])&&(currentplain < dmaplain))
+	        prinfo ("No DMA hole here, due to tight packing");
+	    else if ( (ADDRBASE != DMAHOLEBORDER) && ( (currentplain < dmaplain) 
+	    //else if ( ( (currentplain < dmaplain) 
+		|| ((currentplain == dmaplain) && (bankcount > 0) && (currentbank + 1 < bankcount))) )
 	    {
-		if (bankcount == 0)
-		    ADDRBASE = BANKSTART - ((dmaplain - currentplain) * DMASIZE) + (DMASIZE / 2);
-		else
-		{
-		    ADDRBASE = BANKSTART - ((dmaplain - currentplain) * DMASIZE) + (DMASIZE / 2);
-		    if (romat4k == 1)
-			ABADDRBASE =
-			    REALSTART + ((currentbank - 1) * 0x4000) +
-			    0x2000 - ((dmaplain - currentplain) * DMASIZE) + (DMASIZE / 2);
-		    else
-			ABADDRBASE =
-			    REALSTART + (currentbank * 0x4000) + 0x2000 -
-			    ((dmaplain - currentplain) * DMASIZE) + (DMASIZE / 2);
-
-		}
 		prout ("\n");
 		if (bankcount == 0)
-		    prinfo ("DMA hole #%d starts @ $%04X", currentplain, ADDRBASE);
+		    prinfo ("DMA hole #%d starts @ $%04X", dmaholeindex, ADDRBASE);
 		else
-		    prinfo ("bank #%d, DMA hole #%d starts @ $%04X", currentbank + 1, currentplain, ADDRBASE);
+		    prinfo ("bank #%d, DMA hole #%d starts @ $%04X", currentbank + 1, dmaholeindex, ADDRBASE);
 
 		if (bankcount == 0)
 		    gfxprintf ("\n ORG $%04X,0  ; *************\n", ADDRBASE);
@@ -5082,7 +5121,7 @@ void barf_graphic_file (void)
 		FILE *holefilepointer;
 		char holefilename[256];
 		fflush (stdout);
-		sprintf (holefilename, "7800hole.%d.asm", currentplain);
+		sprintf (holefilename, "7800hole.%d.asm", dmaholeindex);
 		holefilepointer = fopen (holefilename, "r");
 		if (holefilepointer != NULL)
 		{
@@ -5098,32 +5137,17 @@ void barf_graphic_file (void)
 		    prout ("        no code defined for DMA hole\n");
 		}
 
-		if (bankcount == 0)
-		    ADDRBASE = BANKSTART - ((dmaplain - currentplain) * DMASIZE) + DMASIZE;
-		else
-		{
-		    ADDRBASE = BANKSTART - ((dmaplain - currentplain) * DMASIZE) + DMASIZE;
-		    if (romat4k == 1)
-			ABADDRBASE =
-			    REALSTART + ((currentbank - 1) * 0x4000) +
-			    0x2000 - ((dmaplain - currentplain) * DMASIZE) + (DMASIZE / 2);
-		    else
-			ABADDRBASE =
-			    REALSTART + (currentbank * 0x4000) + 0x2000 -
-			    ((dmaplain - currentplain) * DMASIZE) + (DMASIZE / 2);
-
-		}
-
 		if (holefilepointer != NULL)
 		{
 		    printf
 			(" echo \"  \",\"  \",\"  \",\"  \",[(256*WZONEHEIGHT)-(DMAHOLEEND%d - DMAHOLESTART%d)]d , \"bytes of ROM space left in DMA hole %d.\"\n",
-			 currentplain, currentplain, currentplain);
+			 dmaholeindex, dmaholeindex, dmaholeindex);
 		    printf
-			(" if ((256*WZONEHEIGHT)-(DMAHOLEEND%d - DMAHOLESTART%d)) < 0\n", currentplain, currentplain);
+			(" if ((256*WZONEHEIGHT)-(DMAHOLEEND%d - DMAHOLESTART%d)) < 0\n", dmaholeindex, dmaholeindex);
 		    printf ("SPACEOVERFLOW SET (SPACEOVERFLOW+1)\n");
 		    printf (" endif\n");
 		}
+	        dmaholeindex++;
 	    }
 
 	    if (dumpgraphics)
@@ -10862,6 +10886,12 @@ void set (char **statement)
 	    printf ("DLMEMSTART = %s\n", statement[3]);
 	    printf ("DLMEMEND   = %s\n", statement[4]);
 	}
+    }
+    else if (!strncmp (statement[2], "dmaholeborder", 13))
+    {
+	assertminimumargs (statement + 1, "set dmaholeborder", 1);
+	removeCR (statement[3]);	//remove CR if present
+        DMAHOLEBORDER = strictatoi (statement[3]);
     }
     else if (!strncmp (statement[2], "hssupport\0", 10))
     {
