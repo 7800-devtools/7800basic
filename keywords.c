@@ -531,6 +531,8 @@ void keywords (char **cstatement)
 	    plotvalue (statement);
 	else if (!strncmp (statement[1], "displaymode", 11))
 	    displaymode (statement);
+	else if (!strncmp (statement[1], "defaultpalette", 14))
+	    defaultpalette (statement);
 	else if (!strncmp (statement[1], "incgraphic", 10))
 	    add_graphic (statement, 0);
 	else if (!strncmp (statement[1], "incbanner", 9))

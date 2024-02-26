@@ -64,9 +64,13 @@ int bannerheights[1000];
 int bannerwidths[1000];
 int bannerpixelwidth[1000];
 char palettefilenames[1000][100];
+char Areg[SIZEOFSTATEMENT];
 int graphicfilepalettes[1000];
 int graphicfilemodes[1000];
-char Areg[SIZEOFSTATEMENT];
+
+unsigned char graphiccolorindex[16];
+unsigned char graphic7800colors[16];
+unsigned char graphiccolormode;
 
 int dmaplain = 0;
 int templabel = 0;
@@ -3672,9 +3676,6 @@ void convertbmp2png (char *bmpname)
 
 }
 
-unsigned char graphiccolorindex[16];
-unsigned char graphic7800colors[16];
-unsigned char graphiccolormode;
 void add_graphic (char **statement, int incbanner)
 {
     int s, t, width, height;
@@ -4033,6 +4034,63 @@ void add_graphic (char **statement, int incbanner)
 	    sprintf (constants[numconstants++], "%s_color%d", generalname, t);	// record to queue
 	}
     }
+}
+
+void filetolabel(char *target, char *source)
+{
+	int t;
+
+	//our label is based on the filename...
+	snprintf (target, 80, "%s", ourbasename (source));
+
+	checkvalidfilename (target);
+
+	//but remove the extension...
+	for (t = (strlen (target) - 3); t > 0; t--)
+	    if (strcasecmp (target + t, ".png") == 0)
+		target[t] = 0;
+}
+
+void defaultpalette (char **statement)
+{
+    //defaultpalette filename  mode   palette
+    //    1             2        3      4
+
+    int s;
+    unsigned char ourmode;
+
+    assertminimumargs (statement, "defaultpalette", 3);
+    removeCR (statement[4]);
+
+    char imagename[256];
+    filetolabel(imagename,statement[2]);
+
+    if (strcasecmp (statement[3], "160A") == 0)
+	    ourmode = MODE160A;
+    else if (strcasecmp (statement[3], "160B") == 0)
+	    ourmode = MODE160B;
+    else if (strcasecmp (statement[3], "320A") == 0)
+	    ourmode = MODE320A;
+    else if (strcasecmp (statement[3], "320B") == 0)
+	    ourmode = MODE320B;
+    else if (strcasecmp (statement[3], "320C") == 0)
+	    ourmode = MODE320C;
+    else if (strcasecmp (statement[3], "320D") == 0)
+	    ourmode = MODE320D;
+
+    // scan for the palette entry, or make a new one...
+    for (s = 0; s < 1000; s++)
+    {
+        if (palettefilenames[s][0] == 0)
+             break;
+	if (strcmp (palettefilenames[s], imagename) == 0)
+	     break;
+    }
+    if (s > 998)
+        prerror ("ran out of default graphic palette entries");
+    strcpy (palettefilenames[s], imagename);
+    graphicfilepalettes[s] = strictatoi (statement[4]);
+    graphicfilemodes[s] = ourmode;
 }
 
 int getgraphicwidth (char *file_name)
