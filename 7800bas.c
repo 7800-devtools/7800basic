@@ -57,9 +57,10 @@ extern int romsize_already_set;
 extern int firstfourbyte;
 extern int firstcompress;
 extern int dumpgraphics_index;
+extern int TIGHTPACKBORDER;
 int maxpasses = 2;
 
-#define BASIC_VERSION_INFO "7800basic v0.33"
+#define BASIC_VERSION_INFO "7800basic v0.34pre"
 
 int main (int argc, char *argv[])
 {
@@ -200,6 +201,7 @@ int main (int argc, char *argv[])
 	numthens = 0;
 	firstfourbyte = 1;
 	firstcompress = 1;
+	TIGHTPACKBORDER = 0;
 
         // global variable init...
         strcpy (redefined_variables[numredefvars++], "collisionwrap = 1");

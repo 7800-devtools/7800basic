@@ -114,7 +114,7 @@ int firstcompress = 1;
 
 int romsize_already_set = 0;
 
-int DMAHOLEBORDER = 0;
+int TIGHTPACKBORDER = 0;
 
 #define TALLSPRITEMAX 2048
 char tallspritelabel[TALLSPRITEMAX][1024];
@@ -4939,8 +4939,8 @@ void barf_graphic_file (void)
 
     if ((graphicsdatawidth[dmaplain] > 0) || (dmaplain > 0))	//only process if the incgraphic command was encountered.
     {
-	if (((bankcount > 0) && (zoneheight == 16) && (dmaplain > 1) && (!DMAHOLEBORDER)) ||
-	    ((bankcount > 0) && (zoneheight == 8) && (dmaplain > 3) && (!DMAHOLEBORDER)))
+	if (((bankcount > 0) && (zoneheight == 16) && (dmaplain > 1) && (!TIGHTPACKBORDER)) ||
+	    ((bankcount > 0) && (zoneheight == 8) && (dmaplain > 3) && (!TIGHTPACKBORDER)))
 	{
 	    prerror ("graphics overrun in bank %d", currentbank);
 	}
@@ -4979,7 +4979,7 @@ void barf_graphic_file (void)
 	}
 
 	// 1a. adjust if we can start in what would normally be a dma hole...
-	if (ADDRBASE + (DMASIZE/2) <= DMAHOLEBORDER)
+	if (ADDRBASE + (DMASIZE/2) <= TIGHTPACKBORDER)
 	{
 	    ADDRBASE = ADDRBASE + (DMASIZE/2);
 	    ABADDRBASE = ABADDRBASE + (DMASIZE/2);
@@ -4990,14 +4990,14 @@ void barf_graphic_file (void)
 	{
 	    graphics_addr[currentplain] = ADDRBASE;
 	    graphics_addr_absolute[currentplain] = ABADDRBASE;
-	    if (ADDRBASE > DMAHOLEBORDER)
+	    if (ADDRBASE > TIGHTPACKBORDER)
 	    {
 	        ADDRBASE = ADDRBASE - DMASIZE;
 	        ABADDRBASE = ABADDRBASE - DMASIZE;
 	        if (currentplain>0)
 	            tightpacked[currentplain-1]=0;
 	    }
-	    else // (ADDRBASE <= DMAHOLEBORDER)
+	    else // (ADDRBASE <= TIGHTPACKBORDER)
 	    {
 	        ADDRBASE = ADDRBASE - (DMASIZE/2);
 	        ABADDRBASE = ABADDRBASE - (DMASIZE/2);
@@ -5100,7 +5100,7 @@ void barf_graphic_file (void)
 	    // if we're in a DMA hole, report on it and barf any code that was saved for it...
 	    if ((tightpacked[currentplain])&&(currentplain < dmaplain))
 	        prinfo ("No DMA hole here, due to tight packing");
-	    else if ( (ADDRBASE != DMAHOLEBORDER) && ( (currentplain < dmaplain) 
+	    else if ( (ADDRBASE != TIGHTPACKBORDER) && ( (currentplain < dmaplain) 
 	    //else if ( ( (currentplain < dmaplain) 
 		|| ((currentplain == dmaplain) && (bankcount > 0) && (currentbank + 1 < bankcount))) )
 	    {
@@ -10887,11 +10887,11 @@ void set (char **statement)
 	    printf ("DLMEMEND   = %s\n", statement[4]);
 	}
     }
-    else if (!strncmp (statement[2], "dmaholeborder", 13))
+    else if (!strncmp (statement[2], "tightpackborder", 15))
     {
-	assertminimumargs (statement + 1, "set dmaholeborder", 1);
+	assertminimumargs (statement + 1, "set tightpackborder", 1);
 	removeCR (statement[3]);	//remove CR if present
-        DMAHOLEBORDER = strictatoi (statement[3]);
+        TIGHTPACKBORDER = strictatoi (statement[3]);
     }
     else if (!strncmp (statement[2], "hssupport\0", 10))
     {
