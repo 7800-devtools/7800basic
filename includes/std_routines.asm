@@ -1762,6 +1762,7 @@ pvnibble2charextra
          adc #1
          sta VALBUFFER,x
          inx
+         dec plotdigitcount
 
 pvnibble2char_skipnibbleextra
          ; low nibble...
