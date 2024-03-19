@@ -74,6 +74,7 @@ unsigned char graphiccolormode;
 
 int dmaplain = 0;
 int templabel = 0;
+int plotlabel = 0;
 int doublewide = 0;
 int zoneheight = 16;
 int zonelocking = 0;
@@ -1548,6 +1549,15 @@ void plotsprite (char **statement, int fourbytesprite)
     else if ((tsi >= 0) && (tallspritemode != 2))
     {
 	int t;
+
+	printf ("  ifconst TALLCLIP\n");
+	printf ("      lda #0\n");
+	printf ("      ldy temp5\n");
+	printf ("      cpy #(WSCREENHEIGHT)\n");
+	printf ("      adc #$FF\n");
+	printf ("      sta temp7 ; on-screen: temp7=0, off-screen: temp7=$ff\n");
+	printf ("  endif ; TALLCLIP\n");
+
 	for (t = 1; t < tallspriteheight[tsi]; t++)
 	{
 	    printf ("    ; +tall sprite replot\n");
@@ -1558,8 +1568,18 @@ void plotsprite (char **statement, int fourbytesprite)
 	    printf ("    lda temp5\n");
 	    printf ("    adc #WZONEHEIGHT\n");
 	    printf ("    sta temp5\n");
-	    printf ("    jsr plotsprite\n");
+	    printf ("  ifconst TALLCLIP\n");
+	    printf ("      ora temp7\n");
+	    printf ("      cmp #(WSCREENHEIGHT)\n");
+	    printf ("      bcs .plotexit_%d\n",plotlabel);
+	    printf ("  endif ; TALLCLIP\n");
+            if(!fourbytesprite)
+	        printf ("    jsr plotsprite\n");
+            else
+	        printf ("    jsr plotsprite4\n");
 	}
+	    printf (".plotexit_%d\n",plotlabel);
+            plotlabel++;
     }
 }
 

@@ -29,6 +29,7 @@ extern int passes;
 extern int line;
 extern int dmaplain;
 extern int templabel;
+extern int plotlabel;
 extern int tallspritecount;
 extern int fourbitfade_alreadyused;
 extern int zonelocking;
@@ -173,6 +174,7 @@ int main (int argc, char *argv[])
 	defi = 0;
 	dmaplain = 0;
 	templabel = 0;
+	plotlabel = 0;
 	currentbank = 0;
 	branchtargetnumber = 0;
 	doingfunction = 0;
