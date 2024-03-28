@@ -637,12 +637,18 @@ mega7800handlerdone
      lda #0
      sta palfastframe
      sta ntscslowframe
-     ldx paldetected ; 0=ntsc 1=pal
      ldy palframes
      iny
-     cpy #5
+     ldx paldetected ; 0=ntsc 1=pal
+     beq ntsc2palskipcheck
+pal2ntscskipcheck
+     cpy #5 ; every 5th frame, add a frame
      bne palframeskipdone
-     lda paldetected
+     beq frameskipdo
+ntsc2palskipcheck
+     cpy #6 ; every 6th frame, drop a frame
+     bne palframeskipdone
+frameskipdo
      inc ntscslowframe,x
      ldy #0
 palframeskipdone
