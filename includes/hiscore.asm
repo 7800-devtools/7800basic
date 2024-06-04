@@ -107,6 +107,11 @@ SCORESIZE                     = HSSCORESIZE
 SCORESIZE                     = 6
                  endif
 
+                 jsr mutetia
+                 ifconst pokeysupport
+                     jsr mutepokey
+                 endif ; pokeysupport
+
                  ;save shadow registers for later return...
                  lda sCTRL
                  pha
