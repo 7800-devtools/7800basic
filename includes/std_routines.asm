@@ -3214,8 +3214,8 @@ paddlebuttonhandler     ; outside of conditional, for button-handler LUT
          asl
          asl
 skippaddleport2shift
-         and #%10000000
-         eor #%10000000 ; invert
+         and #%11000000
+         eor #%11000000 ; invert
          sta sINPT1,x
          jmp buttonreadloopreturn
      endif ; PADDLESUPPORT
