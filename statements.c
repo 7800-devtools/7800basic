@@ -1433,6 +1433,24 @@ void plotsprite (char **statement, int fourbytesprite)
 
     assertminimumargs (statement, "plotsprite", 4);
 
+    int len = strlen(statement[2]);
+    char *pagedelim = strchr(statement[2],'@');
+    int rampage = 0;
+
+    if (pagedelim != NULL)
+    {
+        pagedelim[0]=0; // split the pre-delimiter and post-delimiter into 2 strings
+
+        if (pagedelim[1]==0)
+            rampage = 0x40;
+        else
+            rampage = strictatoi (pagedelim+1);
+        if (rampage > 255)
+            prerror ("plotsprite graphic redirection '%s' is >255 (%s)", statement[2],pagedelim+1);
+
+        // note: if rampage<0 then the user is using a variable for the ram page
+    }
+
     if(fourbytesprite && firstfourbyte)
     {
 	strcpy (redefined_variables[numredefvars++], "PLOTSP4 = 1");
@@ -1482,7 +1500,16 @@ void plotsprite (char **statement, int fourbytesprite)
 	printf ("    sta temp1\n\n");
     }
 
-    printf ("    lda #>%s\n", statement[2]);
+    if (pagedelim != NULL)
+    {
+        if (rampage < 0)
+            printf ("    lda %s\n", pagedelim+1);
+        else
+            printf ("    lda #%d\n", rampage);
+    }
+    else
+        printf ("    lda #>%s\n", statement[2]);
+
     printf ("    sta temp2\n\n");
 
     if ((statement[3][0] >= '0') && (statement[3][0] <= '9'))
