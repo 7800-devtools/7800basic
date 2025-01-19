@@ -3367,3 +3367,45 @@ thisjoy2buttonbit
           ; p0   p1   p0
      .byte $04, $10, $04
 
+     ifconst CHANGEDMAHOLES
+removedmaholes
+     ldx #0
+removedllholesloop
+     lda DLLMEM,x
+     and #%10001111
+     sta DLLMEM,x
+   ifconst DOUBLEBUFFER
+     sta DLLMEM+DBOFFSET,x
+   endif
+     inx
+     inx
+     inx
+   ifconst DOUBLEBUFFER
+     cpx #DBOFFSET
+     bcc removedllholesloop
+   else
+     bpl removedllholesloop
+   endif
+     rts
+
+createdmaholes
+     ldx #0
+createdllholesloop
+     lda DLLMEM,x
+     ora #(WZONEHEIGHT*4)
+     sta DLLMEM,x
+   ifconst DOUBLEBUFFER
+     sta DLLMEM+DBOFFSET,x
+   endif
+     inx
+     inx
+     inx
+   ifconst DOUBLEBUFFER
+     cpx #DBOFFSET
+     bcc createdllholesloop
+   else
+     bpl createdllholesloop
+   endif
+     rts
+ endif
+

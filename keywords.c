@@ -429,6 +429,8 @@ void keywords (char **cstatement)
 	    drawwait ();
 	else if (!strncmp (statement[1], "doublebuffer", 11))
 	    doublebuffer (statement);
+	else if (!strncmp (statement[1], "changedmaholes", 14))
+	    changedmaholes (statement);
 	else if (!strncmp (statement[1], "savescreen", 10))
 	    savescreen ();
 	else if (!strncmp (statement[1], "restorescreen", 10))

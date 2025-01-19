@@ -59,6 +59,7 @@ extern int firstfourbyte;
 extern int firstcompress;
 extern int dumpgraphics_index;
 extern int TIGHTPACKBORDER;
+extern int changedmaholescalled;
 int maxpasses = 2;
 
 #define BASIC_VERSION_INFO "7800basic v0.34pre"
@@ -163,6 +164,7 @@ int main (int argc, char *argv[])
         prout ("%s %s %s\n", BASIC_VERSION_INFO, __DATE__, __TIME__);
 
         // a bunch of vars that should be reset each pass.
+        changedmaholescalled = 0;
         numredefvars = 0;
         numconstants = 0;
 	incbasepath[0] = 0;

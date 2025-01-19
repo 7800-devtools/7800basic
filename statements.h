@@ -137,6 +137,7 @@ void newblock ();
 void voice (char **statement);
 int getgraphicwidth (char *file_name);
 void characterset (char **statement);
+void changedmaholes (char **statement);
 void savescreen (void);
 void restorescreen (void);
 void barf_graphic_file (void);

@@ -117,6 +117,8 @@ int dumpgraphics_index = 0;
 int firstfourbyte = 1;
 int firstcompress = 1;
 
+int changedmaholescalled = 0;
+
 int romsize_already_set = 0;
 
 int TIGHTPACKBORDER = 0;
@@ -10996,7 +10998,10 @@ void set (char **statement)
     {
 	assertminimumargs (statement + 1, "set tightpackborder", 1);
 	removeCR (statement[3]);	//remove CR if present
-        TIGHTPACKBORDER = strictatoi (statement[3]);
+	if (!strncmp (statement[3], "top", 3))
+            TIGHTPACKBORDER = 0xEFFF;
+	else
+            TIGHTPACKBORDER = strictatoi (statement[3]);
     }
     else if (!strncmp (statement[2], "hssupport\0", 10))
     {
@@ -11947,6 +11952,30 @@ void savescreen (void)
     invalidate_Areg ();
     jsr ("savescreen");
 }
+
+void changedmaholes (char **statement)
+{
+
+    //   1              2
+    // changedmaholes value
+    // accepted values are "enable" and "disable"
+
+    assertminimumargs (statement, "changedmaholes", 1);
+
+    if (!changedmaholescalled)
+    {
+	changedmaholescalled = 1;
+	strcpy (redefined_variables[numredefvars++], "CHANGEDMAHOLES = 1");
+    }
+
+    if (!strncmp(statement[2], "disable",7))
+        printf ("    jsr removedmaholes\n");
+    else if (!strncmp(statement[2], "enable",6))
+        printf ("    jsr createdmaholes\n");
+    else
+	prerror ("Unrecognized argument '%s' was provided to changedmaholes.\n", statement[2]);
+}
+
 
 void restorescreen (void)
 {
