@@ -120,6 +120,7 @@ int main (int argc, char *argv[])
         // we were called without the "-p" switch, so revert to the historic
         // single-pass behavior, since the basic source is coming from stdin,
         // and we can't rewind stdin.
+	prwarn ("7800basic was launched without -p. Using single-pass only.");
 	maxpasses=1;
         preprocessedfd = stdin;
     }
