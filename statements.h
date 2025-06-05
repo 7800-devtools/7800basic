@@ -50,7 +50,7 @@ void create_includes (char *);
 void filetolabel(char *target, char *source);
 void incline ();
 void fixfilename (char *);
-void init_includes ();
+void init_includes (char *path);
 void invalidate_Areg ();
 void shiftdata (char **, int);
 void compressdata (char **, int, int);
