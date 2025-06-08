@@ -5401,7 +5401,7 @@ void create_includes (char *includesfile)
 	}
 	if (writeline)
 	{
-	    if (!strncasecmp (dline, "7800.asm\0", 6))
+	    if (!strncasecmp (dline, "7800.asm", 8))
 		if (user_includes[0] != '\0')
 		    fprintf (includeswrite, "%s", user_includes);
 	    fprintf (includeswrite, "%s", dline);

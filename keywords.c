@@ -19,10 +19,11 @@ int ors = 0;
 int numelses = 0;
 int numthens = 0;
 
-int swaptest (char *value)	// check for then, && or ||
+// Checks if the token is "then", "&&", or "||"
+int isConditionalContinuationToken (char *value)
 {
-    if (!strncmp (value, "then", 4) || !strncmp (value, "&&", 2) || !strncmp (value, "||", 2))
-	return 1;
+    if (strcmp(value, "then") == 0 || strcmp(value, "&&") == 0 || strcmp(value, "||") == 0)
+        return 1;
     return 0;
 }
 
@@ -97,7 +98,7 @@ void keywords (char **cstatement)
 		    foundelse = i;
 	    }
 	    if (!strncmp (cstatement[k + 3], ">", 2)
-		&& (!strncmp (cstatement[k + 1], "if", 2)) && (swaptest (cstatement[k + 5])))
+		&& (!strncmp (cstatement[k + 1], "if", 2)) && (isConditionalContinuationToken (cstatement[k + 5])))
 	    {
 		// swap operands and switch compare
 		strncpy (cstatement[k + 3], cstatement[k + 2],200);	// stick 1st operand here temporarily
@@ -106,7 +107,7 @@ void keywords (char **cstatement)
 		strcpy (cstatement[k + 3], "<");	// replace compare
 	    }
 	    else if (!strncmp (cstatement[k + 3], "<=", 2)
-		     && (!strncmp (cstatement[k + 1], "if", 2)) && (swaptest (cstatement[k + 5])))
+		     && (!strncmp (cstatement[k + 1], "if", 2)) && (isConditionalContinuationToken (cstatement[k + 5])))
 	    {
 		// swap operands and switch compare
 		strncpy (cstatement[k + 3], cstatement[k + 2],200);
@@ -130,7 +131,7 @@ void keywords (char **cstatement)
 	    else if (!strncmp (cstatement[k + 3], "||", 2))
 	    {
 		if (!strncmp (cstatement[k + 5], ">", 2)
-		    && (!strncmp (cstatement[k + 1], "if", 2)) && (swaptest (cstatement[k + 7])))
+		    && (!strncmp (cstatement[k + 1], "if", 2)) && (isConditionalContinuationToken (cstatement[k + 7])))
 		{
 		    // swap operands and switch compare
 		    strncpy (cstatement[k + 5], cstatement[k + 4],200);	// stick 1st operand here temporarily
@@ -139,7 +140,7 @@ void keywords (char **cstatement)
 		    strcpy (cstatement[k + 5], "<");	// replace compare
 		}
 		else if (!strncmp (cstatement[k + 5], "<=", 2)
-			 && (!strncmp (cstatement[k + 1], "if", 2)) && (swaptest (cstatement[k + 7])))
+			 && (!strncmp (cstatement[k + 1], "if", 2)) && (isConditionalContinuationToken (cstatement[k + 7])))
 		{
 		    // swap operands and switch compare
 		    strncpy (cstatement[k + 5], cstatement[k + 4],200);
@@ -164,7 +165,7 @@ void keywords (char **cstatement)
 	    else if (!strncmp (cstatement[k + 5], "||", 2))
 	    {
 		if (!strncmp (cstatement[k + 7], ">", 2)
-		    && (!strncmp (cstatement[k + 1], "if", 2)) && (swaptest (cstatement[k + 9])))
+		    && (!strncmp (cstatement[k + 1], "if", 2)) && (isConditionalContinuationToken (cstatement[k + 9])))
 		{
 		    // swap operands and switch compare
 		    strncpy (cstatement[k + 7], cstatement[k + 6],200);	// stick 1st operand here temporarily
@@ -173,7 +174,7 @@ void keywords (char **cstatement)
 		    strcpy (cstatement[k + 7], "<");	// replace compare
 		}
 		else if (!strncmp (cstatement[k + 7], "<=", 2)
-			 && (!strncmp (cstatement[k + 1], "if", 2)) && (swaptest (cstatement[k + 9])))
+			 && (!strncmp (cstatement[k + 1], "if", 2)) && (isConditionalContinuationToken (cstatement[k + 9])))
 		{
 		    // swap operands and switch compare
 		    strncpy (cstatement[k + 7], cstatement[k + 6],200);
