@@ -63,13 +63,14 @@ extern int TIGHTPACKBORDER;
 extern int changedmaholescalled;
 int maxpasses = 2;
 
-#define BASIC_VERSION_INFO "7800basic v0.34pre"
+#define BASIC_VERSION_INFO "7800basic v0.34"
 
 int main (int argc, char *argv[])
 {
     char **statement;
     char **deallocate_mem;
     int i, j, k;
+    int def_idx;
     int unnamed, defcount, defi;
     char *c;
     char single;
@@ -323,7 +324,7 @@ int main (int argc, char *argv[])
 	    }
 	    else if (defi) // This 'i' refers to the outer loop variable for iterating through existing defines
 	    {
-		for (int def_idx = 0; def_idx < defi; ++def_idx)
+		for (def_idx = 0; def_idx < defi; ++def_idx)
 		{
 		    codeadd = NULL;
 		    finalcode[0] = '\0';
