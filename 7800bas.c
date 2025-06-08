@@ -80,8 +80,8 @@ int main (int argc, char *argv[])
     char *filename = "7800basic_variable_redefs.h";
     char *prefilename = NULL;
     char *path = 0;
-    char def[250][100];
-    char defr[250][100];
+    char def[500][100];
+    char defr[500][100];
     char finalcode[500];
     char *codeadd;
     char mycode[500];
@@ -279,8 +279,8 @@ int main (int argc, char *argv[])
 	    code[k_def_search + 4] == ' ')
 	    {			// found a define
 	        int current_pos = k_def_search + 5; // current_pos now points to start of define name.
-	        if (defi >= 249) { // Max 250 defines
-		    fprintf(stderr, "(%d) ERROR: Maximum number of defines (250) reached.\n", bbgetline());
+	        if (defi >= 499) { // Max 500 defines
+		    fprintf(stderr, "(%d) ERROR: Maximum number of defines (500) reached.\n", bbgetline());
 		    exit(1);
 		}
 	        for (j = 0; current_pos < 499 && code[current_pos] != ' ' && code[current_pos] != '\0' && code[current_pos] != '\n' && code[current_pos] != '\r'; current_pos++)
