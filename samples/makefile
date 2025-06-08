@@ -1,4 +1,4 @@
-all: adventurer/adventurer.bas.a78 atarivoxspeech/atarivoxspeech.bas.a78 backuptest/backuptest.bas.a78 banksets/banksets.bas.a78 banner/banner.bas.a78 boxcollision/boxcollision.bas.a78 colorfade/colorfade.bas.a78 doublebuffer/doublebuffer.bas.a78 drivingcontrol/drivingcontrol.bas.a78 eightysix/eightysix.bas.a78 fontcheck/fontcheck.bas.a78 helloworld/helloworld.bas.a78 hiscoretable/hiscoretable.bas.a78 keypadcontrol/keypadcontrol.bas.a78 mega7800controllers/mega7800controllers.bas.a78 mousedemo/mousedemo.bas.a78 multibuttoncontrollers/multibuttoncontrollers.bas.a78 multisprite/multisprite.bas.a78 onehundredandone/onehundredandone.bas.a78 plotmapfile/plotmapfile.bas.a78 pokey/pokey.bas.a78 ramcharmap/ramcharmap.bas.a78 rmtramdemo/rmtramdemo.bas.a78 rmtromdemo/rmtromdemo.bas.a78 rotationalcontrols/rotationalcontrols.bas.a78 screensafe/screensafe.bas.a78 simple/simple.bas.a78 smasteroids/smasteroids.bas.a78 snescontrollers/snescontrollers.bas.a78 soundtest/soundtest.bas.a78 spacephysics/spacephysics.bas.a78 trackertest/trackertest.bas.a78 underthehood/underthehood.bas.a78 
+all: adventurer/adventurer.bas.a78 atarivoxspeech/atarivoxspeech.bas.a78 backuptest/backuptest.bas.a78 banksets/banksets.bas.a78 banner/banner.bas.a78 boxcollision/boxcollision.bas.a78 colorfade/colorfade.bas.a78 doublebuffer/doublebuffer.bas.a78 drivingcontrol/drivingcontrol.bas.a78 eightysix/eightysix.bas.a78 fontcheck/fontcheck.bas.a78 helloworld/helloworld.bas.a78 hiscoretable/hiscoretable.bas.a78 keypadcontrol/keypadcontrol.bas.a78 languagetest/languagetest.bas.a78 mega7800controllers/mega7800controllers.bas.a78 mousedemo/mousedemo.bas.a78 multibuttoncontrollers/multibuttoncontrollers.bas.a78 multisprite/multisprite.bas.a78 onehundredandone/onehundredandone.bas.a78 plotmapfile/plotmapfile.bas.a78 pokey/pokey.bas.a78 ramcharmap/ramcharmap.bas.a78 rmtramcompressiondemo/rmtramcompressiondemo.bas.a78 rmtramdemo/rmtramdemo.bas.a78 rmtromdemo/rmtromdemo.bas.a78 rotationalcontrols/rotationalcontrols.bas.a78 screensafe/screensafe.bas.a78 simple/simple.bas.a78 smasteroids/smasteroids.bas.a78 snescontrollers/snescontrollers.bas.a78 soundtest/soundtest.bas.a78 spacephysics/spacephysics.bas.a78 trackertest/trackertest.bas.a78 underthehood/underthehood.bas.a78 
 
 test:
 	./make_test.sh
@@ -45,6 +45,9 @@ hiscoretable/hiscoretable.bas.a78:
 keypadcontrol/keypadcontrol.bas.a78:
 	cd keypadcontrol ; 7800basic.sh keypadcontrol.bas
 
+languagetest/languagetest.bas.a78:
+	cd languagetest ; 7800basic.sh languagetest.bas
+
 mega7800controllers/mega7800controllers.bas.a78:
 	cd mega7800controllers ; 7800basic.sh mega7800controllers.bas
 
@@ -68,6 +71,9 @@ pokey/pokey.bas.a78:
 
 ramcharmap/ramcharmap.bas.a78:
 	cd ramcharmap ; 7800basic.sh ramcharmap.bas
+
+rmtramcompressiondemo/rmtramcompressiondemo.bas.a78:
+	cd rmtramcompressiondemo ; 7800basic.sh rmtramcompressiondemo.bas
 
 rmtramdemo/rmtramdemo.bas.a78:
 	cd rmtramdemo ; 7800basic.sh rmtramdemo.bas

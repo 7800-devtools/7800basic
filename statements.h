@@ -1,5 +1,11 @@
 // Provided under the GPL v2 license. See the included LICENSE.txt for details.
 
+#ifndef STATEMENTS_H_CONSTANTS_DEFINED
+#define STATEMENTS_H_CONSTANTS_DEFINED
+
+#define MAXCONSTANTS 80000
+#define CONSTANTLEN    100
+
 #define _readpaddle 1
 #define _background 64
 #define MAX_EXTRAS 5
@@ -12,6 +18,8 @@
 #define MODE320B 4
 #define MODE320C 8
 #define MODE320D 16
+
+#endif // !STATEMENTS_H_CONSTANTS_DEFINED
 
 #include <stdio.h>
 
