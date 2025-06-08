@@ -140,6 +140,8 @@ void changecontrol (char **statement);
 void snesdetect ();
 void defaultpalette (char **statement);
 int inlinealphadata (char **statement);
+void incbasic (char **statement);
+void incbasicend ();
 void incgraphic (char *file_name, int offset);
 void newblock ();
 void voice (char **statement);

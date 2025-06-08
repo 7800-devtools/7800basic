@@ -27,6 +27,7 @@ extern int graphicsdatawidth[16];
 extern char charactersetchars[257];
 extern int passes;
 extern int line;
+extern int savelevel;
 extern int dmaplain;
 extern int templabel;
 extern int plotlabel;
@@ -171,6 +172,7 @@ int main (int argc, char *argv[])
 	incbasepath[0] = 0;
 	currentcharset[0] = 0;
 	line = 0;
+	savelevel = 0;
 	unnamed = 0;
 	defcount = 0;
 	multiplespace = 0;

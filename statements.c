@@ -24,6 +24,11 @@
 #define FALSE (1==0)
 #endif
 
+#define MAXINCBASIC 50
+#define MAXINCBASICSTR 100
+int savelines[MAXINCBASIC];
+char savelinesname[MAXINCBASIC][MAXINCBASIC];
+
 extern char stdoutfilename[256];
 extern FILE *stdoutfilepointer;
 extern FILE *preprocessedfd;
@@ -72,6 +77,7 @@ unsigned char graphiccolorindex[16];
 unsigned char graphic7800colors[16];
 unsigned char graphiccolormode;
 
+int savelevel = 0;
 int dmaplain = 0;
 int templabel = 0;
 int plotlabel = 0;
@@ -3449,6 +3455,29 @@ void playsfx (char **statement)
     printf (" endif ; NOTIALOCKMUTE\n");
 }
 
+void incbasic (char **statement)
+{
+    // the inclusion is handled by the preprocessor, but we need to
+    // fix the line number and record the name of the file we're working
+    // with to have helpful error messages.
+    removeCR(statement[2]);
+    savelevel++;
+    if (savelevel > MAXINCBASIC)
+        prerror ("Too many nested incbas files!");
+    savelines[savelevel] = line;
+    strncpy(savelinesname[savelevel],statement[2],MAXINCBASICSTR);
+    line = 1;
+}
+
+void incbasicend ()
+{
+    // the included file ended. go back a level.
+    line = savelines[savelevel];
+    savelevel--;
+    if (savelevel < 0)
+        prerror ("We somehow reached the end of more incbas files than used!");
+}
+
 void mutesfx (char **statement)
 {
     //   1         2
@@ -3521,7 +3550,6 @@ void fixfilename (char *filename)
 #endif
 
 }
-
 
 char *ourbasename (char *fullpath)
 {
@@ -12072,7 +12100,10 @@ void prwarn (char *format, ...)
     va_list args;
     va_start (args, format);
     vsnprintf (buffer, 1023, format, args);
-    fprintf (stderrfilepointer, "*** (%d): WARNING, %s\n", line, buffer);
+    if (savelevel)
+        fprintf (stderrfilepointer, "*** (%s:%d): WARNING, %s\n", savelinesname[savelevel], line, buffer);
+    else
+        fprintf (stderrfilepointer, "*** (%d): WARNING, %s\n", line, buffer);
     va_end (args);
 }
 
@@ -12083,7 +12114,10 @@ void prerror (char *format, ...)
     va_list args;
     va_start (args, format);
     vsnprintf (buffer, 1023, format, args);
-    fprintf (stderrfilepointer, "*** (%d): ERROR, %s\n", line, buffer);
+    if (savelevel)
+        fprintf (stderrfilepointer, "*** (%s:%d): ERROR, %s\n", savelinesname[savelevel], line, buffer);
+    else
+        fprintf (stderrfilepointer, "*** (%d): ERROR, %s\n", line, buffer);
     va_end (args);
     lastrites();
     exit (1);
