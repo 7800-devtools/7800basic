@@ -63,7 +63,7 @@ extern int TIGHTPACKBORDER;
 extern int changedmaholescalled;
 int maxpasses = 2;
 
-#define BASIC_VERSION_INFO "7800basic v0.34"
+#define BASIC_VERSION_INFO "7800basic v0.35"
 
 int main (int argc, char *argv[])
 {
@@ -426,11 +426,6 @@ int main (int argc, char *argv[])
 	printf ("  echo \"\"\n");
 	printf ("  echo \"######## ERROR: space overflow detected in\",[SPACEOVERFLOW]d,\"areas.\"\n");
 	printf ("  echo \"######## look above for areas with negative ROM space left.\"\n");
-	printf ("  echo \"######## Aborting assembly.\"\n");
-	printf ("SPACEOVERFLOWPASS SET (SPACEOVERFLOWPASS + 1)\n");
-	printf (" if SPACEOVERFLOWPASS > 0\n");
-	printf ("  ERR\n");
-	printf (" endif\n");
 	printf (" endif\n");
 
 	printf (" \n\n");
