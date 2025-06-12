@@ -392,7 +392,7 @@ int main (int argc, char *argv[])
 		sprintf (statement[0], "L0%d", unnamed++);
 	    }
 	    if (strncmp (statement[0], "end\0", 3))
-		printf (".%s ;; %s\n", statement[0], displaycode);	//    printf(".%s ; %s\n",statement[0],code);
+		printf (".%s ;;line %d;; %s\n", statement[0], line, displaycode);
 	    else
 		doend ();
 
