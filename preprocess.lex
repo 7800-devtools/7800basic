@@ -236,14 +236,14 @@ void handle_include_file(const char* filename_yytext, int filename_len) {
 <speechquotestart>\n {fprintf(stderr, "(%d) Warning: Unterminated speech quote.\n", linenumber); linenumber++; printf("\n"); BEGIN(speechdata);} 
 
 
-"_songdata"            printf("%s", yytext);  
+"_songdata"            printf("%s", yytext);
 "songdata" {printf("%s",yytext);BEGIN(songdata);}
 <songdata>['] {printf("%s",yytext);BEGIN(songquotestart);}
-<songdata>"\n"[ \t]*"end" {linenumber++;printf("\nend");BEGIN(INITIAL);}
+<songdata>^"\nend" printf("%s",yytext);
+<songdata>"\nend" {linenumber++;printf("\nend");BEGIN(INITIAL);}
 <songdata>[ \t]+ putchar(' ');
 <songdata>[ \t\r]+$
 <songdata>"\n" {linenumber++;printf("\n");}
-<songdata>[^'\n]+ {printf("%s", yytext);}
 
 
 <songquotestart>[ \t] putchar('^');
