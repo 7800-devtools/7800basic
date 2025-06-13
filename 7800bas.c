@@ -358,6 +358,8 @@ int main (int argc, char *argv[])
 
 	    // preprocessing removed in favor of a simplistic lex-based preprocessor
 
+            // fprintf(stderr,"%s",code); // DEBUG
+
 	    i = 0;
 	    j = 0;
 	    k = 0;
