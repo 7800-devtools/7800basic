@@ -63,7 +63,7 @@ extern int TIGHTPACKBORDER;
 extern int changedmaholescalled;
 int maxpasses = 2;
 
-#define BASIC_VERSION_INFO "7800basic v0.36WIP"
+#define BASIC_VERSION_INFO "7800basic v0.36"
 
 int main (int argc, char *argv[])
 {
