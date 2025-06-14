@@ -394,7 +394,7 @@ int yywrap(void) {
             fclose(finished_file);
         }
 
-	printf(" incbasicend\n");
+	printf("\n incbasicend\n");
         
         return 0; // Signal to Flex: "more input is available from the new (old) buffer"
     }
