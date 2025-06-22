@@ -11830,6 +11830,10 @@ void dopop ()
     printf ("  pla\n");
 }
 
+void rerand ()
+{
+    jsr ("randomize");
+}
 
 void bmi (char *linenumber)
 {

@@ -492,6 +492,8 @@ void keywords (char **cstatement)
 	    incbasic (statement);
 	else if (!strncmp (statement[1], "incbasicend", 11))
 	    incbasicend ();
+	else if (!strncmp (statement[1], "rerand", 7))
+	    rerand();
 	else if (!strncmp (statement[1], "incgraphic", 10))
 	    add_graphic (statement, 0);
 	else if (!strncmp (statement[1], "incbanner", 9))

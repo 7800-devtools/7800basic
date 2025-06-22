@@ -33,6 +33,7 @@ void domemset (char **statement);
 void doasm ();
 void dopop ();
 void doreboot ();
+void rerand ();
 void incmapfile (char **statement);
 void incrmtfile (char **statement);
 void decompress (char **statement);
