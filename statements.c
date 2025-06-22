@@ -12099,7 +12099,7 @@ void prinfo (char *format, ...)
     va_list args;
     va_start (args, format);
     vsnprintf (buffer, 1023, format, args);
-    fprintf (stderrfilepointer, "*** (): INFO, %s\n", buffer);
+    fprintf (stderrfilepointer, "*** INFO  %s\n", buffer);
     va_end (args);
 }
 
@@ -12111,9 +12111,9 @@ void prwarn (char *format, ...)
     va_start (args, format);
     vsnprintf (buffer, 1023, format, args);
     if (savelevel)
-        fprintf (stderrfilepointer, "*** (%s:%d): WARNING, %s\n", savelinesname[savelevel], line, buffer);
+        fprintf (stderrfilepointer, "*** WARNING  line %d (%s): %s\n", line, savelinesname[savelevel], buffer);
     else
-        fprintf (stderrfilepointer, "*** (%d): WARNING, %s\n", line, buffer);
+        fprintf (stderrfilepointer, "*** WARNING  line %d: %s\n", line, buffer);
     va_end (args);
 }
 
@@ -12125,9 +12125,9 @@ void prerror (char *format, ...)
     va_start (args, format);
     vsnprintf (buffer, 1023, format, args);
     if (savelevel)
-        fprintf (stderrfilepointer, "*** (%s:%d): ERROR, %s\n", savelinesname[savelevel], line, buffer);
+        fprintf (stderrfilepointer, "*** ERROR  line %d (%s): %s\n", line, savelinesname[savelevel], buffer);
     else
-        fprintf (stderrfilepointer, "*** (%d): ERROR, %s\n", line, buffer);
+        fprintf (stderrfilepointer, "*** ERROR  line %d: %s\n", line, buffer);
     va_end (args);
     lastrites();
     exit (1);
