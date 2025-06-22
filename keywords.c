@@ -305,6 +305,7 @@ void keywords (char **cstatement)
 
 	i = 0;
 	removeCR (statement[0]);
+	removeCR (statement[1]);
 	if (!strncmp (statement[0], "return", 7))
 	    prerror ("return used as label");
 	else if (statement[1][0] == '\0')
@@ -413,10 +414,6 @@ void keywords (char **cstatement)
 	    dofor (statement);
 	else if (!strncmp (statement[1], "next", 5))
 	    next (statement);
-	else if (!strncmp (statement[1], "next\n", 5))
-	    next (statement);
-	else if (!strncmp (statement[1], "next\r", 5))
-	    next (statement);
 	else if (!strncmp (statement[1], "adjustvisible", 14))
 	    adjustvisible (statement);
 	else if (!strncmp (statement[1], "lockzone", 9))
@@ -467,47 +464,7 @@ void keywords (char **cstatement)
 	    freemem (deallocelstatement);
 	    return;
 	}
-	else if (!strncmp (statement[1], "asm\n", 4))
-	    doasm ();
-	else if (!strncmp (statement[1], "pop\n", 4))
-	    dopop ();
-	else if (!strncmp (statement[1], "rem\n", 4))
-	{
-	    rem (statement);
-	    free (deallocstatement);
-	    freemem (deallocorstatement);
-	    freemem (deallocelstatement);
-	    return;
-	}
-	else if (!strncmp (statement[1], "asm\r", 4))
-	    doasm ();
-	else if (!strncmp (statement[1], "pop\r", 4))
-	    dopop ();
-	else if (!strncmp (statement[1], "rem\r", 4))
-	{
-	    rem (statement);
-	    free (deallocstatement);
-	    freemem (deallocorstatement);
-	    freemem (deallocelstatement);
-	    return;
-	}
 	else if (!strncmp (statement[1], "echo", 5))
-	{
-	    echo (statement);
-	    free (deallocstatement);
-	    freemem (deallocorstatement);
-	    freemem (deallocelstatement);
-	    return;
-	}
-	else if (!strncmp (statement[1], "echo\n", 5))
-	{
-	    echo (statement);
-	    free (deallocstatement);
-	    freemem (deallocorstatement);
-	    freemem (deallocelstatement);
-	    return;
-	}
-	else if (!strncmp (statement[1], "echo\r", 5))
 	{
 	    echo (statement);
 	    free (deallocstatement);
@@ -520,14 +477,6 @@ void keywords (char **cstatement)
 	else if (!strncmp (statement[1], "return", 7))
 	    doreturn (statement);
 	else if (!strncmp (statement[1], "reboot", 7))
-	    doreboot ();
-	else if (!strncmp (statement[1], "return\n", 7))
-	    doreturn (statement);
-	else if (!strncmp (statement[1], "reboot\n", 7))
-	    doreboot ();
-	else if (!strncmp (statement[1], "return\r", 7))
-	    doreturn (statement);
-	else if (!strncmp (statement[1], "reboot\r", 7))
 	    doreboot ();
 	else if (!strncmp (statement[1], "changecontrol", 14))
 	    changecontrol (statement);
