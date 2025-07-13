@@ -3871,6 +3871,8 @@ void add_graphic (char **statement, int incbanner)
 	{
 	    if (statement[t + 4][0] == ':')
 		break;
+	    if (statement[t + 4][0] == ';')
+		break;
 	    if (statement[t + 4][0] != 0)
 	    {
 		removeCR (statement[t + 4]);
@@ -3970,7 +3972,7 @@ void add_graphic (char **statement, int incbanner)
 		    break;
 		}
 		removeCR (statement[t]);	//remove CR
-		if ((statement[t][0] == 0) || (statement[t][0] == ':'))
+		if ((statement[t][0] == 0) || (statement[t][0] == ':') || (statement[t][0] == ';'))
 		{
 		    t = 0;
 		    break;
