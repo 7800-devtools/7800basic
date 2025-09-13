@@ -24,7 +24,7 @@
 #define FALSE (1==0)
 #endif
 
-#define MAXINCBASIC 50
+#define MAXINCBASIC 250
 #define MAXINCBASICSTR 100
 int savelines[MAXINCBASIC];
 char savelinesname[MAXINCBASIC][MAXINCBASIC];
@@ -3463,7 +3463,7 @@ void incbasic (char **statement)
     removeCR(statement[2]);
     savelevel++;
     if (savelevel > MAXINCBASIC)
-        prerror ("Too many nested incbas files!");
+        prerror ("Maximum number of incbas files (%d) exceeded!",MAXINCBASIC);
     savelines[savelevel] = line;
     strncpy(savelinesname[savelevel],statement[2],MAXINCBASICSTR);
     line = 1;
