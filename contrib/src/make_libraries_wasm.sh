@@ -1,8 +1,7 @@
 #!/bin/sh
-# /data/fun/Atari/7800basic.0.1/contrib/lib/linux
-# rebuild zlib static library for linux x86 64-bit
+# rebuild static libraries for web assembly
 
-TARGETDIR="$PWD/../Linux.x64"
+TARGETDIR="$PWD/../wasm"
 
 rm -fr "$TARGETDIR"
 mkdir "$TARGETDIR" 2>/dev/null
@@ -11,7 +10,12 @@ mkdir "$TARGETDIR" 2>/dev/null
 rm -fr zlib-1.2.8
 tar -xvzf zlib-1.2.8.tar.gz
 cd zlib-1.2.8
-export CFLAGS="-m64" 
+
+export WASI_SDK=/opt/wasi-sdk/
+export CC=$WASI_SDK/bin/clang
+export CFLAGS="-O2"
+export LDFLAGS="-O2 -Wl,--no-entry"
+
 ./configure --static --prefix="$TARGETDIR"
 make
 make install
@@ -21,10 +25,14 @@ rm -fr zlib-1.2.8
 #libpng...................
 rm -fr libpng-1.5.17
 tar -xvzf libpng-1.5.17.tar.gz
-cd libpng-1.5.17/
-export LDFLAGS="-L$TARGETDIR/lib"
-export CFLAGS="-m64  -I$TARGETDIR/include"
-./configure --enable-static --disable-shared  --prefix="$TARGETDIR"
+cd libpng-1.5.17
+
+export WASI_SDK=/opt/wasi-sdk/
+export CC=$WASI_SDK/bin/clang
+export CPPFLAGS="-I$TARGETDIR/include -DPNG_SETJMP_NOT_SUPPORTED"
+export CFLAGS="-O2 -I$TARGETDIR/include -I./include -DPNG_SETJMP_NOT_SUPPORTED"
+export LDFLAGS="-O2 -Wl,--no-entry -L$TARGETDIR/lib"
+./configure --enable-static --disable-shared --host=wasm32-unknown-wasi --prefix="$TARGETDIR" --with-zlib-prefix="$TARGETDIR"
 make
 make install
 cd ..
@@ -34,13 +42,17 @@ rm -fr libpng-1.5.17
 rm -fr lzsa
 tar -xvzf lzsa-1.4.1.tar.gz
 cd lzsa
+export WASI_SDK=/opt/wasi-sdk/
+export CC=$WASI_SDK/bin/clang
+export CFLAGS="-O2"
+export LDFLAGS="-O2 -Wl,--no-entry"
 make
 ar -ros liblzsa.a obj/src/shrink_inmem.o obj/src/shrink_context.o obj/src/shrink_block_v1.o obj/src/shrink_block_v2.o obj/src/frame.o obj/src/matchfinder.o obj/src/libdivsufsort/lib/divsufsort.o obj/src/libdivsufsort/lib/divsufsort_utils.o obj/src/libdivsufsort/lib/sssort.o obj/src/libdivsufsort/lib/trsort.o
 
 cp liblzsa.a "$TARGETDIR/lib"
 cp includelib/* "$TARGETDIR/include"
 # copy the binary out, in case someone needs it outside of 7800basic...
-cp lzsa ../../../lzsa.Linux.x64
+cp lzsa ../../../lzsa.wasm
 cd ..
 rm -fr lzsa
 cat << EOF > ../../lzsa.LICENSE.txt

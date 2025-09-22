@@ -110,4 +110,4 @@ underthehood/underthehood.bas.a78:
 
 
 clean:
-	rm -fr */*.bas.* */*.list.txt */*.symbol.txt */banksetrom.asm */7800.asm */7800basic_variable_redefs.h */a78info.cfg */includes.7800 */cfg */banksetrom.bin */message.log
+	rm -fr */*.bas.* */*.list.txt */*.symbol.txt */banksetrom.asm */7800.asm */7800basic_variable_redefs.h */a78info.cfg */includes.7800 */cfg */banksetrom.bin */message.log */7800hsgameranks.asm */backups/backuptest.tar

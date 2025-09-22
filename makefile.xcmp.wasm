@@ -4,11 +4,11 @@
 # See COMPILE.txt for details on how to setup the supporting environment
 #
 
-export PATH := /usr/i686-apple-darwin10/bin:$(PATH)
-SHELL=/bin/sh
-ARCH=Darwin.x86
-CFLAGS=-arch i386 -m32 -O0
-CC=i686-apple-darwin10-gcc
+export WASI_SDK=/opt/wasi-sdk/
+ARCH=wasm
+CFLAGS=-O2 
+CC=${WASI_SDK}/bin/clang
+LDFLAGS=-O2 -Wl,--no-entry
 LEX=lex
 LEXFLAGS=-t
 LDIR=contrib/${ARCH}
@@ -58,5 +58,5 @@ banksetsymbols.${ARCH}: banksetsymbols.c
 install:   all
 
 clean:
-	rm -f 7800basic.${ARCH} 7800preprocess.${ARCH} 7800postprocess.${ARCH} 7800optimize.${ARCH} 7800header.${ARCH} 7800sign.${ARCH} 7800filter.${ARCH} 7800makecc2.${ARCH} snip.${ARCH} banksetsymbols.${ARCH} 7800rmtfix.${ARCH} 7800rmt2asm.${ARCH} lz4raw.${ARCH}
+	rm -f 7800basic.${ARCH} 7800preprocess.${ARCH} 7800postprocess.${ARCH} 7800optimize.${ARCH} 7800header.${ARCH} 7800sign.${ARCH} snip.${ARCH} banksetsymbols.${ARCH} 7800rmt2asm.${ARCH} 7800filter.${ARCH} 7800makecc2.${ARCH} 7800rmtfix.${ARCH} lz4raw.${ARCH} snip.${ARCH}
 

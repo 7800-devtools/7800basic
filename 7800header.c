@@ -202,6 +202,7 @@ int main (int argc, char **argv)
 
     for (;;)			//loop infinitely through the report until the user explicitly exits
     {
+/*
 #ifdef _WIN32
 	if (printinfo == 0)
 	    system ("cls");
@@ -209,6 +210,7 @@ int main (int argc, char **argv)
 	if (printinfo == 0)
 	    system ("clear");
 #endif
+*/
 
 	report ();
 	if (printinfo)

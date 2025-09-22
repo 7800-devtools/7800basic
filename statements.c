@@ -35,6 +35,8 @@ extern FILE *preprocessedfd;
 extern char backupname[256];
 extern int maxpasses;
 
+FILE *banksetout = NULL;
+
 FILE *stderrfilepointer = NULL;
 
 int passes;
@@ -4210,10 +4212,6 @@ int getgraphicwidth (char *file_name)
     {
 	prerror ("when preparing '%s', png_create_info_struct failed", file_name);
     }
-    if (setjmp (png_jmpbuf (png_ptr)))
-    {
-	prerror ("libpng error during init_io");
-    }
 
     png_init_io (png_ptr, fp);
     png_set_sig_bytes (png_ptr, 8);
@@ -4281,12 +4279,9 @@ int getgraphicheight (char *file_name)
     {
 	prerror ("when preparing '%s', png_create_info_struct failed", file_name);
     }
-    if (setjmp (png_jmpbuf (png_ptr)))
-    {
-	prerror ("libpng error during init_io");
-    }
 
     png_init_io (png_ptr, fp);
+
     png_set_sig_bytes (png_ptr, 8);
 
     png_read_info (png_ptr, info_ptr);
@@ -4358,14 +4353,9 @@ void incgraphic (char *file_name, int offset)
     {
 	prerror ("when preparing '%s', png_create_info_struct failed", file_name);
     }
-    if (setjmp (png_jmpbuf (png_ptr)))
-    {
-	prerror ("libpng error during init_io");
-    }
 
     png_init_io (png_ptr, fp);
     png_set_sig_bytes (png_ptr, 8);
-
     png_read_info (png_ptr, info_ptr);
 
     width = png_get_image_width (png_ptr, info_ptr);
@@ -4470,15 +4460,7 @@ void incgraphic (char *file_name, int offset)
     //change png to one byte per pixel, rather than tight packing...
     png_set_packing (png_ptr);
 
-
     png_read_update_info (png_ptr, info_ptr);
-
-
-    /* read in the rest of the png */
-    if (setjmp (png_jmpbuf (png_ptr)))
-    {
-	prerror ("libpng error during read_image");
-    }
 
     rowbytes = png_get_rowbytes (png_ptr, info_ptr);
     row_pointers = (png_bytep *) malloc (sizeof (png_bytep) * height);
@@ -12040,12 +12022,13 @@ void orgprintf (char *format, ...)
     if (banksetrom == 0)
 	return;
 
-    FILE *banksetout;
-    banksetout = fopen (BANKSETASM, "ab");
+    if (passes == 0)
+	return;
+    if (banksetout == NULL)
+    	banksetout = fopen (BANKSETASM, "ab");
     if (banksetout == NULL)
 	prerror ("Couldn't open bankset assembly file %s for update\n", BANKSETASM);
     fprintf (banksetout, "%s", buffer);
-    fclose (banksetout);
 }
 
 void gfxprintf (char *format, ...)
@@ -12066,12 +12049,13 @@ void gfxprintf (char *format, ...)
 	return;
     }
 
-    FILE *banksetout;
-    banksetout = fopen (BANKSETASM, "ab");
+    if (passes == 0)
+	return;
+    if (banksetout == NULL)
+    	banksetout = fopen (BANKSETASM, "ab");
     if (banksetout == NULL)
 	prerror ("Couldn't open bankset assembly file %s for update\n", BANKSETASM);
     fprintf (banksetout, "%s", buffer);
-    fclose (banksetout);
 }
 
 void prinit()
@@ -12246,6 +12230,8 @@ void header_write (FILE * header, char *filename)
 
 void lastrites()
 {
+    if(banksetout)
+        fclose(banksetout);
     if(backupflag)
     {
         CloseArchive();

@@ -30,68 +30,27 @@ rm packages/7800basic/samples/make_test.sh
 cp *.TXT *.txt packages/7800basic/
 cp docs/7800basic*pdf packages/7800basic/
 
-for OSARCH in linux@Linux osx@Darwin win@Windows ; do
-	for BITS in x64 x86 ; do
-		OS=$(echo $OSARCH | cut -d@ -f1)
-		ARCH=$(echo $OSARCH| cut -d@ -f2)
-		if [ $OS = win ] ; then
-			unix2dos packages/7800basic/*.txt
-			rm -f packages/7800basic/7800basic.sh
-			rm -f packages/7800basic/install_ux.sh
-			cp 7800bas.bat packages/7800basic/
-			cp install_win.bat packages/7800basic/
-			for FILE in *"$ARCH"."$BITS".exe ; do
-			  cp "$FILE" packages/7800basic/
-			  SHORT=$(echo $FILE | cut -d. -f1)
-			  mv "packages/7800basic/$FILE" "packages/7800basic/$SHORT.exe"
-                        done
-                        (cd packages ; zip -r 7800basic-$ERELEASE-$OS-$BITS.zip 7800basic)
-			for FILE in *"$ARCH"."$BITS".exe ; do
-			   SHORT=$(echo $FILE | cut -d. -f1)
-			   rm "packages/7800basic/$SHORT" 2>/dev/null
-                        done
-                else
-			dos2unix packages/7800basic/*.txt
-			rm -f packages/7800basic/7800bas.bat
-			rm -f packages/7800basic/install_win.bat
-			cp install_ux.sh packages/7800basic/
-			cp 7800basic.sh packages/7800basic/
-			for FILE in *"$ARCH"."$BITS" ; do
-			  cp "$FILE" packages/7800basic/
-			  SHORT=$(echo $FILE | cut -d. -f1)
-			  mv "packages/7800basic/$FILE" "packages/7800basic/$SHORT"
-			done
-                        (cd packages ; tar --numeric-owner -cvzf 7800basic-$ERELEASE-$OS-$BITS.tar.gz 7800basic)
-			for FILE in *"$ARCH"."$BITS" ; do
-			   SHORT=$(echo $FILE | cut -d. -f1)
-			   rm "packages/7800basic/$SHORT" 2>/dev/null
-			done
-                fi
-        done
+OS=wasm
+dos2unix packages/7800basic/*.txt
+cp install_ux.sh packages/7800basic/
+cp install_win.bat packages/7800basic/
+cp install_win.ps1 packages/7800basic/
+cp 7800basic.sh packages/7800basic/
+cp 7800bas.bat packages/7800basic/
+cp *.wasm packages/7800basic/
+for FILE in *.wasm ; do
+  BASE=$(echo $FILE | cut -d. -f1)
+  # gotta skip 7800basic.sh because it isn't a wrapper
+  echo $BASE | grep 7800bas >/dev/null && continue
+  if [ -r "$BASE.sh" ] ; then
+      cp $BASE.sh packages/7800basic/$BASE 
+  fi
+  if [ -r "$BASE.bat" ] ; then
+      cp $BASE.bat packages/7800basic/
+  fi
 done
-
-cp *.exe *.Linux.x* *.Darwin.x* install_ux.sh install_win.bat 7800bas.bat 7800bas.c.sh packages/7800basic
-
-#32-bit windows is default, for now
-for FILE in *.Windows.x86.* ; do
-	SHORT=$(echo $FILE | cut -d. -f1)
-	mv "packages/7800basic/$FILE" "packages/7800basic/$SHORT.exe"
-done
-
-# make the ALL package with source code and all binaries...
-cp *.c *.h *.sh *.bat make* *.lex release* *.txt packages/7800basic/
-cp -R samples includes contrib packages/7800basic/
-rm packages/7800basic/samples/sizes.ref packages/7800basic/samples/makefile
-rm packages/7800basic/samples/make_test.sh
-unix2dos packages/7800basic/*.txt
-(cd packages ; tar --numeric-owner -cvzf 7800basic-$ERELEASE-ALL.tar.gz 7800basic)
-(cd packages ; zip -r 7800basic-$ERELEASE-ALL.zip 7800basic)
-
-# make the SRC packages. gotta remove the binaries
-rm packages/7800basic/*exe
-rm packages/7800basic/*.x64 packages/7800basic/*.x86 
-
-(cd packages ; tar --numeric-owner -cvzf 7800basic-$ERELEASE-SRC.tar.gz 7800basic)
-(cd packages ; zip -r 7800basic-$ERELEASE-SRC.zip 7800basic)
-
+  
+rm packages/7800basic/makefile.xcmp.wasm
+(cd packages ; tar --numeric-owner -cvzf 7800basic-$ERELEASE-$OS.tar.gz 7800basic)
+(cd packages ; zip -r 7800basic-$ERELEASE-$OS.zip 7800basic)
 rm -fr packages/7800basic

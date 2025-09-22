@@ -1,48 +1,55 @@
 @echo off
 setlocal enabledelayedexpansion
 echo.
-echo The 7800basic installation batch file v1.1
-echo ------------------------------------------
+echo The 7800basic Windows Installer v2
+echo -----------------------------------
 echo.
-echo   Permanently setting the bas7800dir variable to:
-echo.
+
+REM --- Check for wasmtime ---
+where wasmtime >nul 2>&1
+if %ERRORLEVEL% NEQ 0 (
+  echo ERROR: wasmtime is not installed or not in PATH.
+  echo.
+  echo You can install it using:
+  echo   - Windows winget: winget install BytecodeAlliance.Wasmtime.Portable
+  echo   - Or download from: https://wasmtime.dev/
+  echo.
+  echo Installation cannot continue without wasmtime.
+  pause
+  exit /b 1
+)
+
+REM --- Set bas7800dir ---
 SET bas7800dir=%~dp0
 SET bas7800dir=%bas7800dir:~0,-1%
+echo   Permanently setting bas7800dir to:
 echo      %bas7800dir%
 echo.
-echo setx bas7800dir "%bas7800dir%" > install_win.log
-setx bas7800dir "%bas7800dir%" 2>> install_win.log
+
+setx bas7800dir "%bas7800dir%" > install_win.log 2>&1
+if %ERRORLEVEL% NEQ 0 goto FAILED
+
+REM --- Update PATH if needed ---
+for /f "tokens=2,*" %%A in ('reg query HKCU\Environment /v PATH 2^>nul') do set USERPATH=%%B
+if "%USERPATH%"=="" set USERPATH=%PATH%
+
+echo %USERPATH% | find /i "%bas7800dir%" >nul
+if %ERRORLEVEL% NEQ 0 (
+  echo   Adding bas7800dir to PATH...
+  setx PATH "%bas7800dir%;%USERPATH%" >> install_win.log 2>&1
+)
+
 echo.
-set bas7800dir=%bas7800dir%;
-if %ERRORLEVEL% NEQ 0 GOTO FAILED
-reg query HKCU\Environment /v PATH >NUL 2>NUL
-if %ERRORLEVEL% NEQ 0 GOTO SKIPENVCHECK
-for /f "usebackq tokens=2,*" %%A in (`reg query HKCU\Environment /v PATH`) do set USERPATH=%%B 
-:SKIPENVCHECK
-IF NOT "%USERPATH%"=="" call set USERPATH=%%USERPATH:!bas7800dir!=%%
-echo set USERPATH "%bas7800dir%%USERPATH%" >> install_win.log
-set USERPATH "%bas7800dir%%USERPATH%" 2>> install_win.log
-echo.
-echo   Updating the user PATH variable so this bas7800dir directory is your primary
-echo.
-echo setx PATH "%bas7800dir%%USERPATH%" >> install_win.log
-setx PATH "%bas7800dir%%USERPATH%" 2>> install_win.log
-echo.
-:SKIPUPDATE
-echo   You should re-open any programs or command-line windows that rely on this
-echo   variable so they take on the new value.
-echo.
-echo   You should re-run this batch file if you ever change the location of the
-echo   7800basic directory.
+echo Installation complete.
+echo   - Reopen any command prompts for changes to take effect.
+echo   - Run:  7800basic.bat -v   to test your setup.
 echo.
 pause
-exit
+exit /b 0
 
 :FAILED
-echo   Setting the bas7800dir variable failed. This batch file requires SETX,
-echo   which comes with Windows Vista, and later versions of Windows.
-echo.
-echo   You should obtain a copy of SETX and re-run this script, or set the
-echo   bas7800dir variable manually.
-echo.
+echo ERROR: Failed to set bas7800dir.
+echo This installer requires SETX (Windows Vista or newer).
+echo You may need to set environment variables manually.
 pause
+exit /b 1
