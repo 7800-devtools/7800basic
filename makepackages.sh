@@ -34,7 +34,6 @@ OS=wasm
 dos2unix packages/7800basic/*.txt
 cp install_ux.sh packages/7800basic/
 cp install_win.bat packages/7800basic/
-cp install_win.ps1 packages/7800basic/
 cp 7800basic.sh packages/7800basic/
 cp 7800bas.bat packages/7800basic/
 cp *.wasm packages/7800basic/
