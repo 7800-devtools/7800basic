@@ -12195,6 +12195,15 @@ void removeCR (char *linenumber)	// remove trailing CR from string
 void remove_trailing_commas (char *linenumber)	// remove trailing commas from string
 {
     int i;
+    char *semicolon;
+
+    // search for a ; comment, and strip it first if found
+    semicolon = strchr(linenumber,';');
+    if (semicolon != NULL)
+        *semicolon = 0; 
+
+    // search from the end of the line for a trailing comma, 
+    // and if found, change it to a space
     for (i = strlen (linenumber) - 1; i > 0; i--)
     {
 	if ((linenumber[i] != ',') &&
@@ -12207,6 +12216,10 @@ void remove_trailing_commas (char *linenumber)	// remove trailing commas from st
 	    break;
 	}
     }
+    // restore the ; comment, if it was present
+    if (semicolon != NULL)
+        *semicolon = ';'; 
+
 }
 
 void header_write (FILE * header, char *filename)
