@@ -1,5 +1,4 @@
-# The 7800basic OS X cross compiling makefile. This is meant to be run from
-# Linux.
+# The 7800basic cross compiling makefile. 
 #
 # See COMPILE.txt for details on how to setup the supporting environment
 #
