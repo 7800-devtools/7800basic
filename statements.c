@@ -1150,9 +1150,10 @@ void lockzone (char **statement)
 
     assertminimumargs (statement, "lockzone", 1);
     removeCR (statement[2]);
-    int zone = strictatoi (statement[2]);
 
-    printf (" ldx #%d\n", zone);
+    printf (" ldx ");
+    printimmed (statement[2]);
+    printf ("%s\n", statement[2]);
     printf (" jsr lockzonex\n");
 
     if (zonelocking == 0)
@@ -1170,10 +1171,12 @@ void unlockzone (char **statement)
 
     assertminimumargs (statement, "unlockzone", 1);
     removeCR (statement[2]);
-    int zone = strictatoi (statement[2]);
 
-    printf (" ldx #%d\n", zone);
+    printf (" ldx ");
+    printimmed (statement[2]);
+    printf ("%s\n", statement[2]);
     printf (" jsr unlockzonex\n");
+
     if (zonelocking == 0)
     {
 	strcpy (redefined_variables[numredefvars++], "CHECKOVERWRITE = 1");
