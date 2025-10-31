@@ -23,6 +23,10 @@
 
 #include <stdio.h>
 
+// Global stream for all printf output, to avoid freopen performance issues in WASM.
+extern FILE *current_output_fp;
+#define printf(...) fprintf(current_output_fp, __VA_ARGS__)
+
 int linenum ();
 int getcondpart ();
 void add_inline (char *myinclude);

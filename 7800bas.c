@@ -10,7 +10,8 @@
 
 char stdoutfilename[256];
 char backupname[256];
-FILE *stdoutfilepointer;
+FILE *main_asm_fp = NULL;
+FILE *current_output_fp = NULL;
 FILE *preprocessedfd = NULL;
 
 extern int currentbank;
@@ -63,7 +64,7 @@ extern int TIGHTPACKBORDER;
 extern int changedmaholescalled;
 int maxpasses = 2;
 
-#define BASIC_VERSION_INFO "7800basic v0.37"
+#define BASIC_VERSION_INFO "7800basic v0.38"
 
 int main (int argc, char *argv[])
 {
@@ -221,10 +222,12 @@ int main (int argc, char *argv[])
 
 	// redirect STDOUT to 7800.asm, overwriting if it exists... 
 	strcpy (stdoutfilename, "7800.asm");
-	if ((stdoutfilepointer = freopen (stdoutfilename, "w", stdout)) == NULL)
+	main_asm_fp = fopen(stdoutfilename, "w");
+	if (main_asm_fp == NULL)
 	{
 	    prerror ("couldn't create the 7800.asm file.");
 	}
+	current_output_fp = main_asm_fp;
 
 	printf ("SPACEOVERFLOW SET 0\n");
 	printf (" ifnconst SPACEOVERFLOWPASS\n");
@@ -410,14 +413,10 @@ int main (int argc, char *argv[])
 	printf ("DMAHOLEEND%d SET .\n", currentdmahole);
 
 	//if stdout is redirected, change it back to 7800.asm so the gameend label goes in the right spot...
-	if (strcmp (stdoutfilename, "7800.asm") != 0)
-	{
-	    strcpy (stdoutfilename, "7800.asm");
-	    if ((stdoutfilepointer = freopen (stdoutfilename, "a", stdout)) == NULL)
-	    {
-		prerror ("couldn't reopen the 7800.asm file.");
-	    }
-	}
+	fflush(current_output_fp);
+	if (current_output_fp != main_asm_fp) 
+	    fclose(current_output_fp);
+	current_output_fp = main_asm_fp;
 
 	printf ("gameend\n");
 

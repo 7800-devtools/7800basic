@@ -30,8 +30,9 @@ int savelines[MAXINCBASIC];
 char savelinesname[MAXINCBASIC][MAXINCBASIC];
 
 extern char stdoutfilename[256];
-extern FILE *stdoutfilepointer;
 extern FILE *preprocessedfd;
+extern FILE *main_asm_fp;
+extern FILE *current_output_fp;
 extern char backupname[256];
 extern int maxpasses;
 
@@ -1316,8 +1317,13 @@ void dmahole (char **statement)
     if (requestedhole > 0)
 	printf ("DMAHOLEEND%d SET .\n", requestedhole - 1);
 
+    fflush(current_output_fp);
+    if (current_output_fp != main_asm_fp) 
+        fclose(current_output_fp);
+
     sprintf (stdoutfilename, "7800hole.%d.asm", requestedhole);
-    if ((stdoutfilepointer = freopen (stdoutfilename, "w", stdout)) == NULL)
+    current_output_fp = fopen(stdoutfilename, "w");
+    if (current_output_fp == NULL)
     {
 	prerror ("couldn't create the %s file", stdoutfilename);
     }
@@ -4964,15 +4970,10 @@ void barf_graphic_file (void)
     printf ("DMAHOLEEND%d SET .\n", currentdmahole);
 
     //if stdout is redirected, its time change it back to 7800.asm
-    if (strcmp (stdoutfilename, "7800.asm") != 0)
-    {
-	strcpy (stdoutfilename, "7800.asm");
-	if ((stdoutfilepointer = freopen (stdoutfilename, "a", stdout)) == NULL)
-	{
-	    prerror ("couldn't reopen the 7800.asm file");
-	}
-    }
-
+    fflush(current_output_fp);
+    if (current_output_fp != main_asm_fp)
+        fclose(current_output_fp);
+    current_output_fp = main_asm_fp;
 
     ADDRBASE = BANKSTART - (dmaplain * DMASIZE);
 
@@ -5250,7 +5251,7 @@ void barf_graphic_file (void)
 		    prout ("        DMA hole code found and imported\n");
 		    int c;
 		    while ((c = getc (holefilepointer)) != EOF)
-			putchar (c);
+			printf("%c",c);
 		    fclose (holefilepointer);
 		    remove (holefilename);
 		}
@@ -12268,4 +12269,18 @@ void lastrites()
     remove("7800hole.0.asm");
     remove("7800hole.1.asm");
     remove("7800hole.2.asm");
+
+    // Close all our managed file pointers
+    if (current_output_fp != NULL) 
+    {
+        fflush(current_output_fp);
+        if (current_output_fp != main_asm_fp)
+            fclose(current_output_fp);
+        current_output_fp = NULL;
+    }
+    if (main_asm_fp != NULL) 
+    {
+        fclose(main_asm_fp);
+        main_asm_fp = NULL;
+    }
 }
