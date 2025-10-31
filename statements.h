@@ -107,6 +107,8 @@ void pokechar (char **);
 void setfade (char **statement);
 void let (char **);
 void dec (char **);
+void increment (char **);
+void decrement (char **);
 void bank (char **);
 void dmahole (char **);
 void rem (char **);

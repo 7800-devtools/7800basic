@@ -306,6 +306,8 @@ void keywords (char **cstatement)
 	i = 0;
 	removeCR (statement[0]);
 	removeCR (statement[1]);
+	removeCR (statement[2]);
+	removeCR (statement[3]);
 	if (!strncmp (statement[0], "return", 7))
 	    prerror ("return used as label");
 	else if (statement[1][0] == '\0')
@@ -534,6 +536,10 @@ void keywords (char **cstatement)
 	    let (statement);
 	else if (!strncmp (statement[1], "dec", 4))
 	    dec (statement);
+	else if ((statement[2][0]=='+')&&(statement[3][0]=='+'))
+	    increment (statement);
+	else if ((statement[2][0]=='-')&&(statement[3][0]=='-'))
+	    decrement (statement);
 	else if (!strncmp (statement[1], "macro", 6))
 	    domacro (statement);
 	else if (!strncmp (statement[1], "callmacro", 10))

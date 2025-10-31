@@ -9687,6 +9687,24 @@ void displayoperation (char *opcode, char *operand, int index)
     }
 }
 
+void increment (char **statement)
+{
+    //   1        2    3
+    // variable  "+"  "+"
+
+    assertminimumargs (statement, "increment notation", 2);
+    printf ("  inc %s\n", statement[1]);
+}
+
+void decrement (char **statement)
+{
+    //   1        2    3
+    // variable  "-"  "-"
+
+    assertminimumargs (statement, "decrement notation", 2);
+    printf ("  dec %s\n", statement[1]);
+}
+
 void dec (char **cstatement)	// "dec" is variation of "let" that uses decimal mode
 {
     decimal = 1;
