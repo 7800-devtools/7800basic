@@ -6859,57 +6859,66 @@ void incrmtfile (char **statement)
 
     printf("%s\n",datalabelname);
 
-    // we handle rmta different than rmt, so we need to open the file
-    // first and see which it is.
-
     backupthisfile(statement[2]);
 
-    char magic[6];
-    FILE *fp = fopen (statement[2], "rb");
-    if(fp==NULL)
-        prerror ("couldn't open %s",statement[2]);
-    fread(magic,1,5,fp); 
-    magic[5]=0;
-    if(!strcmp(magic,";RMTA"))
-    {
-        // this is an RMTA, so we can just do a regular include and be done
-        fclose(fp);
-        printf("  include \"%s\"\n",statement[2]);
-        return;
-    }
+    FILE *fp = fopen(statement[2], "rb");
+    if (fp == NULL)
+        prerror("couldn't open %s", statement[2]);
+
+    // 1. Get file size and read entire file into memory
+    fseek(fp, 0, SEEK_END);
+    long file_size = ftell(fp);
     rewind(fp);
 
-    memset(magic,0,6);
-    int c;
-    while ((c = fgetc(fp)) != EOF) 
+    unsigned char *file_buffer = malloc(file_size);
+    if (file_buffer == NULL)
+        prerror("couldn't allocate memory to read %s", statement[2]);
+
+    if (fread(file_buffer, 1, file_size, fp) != file_size)
+        prerror("couldn't read %s into memory", statement[2]);
+    fclose(fp);
+
+    // 2. Check for RMTA header in memory
+    if (file_size >= 5 && memcmp(file_buffer, ";RMTA", 5) == 0)
     {
-        magic[0]=magic[1];
-        magic[1]=magic[2];
-        magic[2]=magic[3];
-        magic[3]=c;
-        if (!strncmp(magic,"RMT4",4))
-            break;
+        // This is an RMTA, so we can just do a regular include and be done
+        printf("  include \"%s\"\n", statement[2]);
+        free(file_buffer);
+        return;
     }
-    if (c == EOF)
-        prerror ("file doesn't appear to contain RMT data");
-    printf("  .byte \"RMT4\"\n");    
-    t=0;
-    size=0;
-    while ((c = fgetc(fp)) != EOF) 
+
+    // 3. Scan for 'RMT4' signature in memory
+    long start_offset = -1;
+    for (long i = 0; i < file_size - 4; i++) {
+        if (memcmp(file_buffer + i, "RMT4", 4) == 0) {
+            start_offset = i;
+            break;
+        }
+    }
+
+    if (start_offset == -1) {
+        free(file_buffer);
+        prerror("file doesn't appear to contain RMT data");
+    }
+
+    // 4. Generate output from memory buffer
+    printf("  .byte \"RMT4\"\n");
+    size = 0;
+    for (long i = start_offset + 4; i < file_size; i++)
     {
         size++;
-        if (t%16>0)
+        if ((i - (start_offset + 4)) % 16 > 0)
             printf(",");
-        if (t%16==0)
+        if ((i - (start_offset + 4)) % 16 == 0)
             printf("\n  .byte ");
-        printf("$%02x",c);
-        t++;
-        if (t%16==0)
-            printf("\n");
+        printf("$%02x", file_buffer[i]);
     }
+
     printf("\n");
-    prout ("RMT %s imported, %ld bytes\n",datalabelname,size);
-    fclose(fp);
+    prout ("RMT %s imported, %ld bytes\n", datalabelname, size);
+
+    // 5. Cleanup
+    free(file_buffer);
 }
 
 void decompress (char **statement)
@@ -12268,15 +12277,19 @@ void lastrites()
     }
     prinit();
     fclose(stderrfilepointer);
+
     stderrfilepointer = fopen ("message.log","rb");
-    int logchar;
-    logchar = fgetc (stderrfilepointer);
-    while (logchar != EOF)
+    if (stderrfilepointer != NULL)
     {
-        fputc(logchar,stderr);
-        logchar = fgetc (stderrfilepointer);
+        char buffer[4096];
+        size_t bytes_read;
+        while ((bytes_read = fread(buffer, 1, sizeof(buffer), stderrfilepointer)) > 0)
+        {
+            fwrite(buffer, 1, bytes_read, stderr);
+        }
+        fclose(stderrfilepointer);
     }
-    fclose(stderrfilepointer);
+
     remove("message.log");
     remove("7800hole.0.asm");
     remove("7800hole.1.asm");
