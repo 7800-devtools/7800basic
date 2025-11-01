@@ -4877,6 +4877,7 @@ void add_includes (char *myinclude)
     if (includesfile_already_done)
 	prwarn ("include ignored (includes should typically precede other statements)");
     strcat (user_includes, myinclude);
+    strcat (user_includes, "\n");
 }
 
 void add_inline (char *myinclude)
