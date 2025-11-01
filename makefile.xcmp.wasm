@@ -12,47 +12,65 @@ LEX=lex
 LEXFLAGS=-t
 LDIR=contrib/${ARCH}
 
+# Strip command for wasm binaries. Default is to strip, with the hope it might
+# slightly help wasm module load time with slowpoke wasmtime OSes.
+# Switch to /usr/bin/true (or whatever your "true" is) to turn off stripping.
+STRIP=${WASI_SDK}/bin/strip
+#STRIP=/usr/bin/true
+
 all:  7800basic.${ARCH} 7800preprocess.${ARCH} 7800postprocess.${ARCH} 7800filter.${ARCH} 7800optimize.${ARCH} 7800header.${ARCH} 7800sign.${ARCH} 7800makecc2.${ARCH} snip.${ARCH} banksetsymbols.${ARCH} 7800rmtfix.${ARCH} 7800rmt2asm.${ARCH}
 
 7800basic.${ARCH}: 7800bas.c statements.c keywords.c statements.h keywords.h atarivox.h minitar.c minitar.h 
 	${CC} ${CFLAGS} -o 7800basic.${ARCH} 7800bas.c statements.c keywords.c minitar.c -L${LDIR}/lib -I${LDIR}/include -lpng -lz -lm -llzsa
+	${STRIP} 7800basic.${ARCH}
 
 7800postprocess.${ARCH}: postprocess.c
 	${CC} ${CFLAGS} -o 7800postprocess.${ARCH} postprocess.c
+	${STRIP} 7800postprocess.${ARCH}
 
 7800filter.${ARCH}: filter.c
 	${CC} ${CFLAGS} -o 7800filter.${ARCH} filter.c
+	${STRIP} 7800filter.${ARCH}
 
 7800preprocess.${ARCH}: preprocess.lex
 	${LEX} ${LEXFLAGS}<preprocess.lex>lex.yy.c
 	${CC} ${CFLAGS} -o 7800preprocess.${ARCH} lex.yy.c
+	${STRIP} 7800preprocess.${ARCH}
 	rm -f lex.yy.c
 
 7800optimize.${ARCH}: optimize.lex
 	${LEX} ${LEXFLAGS} -i<optimize.lex>lex.yy.c
 	${CC} ${CFLAGS} -o 7800optimize.${ARCH} lex.yy.c
+	${STRIP} 7800optimize.${ARCH}
 	rm -f lex.yy.c
 
 7800header.${ARCH}: 7800header.c
 	${CC} ${CFLAGS} -o 7800header.${ARCH} 7800header.c
+	${STRIP} 7800header.${ARCH}
 
 7800sign.${ARCH}: 7800sign.c
 	${CC} ${CFLAGS} -o 7800sign.${ARCH} 7800sign.c
+	${STRIP} 7800sign.${ARCH}
 
 snip.${ARCH}: snip.c
 	${CC} ${CFLAGS} -o snip.${ARCH} snip.c
+	${STRIP} snip.${ARCH}
 
 banksetsymbols.${ARCH}: banksetsymbols.c
 	${CC} ${CFLAGS} -o banksetsymbols.${ARCH} banksetsymbols.c
+	${STRIP} banksetsymbols.${ARCH}
 
 7800rmtfix.${ARCH}: 7800rmtfix.c
 	${CC} ${CFLAGS} -o 7800rmtfix.${ARCH} 7800rmtfix.c
+	${STRIP} 7800rmtfix.${ARCH}
 
 7800rmt2asm.${ARCH}: 7800rmt2asm.c
 	${CC} ${CFLAGS} -o 7800rmt2asm.${ARCH} 7800rmt2asm.c
+	${STRIP} 7800rmt2asm.${ARCH}
 
 7800makecc2.${ARCH}: 7800makecc2.c
 	${CC} ${CFLAGS} -o 7800makecc2.${ARCH} 7800makecc2.c
+	${STRIP} 7800makecc2.${ARCH}
 
 install:   all
 
