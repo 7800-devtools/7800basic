@@ -64,6 +64,9 @@ extern int TIGHTPACKBORDER;
 extern int changedmaholescalled;
 int maxpasses = 2;
 
+#define PREPROC_BUFFER_SIZE (256 * 1024) // 256KB buffer for preprocessed file
+static char *preproc_buffer = NULL;
+
 #define BASIC_VERSION_INFO "7800basic v0.39"
 
 int main (int argc, char *argv[])
@@ -134,6 +137,21 @@ int main (int argc, char *argv[])
         {
 	    fprintf (stderr, "unable to open preprocessed basic file: %s\n",prefilename);
 	    exit (2);
+        }
+
+        // Allocate a large buffer to speed up line-by-line reading in WASM
+        preproc_buffer = (char*)malloc(PREPROC_BUFFER_SIZE);
+        if (preproc_buffer == NULL) 
+        {
+            prerror("failed to allocate buffer for preprocessed file");
+        }
+        if (setvbuf(preprocessedfd, preproc_buffer, _IOFBF, PREPROC_BUFFER_SIZE) != 0) 
+        {
+            // Not a fatal error, but performance will be degraded.
+            // Free the buffer as it won't be used.
+            free(preproc_buffer);
+            preproc_buffer = NULL;
+            prwarn("failed to set large buffer for preprocessed file; performance may be slow.");
         }
     }
    
@@ -439,6 +457,15 @@ int main (int argc, char *argv[])
     create_includes (includes_file);
 
     lastrites ();
+
+    // Final cleanup of the preprocessed file descriptor and its buffer
+    if (preprocessedfd != NULL && preprocessedfd != stdin) {
+        fclose(preprocessedfd);
+    }
+    if (preproc_buffer != NULL) {
+        free(preproc_buffer);
+        preproc_buffer = NULL;
+    }
 
     return 0;
 }
