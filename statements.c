@@ -6937,7 +6937,6 @@ void decompress (char **statement)
     printf ("    jsr lzsa1_unpack\n");
 }
 
-
 void inccompress (char **statement)
 {
     // creates compresses data from a data file.
@@ -6951,8 +6950,8 @@ void inccompress (char **statement)
     char datalabelname[256];
     int t;
 
-    unsigned char *lzsa_buf_uncomp, *lzsa_buf_comp;
-    long uncompsize, compsize, position;
+    unsigned char *lzsa_buf_comp;
+    long uncompsize, compsize;
 
     assertminimumargs (statement, "inccompress", 1);
 
@@ -6982,50 +6981,43 @@ void inccompress (char **statement)
 
     backupthisfile(statement[2]);
 
-    char magic[6];
-    FILE *fp = fopen (statement[2], "rb");
-    if(fp==NULL)
-        prerror ("couldn't open %s",statement[2]);
+	FILE *fp = fopen(statement[2], "rb");
+	if (fp == NULL)
+		prerror("couldn't open %s", statement[2]);
 
-    // setup and scan for the 'RMT4' signature in the file
-    memset(magic,0,6);
-    int c;
-    while ((c = fgetc(fp)) != EOF) 
-    {
-        magic[0]=magic[1];
-        magic[1]=magic[2];
-        magic[2]=magic[3];
-        magic[3]=c;
-        if (!strncmp(magic,"RMT4",4))
-            break;
-    }
-    if (c == EOF)              // it's not an RMT4, so rewind to the start.
-        rewind(fp);
-    else
-        fseek(fp,-4,SEEK_CUR); // rewind to the start of the RMT4 header.
+	// 1. Get file size and read entire file into memory
+	fseek(fp, 0, SEEK_END);
+	long file_size = ftell(fp);
+	rewind(fp);
 
-    // Get the size of the file, excluding any bytes we skipped to reach
-    // the RMT4 header...
-    position=ftell(fp);
-    fseek(fp,0,SEEK_END);
-    uncompsize=ftell(fp)-position;
-    fseek(fp,position,SEEK_SET); // and then restore the stream position
+	unsigned char *file_buffer = malloc(file_size);
+	if (file_buffer == NULL)
+		prerror("couldn't allocate memory to read %s", statement[2]);
 
-    lzsa_buf_uncomp = malloc(uncompsize);
-    if(lzsa_buf_uncomp==NULL)
-        prerror ("couldn't allocate memory to read %s",statement[2]);
-    if(fread(lzsa_buf_uncomp,1,uncompsize,fp)!=uncompsize)
-        prerror ("couldn't read %s into memory",statement[2]);
-    fclose(fp);
+	if (fread(file_buffer, 1, file_size, fp) != file_size)
+		prerror("couldn't read %s into memory", statement[2]);
+	fclose(fp);
+
+	// 2. Scan for 'RMT4' signature in memory
+	unsigned char *data_to_compress = file_buffer;
+	uncompsize = file_size;
+
+	for (long i = 0; i < file_size - 4; i++) {
+		if (memcmp(file_buffer + i, "RMT4", 4) == 0) {
+			data_to_compress = file_buffer + i;
+			uncompsize = file_size - i;
+			break;
+		}
+	}
 
     // allocate the destination buffer
-    lzsa_buf_comp = malloc(uncompsize*2); 
+    lzsa_buf_comp = malloc(uncompsize*2);
     if(lzsa_buf_comp==NULL)
         prerror ("couldn't allocate memory to compress %s",statement[2]);
 
     // call the lzsa library in-memory compression routine
     // see libs.h for argument details
-    compsize=lzsa_compress_inmem(lzsa_buf_uncomp,lzsa_buf_comp,uncompsize,uncompsize*2,(LZSA_FLAG_RAW_BLOCK|LZSA_FLAG_FAVOR_RATIO),3,1);
+    compsize=lzsa_compress_inmem(data_to_compress,lzsa_buf_comp,uncompsize,uncompsize*2,(LZSA_FLAG_RAW_BLOCK|LZSA_FLAG_FAVOR_RATIO),3,1);
 
     if (compsize<1)
         prerror ("liblzsa couldn't compress %s",statement[2]);
@@ -7033,21 +7025,22 @@ void inccompress (char **statement)
     if (compsize>uncompsize)
         prwarn ("compressing %s wastes more rom than the uncompressed file",statement[2]);
 
-    for(t=0;t<compsize;t++)
+    for(long i=0;i<compsize;i++)
     {
-        if (t%16>0)
+        if (i%16>0)
             printf(",");
-        if (t%16==0)
+        if (i%16==0)
             printf("\n  .byte ");
-        printf("$%02x",lzsa_buf_comp[t]);
+        printf("$%02x",lzsa_buf_comp[i]);
     }
 
     printf("\n");
     prout ("   %s compressed, %ld->%ld bytes, %02.2f ratio\n",statement[2],uncompsize,compsize,((float)uncompsize/(float)compsize));
-    free(lzsa_buf_uncomp);
+
+    // Free the allocated memory
+    free(file_buffer);
     free(lzsa_buf_comp);
 }
-
 
 void speechdata (char **statement)
 {
