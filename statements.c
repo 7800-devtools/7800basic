@@ -2194,17 +2194,10 @@ void plotvalue (char **statement)
 
 }
 
-
 void plotmapfile (char **statement)
 {
     //         1           2             3           4        5          6             7
     //     plotmapfile map_file.tmx  display_mem  screen_x screen_y screen_width screen_height
-
-    // Overview
-    // 1. open map file
-    // 2. create an int array of widthxheight
-    // 3. set each cell of the int according to the palette of the character there
-    // 4. run through the array and build up the data structure for plotcharloop
 
     char datavalues[256][256];
     int s, t;
@@ -2224,29 +2217,56 @@ void plotmapfile (char **statement)
 
     fixfilename (statement[2]);
 
-    //open file...
-    FILE *fp = fopen (statement[2], "rb");
+    FILE *fp = fopen(statement[2], "rb");
     if (!fp)
-    {
-	prerror ("plotmapfile couldn't open map file '%s' for reading", statement[2]);
-    }
+        prerror("plotmapfile couldn't open map file '%s' for reading", statement[2]);
 
+    // 1. Get file size and read entire file into memory
+    fseek(fp, 0, SEEK_END);
+    long file_size = ftell(fp);
+    rewind(fp);
+
+    char *file_buffer = malloc(file_size + 1);
+    if (file_buffer == NULL)
+        prerror("couldn't allocate memory to read %s", statement[2]);
+
+    if (fread(file_buffer, 1, file_size, fp) != file_size)
+        prerror("couldn't read %s into memory", statement[2]);
+    fclose(fp);
+    file_buffer[file_size] = '\0'; // Null-terminate the entire buffer
 
     //our default data label...
     for (t = 0; t < 256; t++)
 	sprintf (datavalues[t], "palette0");
-//datavalues
-    for (;;)
+
+    // 2. Process the file from the in-memory buffer
+    char *current_pos = file_buffer;
+    char *buffer_end = file_buffer + file_size;
+
+    while (current_pos < buffer_end)
     {
-	char line[1024];
+        char line[1024];
+        char *line_end = strchr(current_pos, '\n');
+        long line_len;
+
+        if (line_end) {
+            line_len = line_end - current_pos;
+        } else {
+            line_len = buffer_end - current_pos;
+        }
+
+        if (line_len >= sizeof(line)) {
+            prerror("line too long in map file '%s'", statement[2]);
+        }
+        
+        memcpy(line, current_pos, line_len);
+        line[line_len] = '\0';
+
 	char *keyword;
 	char *firstgid;
 	char *tilename;
 	int gid;
 	int layer = 0;
-
-	if (fgets (line, 1024, fp) == NULL)
-	    break;
 
 	keyword = strstr (line, "tileset firstgid=\"");
 	if (keyword != NULL)
@@ -2292,18 +2312,21 @@ void plotmapfile (char **statement)
 	    {
 		if ((q == 999) || (palettefilenames[q][0] == 0))
 		{
-                    if (passes==0)
-                        return;
-                    else
-		        prerror ("plotmapfile didn't find a palette for %s", datavalues[gid]);
+                    if (passes==0) {
+                        // Can't error on first pass, just exit loop and function
+                        current_pos = buffer_end;
+                        break;
+                    }
+		    prerror ("plotmapfile didn't find a palette for %s", datavalues[gid]);
 		}
 
 		if (strcmp (palettefilenames[q], datavalues[gid]) == 0)
 		    break;
 	    }
-
-	    palettevalues[tileindex] = graphicfilepalettes[q];
-	    graphicmodes[tileindex] = graphicfilemodes[q];
+            if (q < 1000 && palettefilenames[q][0] != 0) {
+	        palettevalues[tileindex] = graphicfilepalettes[q];
+	        graphicmodes[tileindex] = graphicfilemodes[q];
+            }
 
 	    tileindex++;
 	}
@@ -2311,7 +2334,7 @@ void plotmapfile (char **statement)
 	keyword = strstr (line, "<data encoding=\"");
 	if (keyword != NULL)
 	{
-	    fclose (fp);
+	    free(file_buffer);
 	    keyword = keyword + 15;
 	    for (t = 0; t < 1024; t++)
 		if (line[t] == '"')
@@ -2324,13 +2347,23 @@ void plotmapfile (char **statement)
 	    layer = layer + 1;
 	    if (layer > 1)
 	    {
-		fclose (fp);
+		free(file_buffer);
 		prerror ("map file '%s' contains multiple layers", statement[2]);
 	    }
 	}
-    }
-    fclose (fp);
 
+        if (line_end) {
+            current_pos = line_end + 1;
+        } else {
+            break; // End of buffer
+        }
+    }
+    free(file_buffer);
+
+    // If we bailed on pass 0, just return now.
+    if (passes == 0 && (tileindex == 0 || (palettevalues[0] == 0 && tileindex < 2))) {
+        return;
+    }
 
     int startp;
     int pmwidth, charwidth, pmx, pmy, pmemoffset, pmwidthandpalette;
@@ -2396,6 +2429,7 @@ void plotmapfile (char **statement)
     printf ("skipplotmapfiledata%d\n", templabel);
     templabel = templabel + 1;
 }
+
 
 void plotmap (char **statement)
 {
@@ -3623,80 +3657,115 @@ void incmapfile (char **statement)
 
     backupthisfile(statement[2]);
 
-    //open file...
-    FILE *fp = fopen (statement[2], "rb");
+    FILE *fp = fopen(statement[2], "rb");
     if (!fp)
+        prerror("incmapfile couldn't open map file '%s' for reading", statement[2]);
+
+    // 1. Get file size and read entire file into memory
+    fseek(fp, 0, SEEK_END);
+    long file_size = ftell(fp);
+    rewind(fp);
+
+    char *file_buffer = malloc(file_size + 1);
+    if (file_buffer == NULL)
+        prerror("couldn't allocate memory to read %s", statement[2]);
+
+    if (fread(file_buffer, 1, file_size, fp) != file_size)
+        prerror("couldn't read %s into memory", statement[2]);
+    fclose(fp);
+    file_buffer[file_size] = '\0'; // Null-terminate the entire buffer
+
+    // 2. Process the file from the in-memory buffer
+    char *current_pos = file_buffer;
+    char *buffer_end = file_buffer + file_size;
+
+    while (current_pos < buffer_end)
     {
-	prerror ("incmapfile couldn't open map file '%s' for reading", statement[2]);
+        char line[1024];
+        char *line_end = strchr(current_pos, '\n');
+        long line_len;
+
+        if (line_end) {
+            line_len = line_end - current_pos;
+        } else {
+            line_len = buffer_end - current_pos;
+        }
+
+        if (line_len >= sizeof(line)) {
+            prerror("line too long in map file '%s'", statement[2]);
+        }
+        
+        memcpy(line, current_pos, line_len);
+        line[line_len] = '\0';
+
+        char *keyword;
+        char *firstgid;
+        char *tilename;
+        int gid;
+        int layer = 0;
+
+        keyword = strstr (line, "tileset firstgid=\"");
+        if (keyword != NULL)
+        {
+            firstgid = strstr (line, "firstgid=\"");
+            tilename = strstr (line, "name=\"");
+            if ((tilename != NULL) && (firstgid != NULL))
+            {
+                gid = atoi (firstgid + 10);
+                tilename = tilename + 6;
+                for (t = 0; t < 1024; t++)
+                    if (line[t] == '"')
+                        line[t] = 0;
+                s = 0;
+                for (t = gid; t < 256; t++)
+                {
+                    sprintf (datavalues[t], " .byte <(%s+%d)\n", tilename, s);
+                    s = s + 1;
+                    if (doublewide == 1)
+                        s = s + 1;
+                }
+            }
+        }
+
+        keyword = strstr (line, "tile gid=\"");
+        if (keyword != NULL)
+        {
+            gid = atoi (keyword + 10);
+            if (!thisdatabankset)
+                printf ("%s", datavalues[gid]);
+            else
+                gfxprintf ("%s", datavalues[gid]);
+        }
+
+        keyword = strstr (line, "<data encoding=\"");
+        if (keyword != NULL)
+        {
+            free(file_buffer);
+            keyword = keyword + 15;
+            for (t = 0; t < 1024; t++)
+                if (line[t] == '"')
+                    line[t] = 0;
+            prerror ("map file '%s' is %s encoded. XML is required", statement[2], keyword);
+        }
+        keyword = strstr (line, "<layer name=\"");
+        if (keyword != NULL)
+        {
+            layer = layer + 1;
+            if (layer > 1)
+            {
+                free(file_buffer);
+                prerror ("map file '%s' contains multiple layers", statement[2]);
+            }
+        }
+        
+        if (line_end) {
+            current_pos = line_end + 1;
+        } else {
+            break; // End of buffer
+        }
     }
-
-    for (;;)
-    {
-	char line[1024];
-	char *keyword;
-	char *firstgid;
-	char *tilename;
-	int gid;
-	int layer = 0;
-
-	if (fgets (line, 1024, fp) == NULL)
-	    break;
-
-	keyword = strstr (line, "tileset firstgid=\"");
-	if (keyword != NULL)
-	{
-	    firstgid = strstr (line, "firstgid=\"");
-	    tilename = strstr (line, "name=\"");
-	    if ((tilename != NULL) && (firstgid != NULL))
-	    {
-		gid = atoi (firstgid + 10);
-		tilename = tilename + 6;
-		for (t = 0; t < 1024; t++)
-		    if (line[t] == '"')
-			line[t] = 0;
-		s = 0;
-		for (t = gid; t < 256; t++)
-		{
-		    sprintf (datavalues[t], " .byte <(%s+%d)\n", tilename, s);
-		    s = s + 1;
-		    if (doublewide == 1)
-			s = s + 1;
-		}
-	    }
-	}
-
-	keyword = strstr (line, "tile gid=\"");
-	if (keyword != NULL)
-	{
-	    gid = atoi (keyword + 10);
-	    if (!thisdatabankset)
-		printf ("%s", datavalues[gid]);
-	    else
-		gfxprintf ("%s", datavalues[gid]);
-	}
-
-	keyword = strstr (line, "<data encoding=\"");
-	if (keyword != NULL)
-	{
-	    fclose (fp);
-	    keyword = keyword + 15;
-	    for (t = 0; t < 1024; t++)
-		if (line[t] == '"')
-		    line[t] = 0;
-	    prerror ("map file '%s' is %s encoded. XML is required", statement[2], keyword);
-	}
-	keyword = strstr (line, "<layer name=\"");
-	if (keyword != NULL)
-	{
-	    layer = layer + 1;
-	    if (layer > 1)
-	    {
-		fclose (fp);
-		prerror ("map file '%s' contains multiple layers", statement[2]);
-	    }
-	}
-    }
-    fclose (fp);
+    
+    free(file_buffer);
 
     if (!thisdatabankset)
 	printf ("skipmapdata%d\n", templabel);
