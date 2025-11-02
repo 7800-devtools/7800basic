@@ -104,18 +104,18 @@ void keywords (char **cstatement)
 		&& (!strncmp (cstatement[k + 1], "if", 2)) && (isConditionalContinuationToken (cstatement[k + 5])))
 	    {
 		// swap operands and switch compare
-		strncpy (cstatement[k + 3], cstatement[k + 2],200);	// stick 1st operand here temporarily
-		strncpy (cstatement[k + 2], cstatement[k + 4],200);
-		strncpy (cstatement[k + 4], cstatement[k + 3],200);	// get it back
+		strncpy (cstatement[k + 3], cstatement[k + 2],200); cstatement[k+3][200] = '\0';	// stick 1st operand here temporarily
+		strncpy (cstatement[k + 2], cstatement[k + 4],200); cstatement[k+2][200] = '\0';
+		strncpy (cstatement[k + 4], cstatement[k + 3],200); cstatement[k+4][200] = '\0';	// get it back
 		strcpy (cstatement[k + 3], "<");	// replace compare
 	    }
 	    else if (!strncmp (cstatement[k + 3], "<=", 2)
 		     && (!strncmp (cstatement[k + 1], "if", 2)) && (isConditionalContinuationToken (cstatement[k + 5])))
 	    {
 		// swap operands and switch compare
-		strncpy (cstatement[k + 3], cstatement[k + 2],200);
-		strncpy (cstatement[k + 2], cstatement[k + 4],200);
-		strncpy (cstatement[k + 4], cstatement[k + 3],200);
+		strncpy (cstatement[k + 3], cstatement[k + 2],200); cstatement[k+3][200] = '\0';
+		strncpy (cstatement[k + 2], cstatement[k + 4],200); cstatement[k+2][200] = '\0';
+		strncpy (cstatement[k + 4], cstatement[k + 3],200); cstatement[k+4][200] = '\0';
 		strcpy (cstatement[k + 3], ">=");
 	    }
 	    if (!strncmp (cstatement[k + 3], "&&", 2))
@@ -137,23 +137,26 @@ void keywords (char **cstatement)
 		    && (!strncmp (cstatement[k + 1], "if", 2)) && (isConditionalContinuationToken (cstatement[k + 7])))
 		{
 		    // swap operands and switch compare
-		    strncpy (cstatement[k + 5], cstatement[k + 4],200);	// stick 1st operand here temporarily
-		    strncpy (cstatement[k + 4], cstatement[k + 6],200);
-		    strncpy (cstatement[k + 6], cstatement[k + 5],200);	// get it back
+		    strncpy (cstatement[k + 5], cstatement[k + 4],200);	cstatement[k+5][200] = '\0';// stick 1st operand here temporarily
+		    strncpy (cstatement[k + 4], cstatement[k + 6],200);  cstatement[k+4][200] = '\0';
+		    strncpy (cstatement[k + 6], cstatement[k + 5],200);	cstatement[k+6][200] = '\0';// get it back
 		    strcpy (cstatement[k + 5], "<");	// replace compare
 		}
 		else if (!strncmp (cstatement[k + 5], "<=", 2)
 			 && (!strncmp (cstatement[k + 1], "if", 2)) && (isConditionalContinuationToken (cstatement[k + 7])))
 		{
 		    // swap operands and switch compare
-		    strncpy (cstatement[k + 5], cstatement[k + 4],200);
-		    strncpy (cstatement[k + 4], cstatement[k + 6],200);
-		    strncpy (cstatement[k + 6], cstatement[k + 5],200);
+		    strncpy (cstatement[k + 5], cstatement[k + 4],200); cstatement[k+5][200] = '\0';
+		    strncpy (cstatement[k + 4], cstatement[k + 6],200); cstatement[k+4][200] = '\0';
+		    strncpy (cstatement[k + 6], cstatement[k + 5],200); cstatement[k+6][200] = '\0';
 		    strcpy (cstatement[k + 5], ">=");
 		}
 
 		for (i = 2; i < 198 - k; ++i)
-		    strncpy (orstatement[i], cstatement[k + i + 2],200);
+	        {
+		    strncpy (orstatement[i], cstatement[k + i + 2],200); 
+	            orstatement[i][200] = '\0';
+	        }
 		if (!strncmp (cstatement[k + 5], "then", 4))
 		    compressdata (cstatement, k + 3, k + 2);
 		else if (!strncmp (cstatement[k + 7], "then", 4))
@@ -171,22 +174,25 @@ void keywords (char **cstatement)
 		    && (!strncmp (cstatement[k + 1], "if", 2)) && (isConditionalContinuationToken (cstatement[k + 9])))
 		{
 		    // swap operands and switch compare
-		    strncpy (cstatement[k + 7], cstatement[k + 6],200);	// stick 1st operand here temporarily
-		    strncpy (cstatement[k + 6], cstatement[k + 8],200);
-		    strncpy (cstatement[k + 8], cstatement[k + 7],200);	// get it back
+		    strncpy (cstatement[k + 7], cstatement[k + 6],200);	cstatement[k+7][200] = '\0';// stick 1st operand here temporarily
+		    strncpy (cstatement[k + 6], cstatement[k + 8],200);  cstatement[k+6][200] = '\0';
+		    strncpy (cstatement[k + 8], cstatement[k + 7],200);	cstatement[k+8][200] = '\0';// get it back
 		    strcpy (cstatement[k + 7], "<");	// replace compare
 		}
 		else if (!strncmp (cstatement[k + 7], "<=", 2)
 			 && (!strncmp (cstatement[k + 1], "if", 2)) && (isConditionalContinuationToken (cstatement[k + 9])))
 		{
 		    // swap operands and switch compare
-		    strncpy (cstatement[k + 7], cstatement[k + 6],200);
-		    strncpy (cstatement[k + 6], cstatement[k + 8],200);
-		    strncpy (cstatement[k + 8], cstatement[k + 7],200);
+		    strncpy (cstatement[k + 7], cstatement[k + 6],200); cstatement[k+7][200] = '\0';
+		    strncpy (cstatement[k + 6], cstatement[k + 8],200); cstatement[k+6][200] = '\0';
+		    strncpy (cstatement[k + 8], cstatement[k + 7],200); cstatement[k+8][200] = '\0';
 		    strcpy (cstatement[k + 7], ">=");
 		}
 		for (i = 2; i < 196 - k; ++i)
+	        {
 		    strncpy (orstatement[i], cstatement[k + i + 4],200);
+	            orstatement[i][200] = '\0';
+	        }
 		if (!strncmp (cstatement[k + 7], "then", 4))
 		    compressdata (cstatement, k + 5, k + 2);
 		else if (!strncmp (cstatement[k + 9], "then", 4))
@@ -214,7 +220,10 @@ void keywords (char **cstatement)
 	    }
 
 	for (i = foundelse; i < 200; ++i)
+	{
 	    strncpy (elstatement[i - foundelse], pass2elstatement[i],200);
+	    elstatement[i - foundelse][200] = '\0';
+	}
 	if (islabelelse (pass2elstatement))
 	{
 	    strcpy (pass2elstatement[foundelse++], ":");
@@ -226,6 +235,7 @@ void keywords (char **cstatement)
 	if (!islabelelse (elstatement))
 	{
 	    strncpy (elstatement[2], elstatement[1],200);
+	    elstatement[2][200] = '\0';
 	    strcpy (elstatement[1], "goto");
 	}
 	if (door)

@@ -113,7 +113,7 @@ int main (int argc, char *argv[])
 	    prefilename = optarg;
 	    break;
 	case 'v':
-	    printf ("%s (%s, %s)\n", BASIC_VERSION_INFO, __TIME__, __DATE__);
+	    fprintf (stdout,"%s (%s, %s)\n", BASIC_VERSION_INFO, __TIME__, __DATE__);
 	    exit (0);
 	case '?':
 	    fprintf (stderr, "usage: %s -r <variable redefs file> -i <includes path>\n", argv[0]);
@@ -296,7 +296,7 @@ int main (int argc, char *argv[])
 	    // look for defines and remember them
 	    strcpy (mycode, code);
 	    int k_def_search;
-            for (k_def_search = 0; k_def_search < 495; ++k_def_search)
+	    for (k_def_search = 0; k_def_search < 495 && code[k_def_search] != '\0'; ++k_def_search)
 	        if (code[k_def_search] == ' ')
 		    break;
 	    if (k_def_search < 495 && code[k_def_search] == ' ' && 

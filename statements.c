@@ -2306,6 +2306,11 @@ void plotmapfile (char **statement)
 
 	    //get the tile value...
 	    gid = atoi (keyword + 10);
+	    if (gid >= 256)
+	    {
+	        prwarn("plotmapfile tile gid '%d' is out of bounds (max 255), skipping", gid);
+	        continue;
+	    }
 
 	    if (gid == 0)
 		gid = 1;	//kludge - to work around empty characters
@@ -3716,7 +3721,7 @@ void incmapfile (char **statement)
             {
                 gid = atoi (firstgid + 10);
                 tilename = tilename + 6;
-                for (t = 0; t < 1024; t++)
+                for (t = 0; t < line_len; t++)
                     if (line[t] == '"')
                         line[t] = 0;
                 s = 0;
@@ -3745,7 +3750,7 @@ void incmapfile (char **statement)
         {
             free(file_buffer);
             keyword = keyword + 15;
-            for (t = 0; t < 1024; t++)
+            for (t = 0; t < line_len; t++)
                 if (line[t] == '"')
                     line[t] = 0;
             prerror ("map file '%s' is %s encoded. XML is required", statement[2], keyword);
