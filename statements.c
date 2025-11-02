@@ -32,6 +32,7 @@ char savelinesname[MAXINCBASIC][MAXINCBASIC];
 extern char stdoutfilename[256];
 extern FILE *preprocessedfd;
 extern FILE *main_asm_fp;
+extern char *preproc_buffer;
 extern FILE *current_output_fp;
 extern char backupname[256];
 extern int maxpasses;
@@ -12373,17 +12374,16 @@ void lastrites()
     remove("7800hole.1.asm");
     remove("7800hole.2.asm");
 
-    // Close all our managed file pointers
-    if (current_output_fp != NULL) 
+    // Final cleanup of the preprocessed file descriptor and its buffer.
+    if (preprocessedfd != NULL && preprocessedfd != stdin) 
     {
-        fflush(current_output_fp);
-        if (current_output_fp != main_asm_fp)
-            fclose(current_output_fp);
-        current_output_fp = NULL;
+        fclose(preprocessedfd);
+        preprocessedfd = NULL;
     }
-    if (main_asm_fp != NULL) 
+
+    if (preproc_buffer != NULL) 
     {
-        fclose(main_asm_fp);
-        main_asm_fp = NULL;
+        free(preproc_buffer);
+        preproc_buffer = NULL;
     }
 }

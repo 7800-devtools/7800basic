@@ -65,7 +65,7 @@ extern int changedmaholescalled;
 int maxpasses = 2;
 
 #define PREPROC_BUFFER_SIZE (256 * 1024) // 256KB buffer for preprocessed file
-static char *preproc_buffer = NULL;
+char *preproc_buffer = NULL;
 
 #define BASIC_VERSION_INFO "7800basic v0.39"
 
@@ -451,22 +451,18 @@ int main (int argc, char *argv[])
 
 	prout ("7800basic compilation complete.\n");
 	freemem (deallocate_mem);
+	// Explicitly close the main assembly file at the end of each pass.
+	if (main_asm_fp != NULL) {
+	    fclose(main_asm_fp);
+	    main_asm_fp = NULL;
+	    current_output_fp = NULL;
+	}
     }
 
     header_write (header, filename);
     create_includes (includes_file);
 
     lastrites ();
-
-    // Final cleanup of the preprocessed file descriptor and its buffer
-    if (preprocessedfd != NULL && preprocessedfd != stdin) {
-        fclose(preprocessedfd);
-    }
-
-    if (preproc_buffer != NULL) {
-        free(preproc_buffer);
-        preproc_buffer = NULL;
-    }
 
     return 0;
 }
