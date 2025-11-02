@@ -288,6 +288,8 @@ int main (int argc, char *argv[])
 		}
 	    }
 	    c = fgets (code, 500, preprocessedfd);	// get next line from input
+	    if (!c)
+		break;		//end of file
 	    incline ();
 	    strcpy (displaycode, code);
 
@@ -374,8 +376,6 @@ int main (int argc, char *argv[])
 	    }
 	    if (strcmp (mycode, code))
 		strcpy (code, mycode);
-	    if (!c)
-		break;		//end of file
 
 	    // preprocessing removed in favor of a simplistic lex-based preprocessor
 
@@ -462,6 +462,7 @@ int main (int argc, char *argv[])
     if (preprocessedfd != NULL && preprocessedfd != stdin) {
         fclose(preprocessedfd);
     }
+
     if (preproc_buffer != NULL) {
         free(preproc_buffer);
         preproc_buffer = NULL;

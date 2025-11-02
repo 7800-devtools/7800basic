@@ -561,11 +561,24 @@ void keywords (char **cstatement)
 		 && (statement[0][lastc - 3] == 't')
 		 && (statement[0][lastc - 2] == 'h')
 		 && (statement[0][lastc - 1] == 'e') && (statement[0][lastc - 0] == 'n')))
-		return;
+	    {
+                free (deallocstatement);
+                freemem (deallocorstatement);
+                freemem (deallocelstatement);
+                return;
+            }
+
 
 	    removeCR (statement[1]);
-            if (statement[1][0]==0)
-		return;
+
+	    if (statement[1][0]==0) 
+	    {
+                free (deallocstatement);
+                freemem (deallocorstatement);
+                freemem (deallocelstatement);
+                return;
+	    }
+
 	    sprintf (errorcode, "unknown keyword '%s'.", statement[1]);
 	    prerror (&errorcode[0]);
 	    exit (1);

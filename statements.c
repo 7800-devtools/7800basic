@@ -2207,6 +2207,9 @@ void plotmapfile (char **statement)
     int palettevalues[2048];
     int graphicmodes[2048];
 
+    memset(palettevalues, 0, sizeof(palettevalues));
+    memset(graphicmodes, 0, sizeof(graphicmodes));
+
     assertminimumargs (statement, "plotmapfile", 6);
 
     x = strictatoi (statement[4]);
@@ -5146,6 +5149,7 @@ void barf_graphic_file (void)
 	int graphics_addr[256];
 	int graphics_addr_absolute[256];
 	int tightpacked[256];
+	memset(tightpacked, 0, sizeof(tightpacked));
 	int dmaholeindex = 0;
 
 	// In 7800basic, the graphics blocks are used up from back to front of the rom/bank.
