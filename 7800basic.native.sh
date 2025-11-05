@@ -53,8 +53,8 @@ echo
   
 echo "Starting build of $1"
  7800preprocess$EXT <"$1" >"$1.pre"
- #valgrind --tool=memcheck --leak-check=yes 7800basic$EXT -i "$bas7800dir" -b "$1" -p "$1.pre"
- 7800basic$EXT -i "$bas7800dir" -b "$1" -p "$1.pre"
+ valgrind --tool=memcheck --leak-check=yes 7800basic$EXT -i "$bas7800dir" -b "$1" -p "$1.pre"
+ #7800basic$EXT -i "$bas7800dir" -b "$1" -p "$1.pre"
 
 if [ "$?" -ne "0" ]
  then
@@ -74,7 +74,8 @@ if [ -r banksetrom.asm ] ; then
     banksetsymbols$EXT
 fi
 
-dasm$DASMEXT $1.asm -I"$bas7800dir/includes" -f3 -l"$1.list.txt" -p20 -s"$1.symbol.txt" -o"$1.bin" | 7800filter$EXT 
+dasm $1.asm -I"$bas7800dir/includes" -f3 -l"$1.list.txt" -p20 -s"$1.symbol.txt" -o"$1.bin" | 7800filter$EXT 
+#dasm$DASMEXT $1.asm -I"$bas7800dir/includes" -f3 -l"$1.list.txt" -p20 -s"$1.symbol.txt" -o"$1.bin" | 7800filter$EXT 
 
 7800sign$EXT -w "$1.bin"
 
