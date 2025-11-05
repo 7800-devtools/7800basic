@@ -67,7 +67,7 @@ int maxpasses = 2;
 #define PREPROC_BUFFER_SIZE (256 * 1024) // 256KB buffer for preprocessed file
 char *preproc_buffer = NULL;
 
-#define BASIC_VERSION_INFO "7800basic v0.39"
+#define BASIC_VERSION_INFO "7800basic v0.40"
 
 int main (int argc, char *argv[])
 {
