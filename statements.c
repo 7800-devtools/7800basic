@@ -8524,8 +8524,10 @@ void doend ()
 	printf (" ENDM\n");
 	macroactive = 0;
     }
-    else
+    else if (!doingfunction)
 	prerror ("extraneous end statement found");
+    else
+        doingfunction = 0;
 }
 
 void dosizeof (char **statement)
