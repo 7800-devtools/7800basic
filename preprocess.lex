@@ -101,6 +101,7 @@ void handle_include_file(const char* filename_yytext, int filename_len) {
 %x lives
 %x playercolor
 %x scorecolors
+%x inline
 %x includes
 %x incgraphic
 %x incbanner
@@ -291,6 +292,12 @@ void handle_include_file(const char* filename_yytext, int filename_len) {
 "include" {printf("%s",yytext);BEGIN(includes);}
 <includes>[^\n]* {printf("%s",yytext);}
 <includes>\n {linenumber++;printf("\n");BEGIN(INITIAL);}
+
+
+"_inline"            printf("%s", yytext);  
+"inline" {printf("%s",yytext);BEGIN(inline);}
+<inline>[^\n]* {printf("%s",yytext);}
+<inline>\n {linenumber++;printf("\n");BEGIN(INITIAL);}
 
 "incgraphic" {printf("%s",yytext);BEGIN(incgraphic);}
 <incgraphic>[^\n]* {printf("%s",yytext);}
