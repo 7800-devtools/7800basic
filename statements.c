@@ -6204,7 +6204,7 @@ void data (char **statement)
 	data[SIZEOFSTATEMENT-1]=0;
 	if (strlen(data)==(SIZEOFSTATEMENT-1))
 	{
-	    prerror ("line length exceeded in data statelement.");
+	    prerror ("line length exceeded in data statement.");
 	    exit (1);
 	}
 	if (!strncmp (data, "end\0", 3))
