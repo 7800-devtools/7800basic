@@ -220,16 +220,14 @@ void handle_include_file(const char* filename_yytext, int filename_len) {
 <alphadata>"\n" {linenumber++;printf("\n");}
 <alphadata>[^\n]+ {printf("%s", yytext);} 
 
-
 "_speechdata"            printf("%s", yytext);  
 "speechdata" {printf("%s",yytext);BEGIN(speechdata);}
 <speechdata>['] {printf("%s",yytext);BEGIN(speechquotestart);}
 <speechdata>"\n"[ \t]*"end" {linenumber++;printf("\nend");BEGIN(INITIAL);}
-<speechdata>[ \t]+ putchar(' ');
-<speechdata>[ \t\r]+$ 
+<speechdata>[ \t\r]+/\n   { /* ignore trailing spaces before newline */ }
+<speechdata>[ \t\r]+/[^\n] { putchar(' '); }
 <speechdata>"\n" {linenumber++;printf("\n");}
-<speechdata>[^'\n]+ {printf("%s", yytext);} 
-
+<speechdata>[^ \t\r'\n]+ {printf("%s", yytext);}
 
 <speechquotestart>[ \t] putchar('^');
 <speechquotestart>['] {printf("%s",yytext);BEGIN(speechdata);}
