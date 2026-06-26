@@ -7,20 +7,28 @@
 ; By Alex Herbert, 2004
 ;
 
-
-
-
 ; Constants
-
 
 SERIAL_OUTMASK  equ     $01
 SERIAL_RDYMASK  equ     $02
 
-
-
 ; Macros
 
         mac     SPKOUT
+
+        ; (re)init port A
+        lda      SWACNT
+        and      #(~SERIAL_RDYMASK | SERIAL_OUTMASK)
+        sta      SWACNT
+        lda      SWCHA
+        and      #~SERIAL_OUTMASK
+        sta      SWCHA
+
+        ; delay to let the port init register
+        ldx     #$10
+.delay_loop_2
+        dex
+        bne     .delay_loop_2
 
         ; check buffer-full status
         lda     SWCHA

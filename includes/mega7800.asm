@@ -79,6 +79,8 @@ m7skipp1shift
          ; the controller isn't present... revert to proline
          lda #1 ; proline
          sta port0control,x
+         lda #0
+         sta SWCHA
          rts
      endif ; MULTIBUTTON
 m7skipscuttle
