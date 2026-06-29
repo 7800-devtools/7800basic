@@ -19,9 +19,7 @@ mega7800handler
      sta inttemp5 ; temporary button-state storage
      sta inttemp6 ; temporary button-state storage
 
-     lda CTLSWA
-     and SWCHA_DIRMASK+1,x ; preserve other port nibble
-     ora MEGA_INIT,x
+     lda MEGA_INIT,x
      sta CTLSWA ; enable pins UP/DOWN to work as outputs
 
      ; the controller type bits take a few cycles to get set after we start
@@ -65,8 +63,7 @@ m7skipp1shift
      dey
      bpl m7readloop
 
-     lda CTLSWA
-     and SWCHA_DIRMASK+1,x ; preserve other port nibble
+     lda #0
      sta CTLSWA ; set this port back to input
 
      ; if mega7800 isn't detected this frame, unpress any buttons...
