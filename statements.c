@@ -1078,7 +1078,7 @@ void set_romsize (char *size)
 	append_a78info ("set supergame");
 	if (strncmp (size + 4, "BANKRAM", 7) == 0)
 	{
-	    append_a78info ("set supergamebankram");
+	    append_a78info ("set bankram");
 	    strcpy (redefined_variables[numredefvars++], "SGRAM = 1");
 	    strcpy (redefined_variables[numredefvars++], "BANKRAM = 1");
 	}
@@ -1115,7 +1115,7 @@ void set_romsize (char *size)
 	append_a78info ("set supergame");
 	if (strncmp (size + 4, "BANKRAM", 7) == 0)
 	{
-	    append_a78info ("set supergamebankram");
+	    append_a78info ("set bankram");
 	    strcpy (redefined_variables[numredefvars++], "SGRAM = 1");
 	    strcpy (redefined_variables[numredefvars++], "BANKRAM = 1");
 	}
@@ -11663,6 +11663,14 @@ void set (char **statement)
 	if (!strncmp (statement[3], "weak", 4))
 	{
 	    strcpy (redefined_variables[numredefvars++], "FRAMESKIPGLITCHFIXWEAK = 1");
+	}
+    }
+    else if (!strncmp (statement[2], "twobuttonrequired", 17))
+    {
+	assertminimumargs (statement, "set twobuttonrequired", 1);
+	if (!strncmp (statement[3], "on", 2))
+	{
+	    strcpy (redefined_variables[numredefvars++], "TWOBUTTONREQUIRED = 1");
 	}
     }
     else if (!strncmp (statement[2], "zoneprotection", 14))
