@@ -11569,6 +11569,14 @@ void set (char **statement)
 	    strcpy (redefined_variables[numredefvars++], "FOURBITFADE = 1");
 	}
     }
+    else if (!strncmp (statement[2], "fujinet", 7))
+    {
+	assertminimumargs (statement, "set fujinet", 1);
+	if (!strncmp (statement[3], "on", 2))
+	{
+	    strcpy (redefined_variables[numredefvars++], "FUJINETSUPPORT = 1");
+	}
+    }
     else if (!strncmp (statement[2], "pokeysupport", 12))
     {
 	assertminimumargs (statement, "set pokeysupport", 1);

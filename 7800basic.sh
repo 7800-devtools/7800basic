@@ -40,7 +40,7 @@ fi
 echo
 
 echo "Starting build of $1"
- wasmtime run --dir=. --dir="$bas7800dir" "$bas7800dir/7800preprocess.wasm" <"$1" >"$1.pre"
+ wasmtime run --dir=. --dir="$bas7800dir" --env bas7800dir="$bas7800dir" "$bas7800dir/7800preprocess.wasm" <"$1" >"$1.pre"
  wasmtime run --dir=. --dir="$bas7800dir"  "$bas7800dir/7800basic.wasm" -i "$bas7800dir" -b "$1" -p "$1.pre"
 
 if [ "$?" -ne "0" ]
