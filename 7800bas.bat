@@ -43,7 +43,7 @@ echo.
 echo Starting build of %srcfile%
 
 REM --- Preprocess ---
-wasmtime run --dir . --dir "%srcdir%" --dir "%bas7800dir%" "%bas7800dir%\7800preprocess.wasm" <"%~f1" >"%~1.pre"
+wasmtime run --dir . --dir "%srcdir%" --dir "%bas7800dir%" --env bas7800dir="%bas7800dir%" "%bas7800dir%\7800preprocess.wasm" <"%~f1" >"%~1.pre"
 if errorlevel 1 goto basicerror
 
 REM --- Compile ---

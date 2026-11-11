@@ -9,6 +9,17 @@ doublebuffer 131200
 drivingcontrol 32896
 eightysix 131200
 fontcheck 32896
+fujinetadapter 32896
+fujinetappkey 32896
+fujinetbank 131200
+fujinetboot 32896
+fujinetclock 32896
+fujinetdir 32896
+fujinethello 32896
+fujinethiscore 32896
+fujinetjson 32896
+fujinetnetget 32896
+fujinettcp 32896
 helloworld 32896
 hiscoretable 32896
 keypadcontrol 32896

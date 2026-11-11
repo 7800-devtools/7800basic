@@ -1,4 +1,4 @@
-all: adventurer/adventurer.bas.a78 atarivoxspeech/atarivoxspeech.bas.a78 backuptest/backuptest.bas.a78 banksets/banksets.bas.a78 banner/banner.bas.a78 boxcollision/boxcollision.bas.a78 colorfade/colorfade.bas.a78 doublebuffer/doublebuffer.bas.a78 drivingcontrol/drivingcontrol.bas.a78 eightysix/eightysix.bas.a78 fontcheck/fontcheck.bas.a78 helloworld/helloworld.bas.a78 hiscoretable/hiscoretable.bas.a78 keypadcontrol/keypadcontrol.bas.a78 languagetest/languagetest.bas.a78 mega7800controllers/mega7800controllers.bas.a78 mousedemo/mousedemo.bas.a78 multibuttoncontrollers/multibuttoncontrollers.bas.a78 multisprite/multisprite.bas.a78 onehundredandone/onehundredandone.bas.a78 plotmapfile/plotmapfile.bas.a78 pokey/pokey.bas.a78 ramcharmap/ramcharmap.bas.a78 rmtramcompressiondemo/rmtramcompressiondemo.bas.a78 rmtramdemo/rmtramdemo.bas.a78 rmtromdemo/rmtromdemo.bas.a78 rotationalcontrols/rotationalcontrols.bas.a78 screensafe/screensafe.bas.a78 simple/simple.bas.a78 smasteroids/smasteroids.bas.a78 snescontrollers/snescontrollers.bas.a78 soundtest/soundtest.bas.a78 spacephysics/spacephysics.bas.a78 trackertest/trackertest.bas.a78 underthehood/underthehood.bas.a78 
+all: adventurer/adventurer.bas.a78 atarivoxspeech/atarivoxspeech.bas.a78 backuptest/backuptest.bas.a78 banksets/banksets.bas.a78 banner/banner.bas.a78 boxcollision/boxcollision.bas.a78 colorfade/colorfade.bas.a78 doublebuffer/doublebuffer.bas.a78 drivingcontrol/drivingcontrol.bas.a78 eightysix/eightysix.bas.a78 fontcheck/fontcheck.bas.a78 fujinetadapter/fujinetadapter.bas.a78 fujinetappkey/fujinetappkey.bas.a78 fujinetbank/fujinetbank.bas.a78 fujinetboot/fujinetboot.bas.a78 fujinetclock/fujinetclock.bas.a78 fujinetdir/fujinetdir.bas.a78 fujinethello/fujinethello.bas.a78 fujinethiscore/fujinethiscore.bas.a78 fujinetjson/fujinetjson.bas.a78 fujinetnetget/fujinetnetget.bas.a78 fujinettcp/fujinettcp.bas.a78 helloworld/helloworld.bas.a78 hiscoretable/hiscoretable.bas.a78 keypadcontrol/keypadcontrol.bas.a78 languagetest/languagetest.bas.a78 mega7800controllers/mega7800controllers.bas.a78 mousedemo/mousedemo.bas.a78 multibuttoncontrollers/multibuttoncontrollers.bas.a78 multisprite/multisprite.bas.a78 onehundredandone/onehundredandone.bas.a78 plotmapfile/plotmapfile.bas.a78 pokey/pokey.bas.a78 ramcharmap/ramcharmap.bas.a78 rmtramcompressiondemo/rmtramcompressiondemo.bas.a78 rmtramdemo/rmtramdemo.bas.a78 rmtromdemo/rmtromdemo.bas.a78 rotationalcontrols/rotationalcontrols.bas.a78 screensafe/screensafe.bas.a78 simple/simple.bas.a78 smasteroids/smasteroids.bas.a78 snescontrollers/snescontrollers.bas.a78 soundtest/soundtest.bas.a78 spacephysics/spacephysics.bas.a78 trackertest/trackertest.bas.a78 underthehood/underthehood.bas.a78 
 
 test:
 	./make_test.sh
@@ -35,6 +35,39 @@ eightysix/eightysix.bas.a78:
 
 fontcheck/fontcheck.bas.a78:
 	cd fontcheck ; 7800basic.sh fontcheck.bas
+
+fujinetadapter/fujinetadapter.bas.a78:
+	cd fujinetadapter ; 7800basic.sh fujinetadapter.bas
+
+fujinetappkey/fujinetappkey.bas.a78:
+	cd fujinetappkey ; 7800basic.sh fujinetappkey.bas
+
+fujinetbank/fujinetbank.bas.a78:
+	cd fujinetbank ; 7800basic.sh fujinetbank.bas
+
+fujinetboot/fujinetboot.bas.a78:
+	cd fujinetboot ; 7800basic.sh fujinetboot.bas
+
+fujinetclock/fujinetclock.bas.a78:
+	cd fujinetclock ; 7800basic.sh fujinetclock.bas
+
+fujinetdir/fujinetdir.bas.a78:
+	cd fujinetdir ; 7800basic.sh fujinetdir.bas
+
+fujinethello/fujinethello.bas.a78:
+	cd fujinethello ; 7800basic.sh fujinethello.bas
+
+fujinethiscore/fujinethiscore.bas.a78:
+	cd fujinethiscore ; 7800basic.sh fujinethiscore.bas
+
+fujinetjson/fujinetjson.bas.a78:
+	cd fujinetjson ; 7800basic.sh fujinetjson.bas
+
+fujinetnetget/fujinetnetget.bas.a78:
+	cd fujinetnetget ; 7800basic.sh fujinetnetget.bas
+
+fujinettcp/fujinettcp.bas.a78:
+	cd fujinettcp ; 7800basic.sh fujinettcp.bas
 
 helloworld/helloworld.bas.a78:
 	cd helloworld ; 7800basic.sh helloworld.bas

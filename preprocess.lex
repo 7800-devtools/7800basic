@@ -58,6 +58,17 @@ void handle_include_file(const char* filename_yytext, int filename_len) {
     }
 
     FILE *new_file = fopen(actual_filename, "r");
+    if (!new_file && getenv("bas7800dir")) {
+        // not in the working directory: try the 7800basic includes directory,
+        // where the shared libraries (fujinet.bas, fujilib.bas) live
+        char fallback[1024];
+        const char *basdir = getenv("bas7800dir");
+        size_t baslen = strlen(basdir);
+        snprintf(fallback, sizeof(fallback), "%s%sincludes/%s", basdir,
+                 (baslen && (basdir[baslen-1] == '/' || basdir[baslen-1] == '\\')) ? "" : "/",
+                 actual_filename);
+        new_file = fopen(fallback, "r");
+    }
     if (!new_file) {
         fprintf(stderr, "(%d) Error: Could not open include file '%s'.\n", linenumber, actual_filename);
         perror("fopen error"); // Print system error for more details

@@ -21,6 +21,51 @@ START_OF_ROM SET 0
 
   ; FF80 - FFF7 contains the 7800 encryption key 
 
+  ifconst FUJINETSUPPORT
+    ; the FujiNet cartridge claim: "FUJI", version 1, kind+1 (0 = let the
+    ; cartridge decide), flags (bit 0 = 16K of cart RAM at $4000), 0, 0, 0
+    ifnconst bankswitchmode
+      ORG $FF70
+    else
+      ifconst ROM128K
+        ORG $27F70
+        RORG $FF70
+      endif
+      ifconst ROM144K
+        ORG $27F70
+        RORG $FF70
+      endif
+      ifconst ROM256K
+        ORG $47F70
+        RORG $FF70
+      endif
+      ifconst ROM272K
+        ORG $47F70
+        RORG $FF70
+      endif
+      ifconst ROM512K
+        ORG $87F70
+        RORG $FF70
+      endif
+      ifconst ROM528K
+        ORG $87F70
+        RORG $FF70
+      endif
+    endif
+    .byte "FUJI",1,0
+    ifconst SGRAM
+      ifnconst BANKRAM
+        .byte 1
+      else
+        .byte 0
+      endif
+    else
+      .byte 0
+    endif
+    .byte 0,0,0
+  endif
+
+
   ifnconst bankswitchmode 
     ORG $FFF8
   else
